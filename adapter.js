@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.1.1 · R13h.3";
+  var VERSION = "pwa-1.1.2 · R13h.3";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -75,7 +75,7 @@
     var redirect = location.origin + location.pathname.replace(/[^/]*$/, "");
     var u = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
       client_id: CLIENT_ID, redirect_uri: redirect, response_type: "token", scope: scopes,
-      include_granted_scopes: "true", state: nonce, prompt: opts.consent ? "consent" : ""
+      state: nonce, prompt: opts.consent ? "consent" : ""
     }).toString().replace(/&prompt=$/, "");
     location.assign(u);
   }
