@@ -171,3 +171,4 @@ body.rm #tabbar.nav-settle #tabInd::before{animation:none}body.rm #tabInd,body.r
 body.rm .view.on,body.rm details[open]>:not(summary){animation:none}body.rm #tabbar.nav-moving #tabInd{will-change:auto}
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.glass #tabInd{background:var(--surface);box-shadow:none}#tabInd::before{background:none}}
 @media(forced-colors:active){.glass #tabInd{background:Canvas;border-color:Highlight;box-shadow:none}#tabInd::before{background:none}}
+

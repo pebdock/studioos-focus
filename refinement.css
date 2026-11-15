@@ -138,3 +138,4 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 #mSearch,.matl input,#pwaKey,#pwaProj{min-height:44px}
 #island::after{content:"";position:absolute;inset:-7px -4px}
 @media(max-width:420px){.daynav{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px}#dToday{order:1;grid-column:1/-1;justify-self:center}}
+

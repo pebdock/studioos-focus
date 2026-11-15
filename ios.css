@@ -164,3 +164,4 @@ body.rm .btn,body.rm .tab,body.rm .tab svg{transition:none}
 .td-new{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:var(--r-inner,16px);background:color-mix(in srgb,var(--warn) 12%,transparent);font-size:.85rem}
 .td-new .chipbtn{flex:none}
 a.pill{text-decoration:none}
+

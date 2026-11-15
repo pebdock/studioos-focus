@@ -277,6 +277,7 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 <link rel="stylesheet" href="interaction.css">
 <link rel="stylesheet" href="ios.css">
 <link rel="stylesheet" href="liquid.css">
+<link rel="stylesheet" href="learning.css">
 </head>
 <body>
 <div id="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -346,6 +347,17 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
       </div>
       <p class="center mute small hideable"><span class="kbd">Spazio</span> avvia/pausa · <span class="kbd">C</span> concludi · <span class="kbd">S</span> StandBy · <span class="kbd">O</span> OLED · <span class="kbd">E</span> +10 min · <span class="kbd">F</span> schermo intero · <span class="kbd">1–6</span> sezioni</p>
     </article>
+    <article class="card study-checkin" id="studyCheckin" hidden>
+      <details id="studyCheckinDetails"><summary>Il punto dello studio <span class="small mute" id="studyCheckinHint">Argomento e come ti senti</span></summary>
+        <label for="studyTopic">Argomento su cui stai lavorando</label><select id="studyTopic"></select>
+        <label for="studyActivity">Attività di questo intervallo</label><select id="studyActivity"><option value="">Non classificata</option><option value="theory">Teoria e richiamo</option><option value="practice">Esercizi e laboratorio</option><option value="exam">Simulazione d'esame</option></select>
+        <div class="study-ratings" id="studyRatings"></div>
+        <label for="studyCheckpointNote">Punto raggiunto, pagina o esercizio</label><input id="studyCheckpointNote" maxlength="1000" placeholder="Es. E2.2, primo tentativo: da controllare i segni">
+        <div class="row"><button class="btn" id="studySave">Salva il punto</button><button class="btn ghost" id="studyTutor">Chiedi al tutor</button></div>
+        <p class="small mute">Le valutazioni sono facoltative. Il tempo conta solo dopo la conferma della sessione; il punto si sincronizza con il timer.</p>
+      </details>
+      <div id="studyPrerequisites"></div>
+    </article>
     <article class="card" id="scalettaCard" hidden>
       <div class="row"><h3 class="sp">Scaletta del blocco</h3><span id="stepCount" class="mute small"></span></div>
       <ol class="steps" id="steps"></ol>
@@ -387,6 +399,19 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 
 <!-- ================= SETTIMANA ================= -->
 <section class="view" id="v-settimana" role="tabpanel" aria-labelledby="t-settimana">
+  <article class="card learning-card" aria-labelledby="learningTitle">
+    <div class="row"><div class="sp"><span class="eyebrow">Quello che hai fatto davvero</span><h2 id="learningTitle">Il tuo ritmo</h2></div><button class="btn ghost" id="studyContext">Copia contesto per il tutor</button></div>
+    <p class="small mute" id="learningInfo"></p><div id="learningKpis" class="kpis"></div>
+    <div id="learningDays" class="learning-days" aria-label="Studio confermato negli ultimi 14 giorni"></div>
+    <details><summary>Attività, energia e concentrazione</summary><div id="learningActivity"></div><div id="learningRatings"></div><div id="learningInterruptions"></div></details>
+    <details><summary>Le fasce in cui studi</summary><div id="learningHeat" class="learning-heat"></div><p class="small mute">Minuti misurati per ora di Roma. I suggerimenti richiedono almeno 5 sessioni e 3 giorni; concentrazione ed energia sono autovalutazioni.</p></details>
+    <details><summary>Pesi basati sui tempi reali</summary><div id="learningWeights"></div><p class="small mute">Una proposta richiede almeno 5 blocchi verificati su 3 giorni, contenuti invariati e tempo misurato. Le correzioni suggerite restano entro ±20% e richiedono approvazione.</p></details>
+  </article>
+  <article class="card topic-card" aria-labelledby="topicTitle">
+    <div class="row"><h2 id="topicTitle" class="sp">Argomento per argomento</h2><select id="topicSubject" aria-label="Materia degli argomenti"><option value="">Tutte</option><option>MDP</option><option>BD</option><option>MN</option><option>FIS</option><option>OOP</option><option>RETI</option></select></div>
+    <input id="topicSearch" type="search" placeholder="Cerca un argomento" aria-label="Cerca un argomento"><div id="topicList"></div>
+    <p class="small mute">Copertura dichiarata, tempo misurato, fiducia e prove autonome restano separati. Se la consegna non distingue le unità, il dato è a livello di blocco. I minuti di blocchi con più argomenti restano non attribuiti finché scegli l'argomento.</p>
+  </article>
   <article class="card progress-card" aria-labelledby="prTitle">
     <div class="row"><div class="sp"><span class="eyebrow">Un passo alla volta</span><h2 id="prTitle">La tua preparazione</h2></div><select id="prSubject" aria-label="Materia per le percentuali"><option value="">Tutte le materie</option><option>MDP</option><option>BD</option><option>MN</option><option>FIS</option><option>OOP</option><option>RETI</option></select></div>
     <p class="small mute">Copertura del piano attivo basata sui completamenti dichiarati. Il timer, da solo, non completa le attività.</p>
@@ -419,6 +444,7 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
     <h3>Esercizi, verifiche e simulazioni</h3><div id="anEx" class="small"></div>
     <h3>Stima del voto</h3><div id="anGrade" class="small"></div></article>
   <article class="card"><h3>Appelli</h3><div id="exams"></div></article>
+  <article class="card"><h3>Simula la media</h3><p class="small mute">Un'ipotesi personale: non cambia i voti di AlmaEsami.</p><label for="averageExam">Esame da sostenere</label><select id="averageExam"></select><label for="averageGrade">Voto ipotetico</label><input id="averageGrade" type="number" min="18" max="30" step="1" value="27"><p id="averageResult" role="status"></p></article>
 </section>
 
 <!-- ================= REGISTRO ================= -->
@@ -461,6 +487,7 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 
 <!-- ================= IMPOSTAZIONI ================= -->
 <section class="view" id="v-impostazioni" role="tabpanel" aria-labelledby="t-impostazioni">
+  <article class="card"><details><summary>Salute del sistema</summary><div id="systemHealth"></div><p class="small mute">Ogni stato deriva dall'ultima evidenza disponibile. Un processo senza data verificata resta «da verificare».</p></details></article>
   <article class="card"><h2>Timer</h2>
     <div class="row"><div class="sp"><label for="sWork">Durata studio (min)</label><input id="sWork" type="number" min="10" max="120"></div><div class="sp"><label for="sBreak">Pausa (min)</label><input id="sBreak" type="number" min="3" max="30"></div></div>
     <label><input id="sAuto" type="checkbox"> Pausa automatica allo scadere</label>
@@ -506,6 +533,8 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
   <label for="mdRedo">Esercizio da rifare</label><input id="mdRedo" type="text">
   <label for="mdRev">Argomento da ripassare</label><input id="mdRev" type="text"></details>
   <label>Concentrazione percepita</label><div class="stars" id="mdStars" role="radiogroup" aria-label="Concentrazione da 1 a 5"></div>
+  <div id="mdLearning"></div>
+  <label><input type="checkbox" id="mdArchiveOnly"> Salva solo nell'archivio Focus, senza scrivere PROGRAMMA</label>
   <div class="row" style="margin-top:6px"><button class="btn primary" id="mdOk">Conferma sessione</button><button class="btn" id="mdKeep">Torna allo studio</button><button class="btn ghost" id="mdDrop">Scarta (non conta)</button></div>
 </div></div>
 <div class="sheet" id="mInt" role="dialog" aria-modal="true" aria-labelledby="miT"><div><span class="grab" aria-hidden="true"></span>
@@ -529,14 +558,18 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 <div class="sr" aria-live="assertive" id="announce"></div>
 
 
+
 <script src="sync.js"></script>
 <script src="picker-config.js"></script>
 <script src="adapter.js"></script>
 <script src="progress.js"></script>
 <script src="career.js"></script>
+<script src="learning.js"></script>
 <script src="motion.js"></script>
 <script src="navigation.js"></script>
 <script src="app.js"></script>
+<script src="learning-ui.js"></script>
 <script src="liquid.js"></script>
 </body>
 </html>
+

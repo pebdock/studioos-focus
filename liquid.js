@@ -112,3 +112,4 @@
   const api={update,start,lensMap,GLASS};root.STUDIOOS_LIQUID=api;
   if(doc.readyState==="loading")doc.addEventListener("DOMContentLoaded",start);else start();
 })(typeof window!=="undefined"?window:globalThis);
+

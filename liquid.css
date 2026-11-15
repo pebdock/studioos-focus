@@ -124,3 +124,4 @@ html.lg .lg-seg button{background:none;box-shadow:none;-webkit-backdrop-filter:n
 @media(prefers-reduced-motion:reduce){#lgBg i,#lgBg .lg-tide svg{animation:none}html.lg details[open]>:not(summary),html.lg .top.lg-open .chips.lg-popover{animation:none}}
 body.rm #lgBg i,body.rm #lgBg .lg-tide svg{animation:none}body.rm details[open]>:not(summary){animation:none}
 @media(forced-colors:active){#lgBg{display:none}html.lg :is(.btn,select,summary,#lgStatus){background:ButtonFace;border:1px solid ButtonText;box-shadow:none}}
+

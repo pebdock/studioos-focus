@@ -60,6 +60,7 @@ function actExtend(x,t){if(x.phase!=="work"||x.ext||!x.phaseEnd)return x;x.phase
 const $=id=>document.getElementById(id);
 const SYNC=window.STUDIOOS_SYNC;
 const PROGRESS=window.STUDIOOS_PROGRESS;
+const LEARNING=window.STUDIOOS_LEARNING;
 const DATA_PREFIX=window.STUDIOOS_DATA_PREFIX||"sfocus.";
 const storageKey=k=>(k==="device"||k==="settings"?"sfocus.":DATA_PREFIX)+k;
 let localSaveFailed=false;
@@ -78,7 +79,7 @@ function todayIso(d=new Date()){return new Intl.DateTimeFormat("en-CA",{timeZone
 function addDays(iso,n){const d=new Date(iso+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
 function monday(iso){const d=new Date(iso+"T12:00:00Z");return addDays(iso,-((d.getUTCDay()+6)%7))}
 function off(iso){const m=+iso.slice(5,7);return m>=4&&m<=10?"+02:00":"+01:00"}
-function at(iso,hhmm){return Date.parse(iso+"T"+hhmm+":00"+off(iso))}
+function at(iso,hhmm){return LEARNING?LEARNING.at(iso,hhmm):Date.parse(iso+"T"+hhmm+":00"+off(iso))}
 function hm(ms){return new Intl.DateTimeFormat("it-IT",{timeZone:"Europe/Rome",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(new Date(ms))}
 function fmt(sec){sec=Math.max(0,Math.round(sec));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return (h?h+":"+String(m).padStart(2,"0"):String(m).padStart(2,"0"))+":"+String(s).padStart(2,"0")}
 function mins(hhmm){const [h,m]=(hhmm||"0:0").split(":").map(Number);return h*60+m}
@@ -283,7 +284,8 @@ async function startRun(){if(!cur||cur.rinv)return;if(run&&run.status==="active"
   let x={runId:uid(),blockId:cur.id,date:todayIso(),materia:cur.mat,plannedMin:planned(cur),startedAt:now,segments:[],phase:"await",status:"active",device:deviceId,
     cfg:{work:settings.work,brk:settings.brk,auto:settings.auto,resume:settings.resume,smart:settings.smart},planKey:index[cur.id]?PROGRESS.planKey(index[cur.id]):null,interruptions:[],pauses:0,cycle:0,breaksDone:0,skipped:0,extCount:0,declaredExtraSec:0,
     notes:$("notes").value||"",steps:LS.get("steps."+cur.id,[]),dayBase:dayConfirmedMin(todayIso()),hardEnd:cur.end&&cur.end>now?cur.end:null,sched:schedFor(cur,now),rev:0};
-  startCycle(x,now);lastKey=keyOf(x);await commit(x,"start");acquireWakeIf();buzz(18);say("Sessione avviata");if(x.lastPlan)toast(`Ciclo di ${x.lastPlan.W}′ · ${x.lastPlan.why}`)}
+  const sample=window.STUDIOOS_STUDY_UI?.capture("start",now);if(sample)x.learning={schema:"learning/1",samples:[sample]};
+  startCycle(x,now);lastKey=keyOf(x);await commit(x,"start");acquireWakeIf();buzz(18);say("Sessione avviata");window.STUDIOOS_STUDY_UI?.render();if(x.lastPlan)toast(`Ciclo di ${x.lastPlan.W}′ · ${x.lastPlan.why}`)}
 function act(fn,label){if(!run||run.status!=="active")return;const now=Date.now();const x=clone(advance(run,now));fn(x,now);lastKey=keyOf(x);commit(x,label);buzz(12);render()}
 function pauseRun(){if(!run)return;const d=advance(run,Date.now());if(d.phase==="work")act(actPause,"pause");else act(actResume,"resume")}
 function extendRun(){act(actExtend,"extend");toast("+10 minuti a questo ciclo")}
@@ -301,7 +303,7 @@ function frame(){frame.handle=null;frame.timer=null;const now=Date.now();let d=r
     else frame.timer=setTimeout(()=>{frame.timer=null;frame.handle=requestAnimationFrame(frame)},1000-Date.now()%1000);
   }else frame.idle=true}
 function onTransition(d){const msg=d.phase==="break"?`Pausa di ${Math.round((d.phaseEnd-d.phaseStart)/MIN)}′`:d.phase==="work"?"Si riparte":d.awaitWhy==="target"?"Netto pianificato raggiunto: concludi o continua":d.awaitWhy==="end"?"Fine del blocco":d.awaitWhy==="meal"?"Ora del pasto: riprendi dopo":"Pausa finita: premi Riprendi";
-  alarm(msg);buzz([60,80,60]);toast(msg)}
+  alarm(msg);buzz([60,80,60]);toast(msg);window.STUDIOOS_STUDY_UI?.phase(d)}
 function phaseInfo(d,now){if(!d)return {main:0,frac:0,ph:cur?(cur.rinv?"Blocco rinviato: non eseguire":"Pronto"):"Scegli una sessione",up:false};
   if(d.phase==="work"){if(d.phaseEnd&&d.cfg.auto){const tot=d.phaseEnd-d.phaseStart,el=now-d.phaseStart;return {main:Math.max(0,(d.phaseEnd-now)/1000),frac:clamp(el/tot,0,1),ph:"Studio"}}
     const tot=d.phaseEnd?d.phaseEnd-d.phaseStart:d.cfg.work*MIN,el=now-d.phaseStart;return {main:el/1000,frac:clamp(el/tot,0,1),ph:el>tot?"Studio · pausa consigliata":"Studio",up:true}}
@@ -406,7 +408,7 @@ async function openSession(id,dayHint,quiet){if(run&&run.status==="active"&&run.
     $("fTitle").textContent=arg||id;$("dMat").textContent=(h[0]||[])[0]||"";applyCons(cons,b);LS.set("cons."+id,cons)}
   catch(e){if(!cached)$("dCons").textContent="Consegna non leggibile ora (Sheets non raggiungibile). Usa la descrizione dell'evento in Calendar."}}
   else if(!cached)$("dCons").textContent="Consegna non disponibile senza connessione a Sheets."}
-function applyCons(cons,b){$("dCons").textContent=cons;renderDetailMats(b.mats||$("dMat").textContent||"",b);const a=$("dOpen"),u=safeUrl(b.apri);a.href=u||"#";a.hidden=!u;
+function applyCons(cons,b){$("dCons").textContent=cons;renderDetailMats(b.mats||$("dMat").textContent||"",b);const a=$("dOpen"),u=safeUrl(b.apri);a.href=u||"#";a.hidden=!u;window.STUDIOOS_STUDY_UI?.renderCurrent();
   const crit=cons.split("\n").filter(l=>/^(Verifica|VERIFICA|SIMULAZIONE|REGOLA)/.test(l.trim())).join("\n");$("dCrit").textContent=crit||"Vedi la consegna completa.";cur.crit=$("dCrit").textContent;buildSteps(cons)}
 /* ---------- scaletta ---------- */
 const CK=["Da iniziare","In corso","Completato","Parziale","Da recuperare"];
@@ -432,33 +434,38 @@ $("steps").addEventListener("change",async e=>{if(!e.target.matches("[data-type]
 /* ---------- completion & register ---------- */
 function openDone(){if(!run||run.status!=="active")return;const now=Date.now();let x=clone(advance(run,now));if(x.phase==="work"){actPause(x,now);commit(x,"pause")}const net=workSec(x,now);
   $("mdInfo").textContent=`Tempo netto misurato: ${Math.floor(net/60)} min su ${x.plannedMin} pianificati, ${x.cycle||0} cicli, ${x.breaksDone||0} pause. Il tempo da solo non completa il blocco: scegli l'esito in base alla prova.`;
-  $("mdCrit").textContent=cur&&cur.crit||"";stars=0;drawStars();openSheet("mDone");$("mdOut").focus()}
+  $("mdCrit").textContent=cur&&cur.crit||"";stars=0;drawStars();window.STUDIOOS_STUDY_UI?.prepareDone(x,index[x.blockId]||{});if($("mdArchiveOnly"))$("mdArchiveOnly").checked=!canCloudWrite();$("mdOk").textContent=canCloudWrite()?"Conferma e registra":"Conferma sessione";openSheet("mDone");$("mdOut").focus()}
 function drawStars(){$("mdStars").innerHTML=[1,2,3,4,5].map(n=>`<button class="btn ${n<=stars?"primary":""}" role="radio" aria-checked="${n===stars}" data-s="${n}">${n}</button>`).join("")}
 $("mdStars").addEventListener("click",e=>{const b=e.target.closest("[data-s]");if(b){stars=+b.dataset.s;drawStars();buzz(6)}});
 async function confirmRun(){const out=$("mdOut").value,ev=$("mdEv").value.trim();
+  const learning=window.STUDIOOS_STUDY_UI?.finish();
+  if(out==="Verificato autonomamente"&&learning&&LEARNING&&!LEARNING.validQuiz(learning.quiz)){$("mdInfo").textContent="Completa la mini-verifica e controlla le risposte nel materiale. Puoi scegliere «Da consolidare» se serve ancora esercizio.";return}
   if(out==="Verificato autonomamente"&&(!ev||!$("mdSelf").checked)){$("mdInfo").textContent="Per «Verificato autonomamente» servono la prova osservabile e la conferma di averla svolta senza aiuti.";return}
   if(!run||run.status!=="active")return;clearTimeout(window.__nt);const x=clone(advance(run,Date.now()));if(x.phase==="work")actPause(x,Date.now());
   const study={diff:$("mdDiff").value.trim(),redo:$("mdRedo").value.trim(),review:$("mdRev").value.trim()};
   Object.assign(x,{status:"confirmed",outcome:out,evidence:ev,selfCheck:$("mdSelf").checked,focusScore:stars||null,notes:$("notes").value,study,confirmedAt:Date.now(),phase:"done"});
+  if(learning){x.learning=x.learning||{schema:"learning/1",samples:[]};x.learning.samples=(x.learning.samples||[]).concat([{...learning.sample,focus:stars||learning.sample.focus}]);x.learning.quiz=learning.quiz}
   await commit(x,"confirm");closeSheet("mDone");releaseWake();const id=x.blockId;run=null;saveLocal();LS.set("notes."+id,"");
   $("mdEv").value="";$("mdSelf").checked=false;$("mdDiff").value="";$("mdRedo").value="";$("mdRev").value="";
   for(const [k,lab] of [["redo","Da rifare"],["review","Da ripassare"]])if(study[k]){const e={id:uid(),blockId:id,runId:x.runId,materia:x.materia,text:lab+": "+study[k],fix:study.diff||"",at:Date.now()};await put("errors",e.id,e)}
-  buzz([20,40,20]);renderDay();renderStats();renderRuns();renderWeek();render();renderToday();renderProgress();toast("Sessione confermata");logNow();askRegister(id,out)}
+  buzz([20,40,20]);renderDay();renderStats();renderRuns();renderWeek();render();renderToday();renderProgress();toast("Sessione confermata");logNow();if(!$("mdArchiveOnly")?.checked)askRegister(id,out,true)}
 async function dropRun(){if(!run||run.status!=="active")return;clearTimeout(window.__nt);const x=clone(run);if(cur&&cur.id===x.blockId)x.notes=$("notes").value;x.status="discarded";x.phase="done";await commit(x,"discard");closeSheet("mDone");releaseWake();run=null;saveLocal();render();renderDay();logNow()}
 let regCtx=null;
-async function askRegister(id,out){const b=index[id];if(!b)return;const focusMin=Math.round(netForBlock(id)/60);let sh;
+async function askRegister(id,out,immediate=false){const b=index[id];if(!b)return;const focusMin=Math.round(netForBlock(id)/60);let sh;
   try{sh=await sheetGet(`PROGRAMMA!J${b.row}:L${b.row}`)}catch(e){$("mrInfo").textContent="Sheets non raggiungibile: la sessione resta nell'archivio Focus e potrai scriverla dopo.";regCtx=null;openSheet("mReg");return}
   const r=sh[0]||[];if(r[2]!==id){$("mrInfo").textContent="La riga del registro non corrisponde più all'ID: aggiorna i dati. Nessuna scrittura.";regCtx=null;openSheet("mReg");return}
-  const sheetMin=Number(r[1]||0),last=(syncState["sync_"+id]||{}).min||0,conflict=sheetMin!==last;const st=out||lastOutcome(id)||r[0];regCtx={id,row:b.row,min:focusMin,st,sheetMin};
+  const sheetMin=Number(r[1]||0),last=(syncState["sync_"+id]||{}).min||0,conflict=sheetMin!==last;const st=out||lastOutcome(id)||r[0];regCtx={id,row:b.row,min:focusMin,st,sheetMin,sheetState:r[0]||""};
   $("mrInfo").innerHTML=`Blocco <b>${esc(id)}</b> (riga ${b.row}). Registro attuale: <b>${esc(r[0])}</b>, ${sheetMin} min. Focus: <b>${focusMin}</b> min netti confermati (unione degli intervalli, senza doppi conteggi), esito «${esc(st)}».`+
     (conflict?`<br><b style="color:var(--bad)">Conflitto:</b> il registro è cambiato fuori da Focus (ultima scrittura Focus: ${last} min). Scrivendo imposti ${focusMin} min; se quei minuti vengono da un'altra fonte, annulla e riconcilia a mano.`:"")+`<br>Scrittura: solo colonne J:K, valore assoluto, poi rilettura di verifica.`;
-  openSheet("mReg")}
+  if(immediate&&!conflict&&focusMin>=sheetMin&&canCloudWrite())return writeRegister();openSheet("mReg")}
 function lastOutcome(id){return Object.values(runs).filter(r=>r.blockId===id&&r.status==="confirmed").sort((a,b)=>b.confirmedAt-a.confirmedAt).map(r=>r.outcome)[0]}
 const REG_STATES=["Da iniziare","Affrontato","Parziale","Da consolidare","Verificato autonomamente"];
 async function writeRegister(){const c=regCtx;closeSheet("mReg");if(!c)return;
   if(!REG_STATES.includes(c.st)){toast("Stato non ammesso per il registro: nessuna scrittura",5000);return}
   if(c.min<(c.sheetMin||0)){toast(`Il registro ha già ${c.sheetMin} min, più dei ${c.min} confermati in Focus: nessuna scrittura (i minuti registrati non si riducono da Focus)`,7000);return}
-  try{await call("Google Sheets","update_values",{spreadsheetId:SHEET_ID,range:`PROGRAMMA!J${c.row}:K${c.row}`,values:[[c.st,c.min]]});
+  try{const before=(await sheetGet(`PROGRAMMA!J${c.row}:L${c.row}`))[0]||[];
+    if(before[2]!==c.id||Number(before[1]||0)!==c.sheetMin||String(before[0]||"")!==c.sheetState){toast("Il registro è cambiato: rileggo i valori prima di scrivere",5000);return askRegister(c.id,c.st)}
+    await call("Google Sheets","update_values",{spreadsheetId:SHEET_ID,range:`PROGRAMMA!J${c.row}:K${c.row}`,values:[[c.st,c.min]]});
     const chk=(await sheetGet(`PROGRAMMA!J${c.row}:L${c.row}`))[0]||[];const ok=chk[0]===c.st&&Number(chk[1])===c.min&&chk[2]===c.id;
     if(ok){await put("state","sync_"+c.id,{key:"sync_"+c.id,min:c.min,st:c.st,at:Date.now()});index[c.id].stato=c.st;index[c.id].fatti=c.min;toast("Registro aggiornato e verificato")}
     else toast("La rilettura dopo la scrittura non coincide: controlla PROGRAMMA",5000);
@@ -526,7 +533,7 @@ if(window.ResizeObserver)new ResizeObserver(moveInd).observe($("tabbar"));
 let curView="focus";const viewScroll={};
 function show(v,dir){if(window.__nt&&run&&run.status==="active")persistSession();if(!VIEWS.includes(v))v="focus";if(v===curView&&$("v-"+v).classList.contains("on"))return;const doIt=()=>{if(curView)viewScroll[curView]=window.scrollY;curView=v;VIEWS.forEach(x=>{$("v-"+x).classList.toggle("on",x===v);$("t-"+x).setAttribute("aria-selected",x===v);$("t-"+x).tabIndex=x===v?0:-1});moveInd();window.scrollTo({top:viewScroll[v]||0,behavior:"auto"});
   try{if(location.hash!=="#"+v)history.replaceState(null,"","#"+v)}catch(e){}if(v==="settimana"){renderWeek();renderAnalysis()}if(v==="registro"){renderAllErr();renderRuns();renderMats();renderReviews();renderSims()}if(v==="piano"){renderPlan();loadPlan()}render()};
-  doIt()}
+  doIt();window.STUDIOOS_STUDY_UI?.render()}
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{show(t.dataset.v);buzz(6)});
 navController=window.STUDIOOS_NAV.mount($("tabbar"),{select:v=>{show(v);buzz(6)},reducedMotion:()=>settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches,strength:()=>settings.motion==="soft"?.45:1});
 window.addEventListener("hashchange",()=>{const h=location.hash.match(/b=(R20-\d{4})/);if(h&&index[h[1]]){openSession(h[1],index[h[1]].date);return}show(location.hash.slice(1))});
@@ -614,7 +621,7 @@ async function loadPlan(){if(!mcp||planBusy)return;planBusy=true;try{const v=awa
   catch(e){$("pInfo").dataset.err="1"}finally{planBusy=false}}
 function pend(r){return (r.tipo==="PROPOSTA"||r.tipo==="DOMANDA")&&r.stato==="IN_ATTESA"}
 function parseChg(t){try{const j=JSON.parse(t||"[]");return Array.isArray(j)?j:[]}catch(e){return null}}
-function fmtWhen(iso){const t=Date.parse(iso);return isNaN(t)?esc(iso||""):new Date(t).toLocaleString("it-IT",{dateStyle:"short",timeStyle:"short",timeZone:"Europe/Rome"})}
+function fmtWhen(iso){const raw=String(iso||""),t=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)?at(raw.slice(0,10),raw.slice(11)):Date.parse(raw);return isNaN(t)?esc(raw):new Date(t).toLocaleString("it-IT",{dateStyle:"short",timeStyle:"short",timeZone:"Europe/Rome"})}
 function renderPlan(){const rows=plan.rows||[],np=rows.filter(pend).length,b=$("pBadge");b.hidden=!np;b.textContent=np;
   const notes=rows.filter(r=>r.tipo==="NOTA").sort((x,y)=>(y.creata||"").localeCompare(x.creata||"")).slice(0,3);
   $("pNotes").innerHTML=notes.length?notes.map(r=>`<div class="note-t"><b>${esc(r.titolo)}</b> <span class="mute small">${fmtWhen(r.creata)} · ${esc(r.autore)}</span><div class="small sel">${esc(r.motivo)}</div></div>`).join(""):'<p class="small mute">Nessun messaggio del tutor per ora.</p>';
@@ -757,6 +764,7 @@ function draftRecovery(){const B=Object.values(index).filter(b=>b.stato!=="Rinvi
 }
 $("pDraft").onclick=draftRecovery;
 function renderProgress(){if(!$("prMetrics"))return;const calc=PROGRESS.calculate(Object.values(index),ckGet,Object.values(runs)),s=$("prSubject").value,a=s?(calc.subjects[s]||PROGRESS.calculate([]).all):calc.all;
+  window.STUDIOOS_STUDY_UI?.render();
   const names={preparation:"Preparazione",theory:"Teoria",practice:"Pratica",exam:"Esame · prove"},num=n=>Number(n.toFixed(1)).toLocaleString("it-IT");
   $("prMetrics").innerHTML=Object.entries(names).map(([k,label])=>{const m=a[k],pct=m.pct==null?"N/D":num(m.pct)+"%";return `<div class="coverage-metric"><span>${label}</span><strong>${pct}</strong><progress max="100" value="${m.pct||0}" aria-label="${label}${s?" "+s:""}: ${pct}"></progress><small>${m.total?num(m.done)+" / "+num(m.total)+" min ponderati":"Nessuna attività classificata"}</small></div>`}).join("");
   $("prQuality").textContent=`${a.blocks} blocchi attivi. Tipi attribuiti al ${a.preparation.total?num(100*(a.theory.total+a.practice.total+a.exam.total)/a.preparation.total):"0"}% del piano: teoria, pratica ed esame si riferiscono a questa quota. ${a.unclassified?num(a.unclassified)+" min con tipo misto o da classificare. ":""}${a.unparsed?num(a.unparsed)+" min con verifica a livello di blocco. ":""}${a.legacy?a.legacy+" checklist precedenti da riconfermare. ":""}100% indica copertura del piano, non superamento dell’esame. Appelli: ${planMeta.examsAt?"SCADENZE letto "+hm(planMeta.examsAt):"date predefinite da verificare"}.`;
@@ -776,8 +784,8 @@ function analysisData(){const now=Date.now(),today=todayIso(),B=Object.values(in
   return {per,backlog,future,total,slack,days,wk,last,today}}
 /* ---------- carriera UniBo: scheda UNIBO_STATO scritta dal ponte sul PC, letta anche da iPhone ---------- */
 const CAREER=window.STUDIOOS_CAREER;let career=LS.get("career",null),careerBusy=null,lastCareerAttempt=0,careerErr="";
-function localIso(){const d=new Date(),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`}
-function fmtWhen(v){const d=/Z$/.test(v)?new Date(v):new Date(String(v).slice(0,16)+":00");return Number.isFinite(d.getTime())?d.toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).replace(","," "):"—"}
+function localIso(){return LEARNING?LEARNING.clock(Date.now()):todayIso()+"T"+hm(Date.now())}
+function fmtCareerWhen(v){const raw=String(v||""),ms=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)?at(raw.slice(0,10),raw.slice(11)):Date.parse(raw),d=new Date(ms);return Number.isFinite(d.getTime())?d.toLocaleString("it-IT",{timeZone:"Europe/Rome",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).replace(","," "):"—"}
 function bookingFor(subject,date){return career&&CAREER&&date?CAREER.bookedOn(career.summary,subject,date):null}
 async function loadCareer(force=false){if(!mcp||!CAREER||navigator.onLine===false){renderCareer();return}if(careerBusy)return careerBusy;if(!force&&Date.now()-lastCareerAttempt<180000)return;lastCareerAttempt=Date.now();
   careerBusy=(async()=>{try{const st=CAREER.parse(await archGet("UNIBO_STATO!A1:J2"));careerErr="";if(st){career=Object.assign(st,{readAt:Date.now()});LS.set("career",career)}else if(!career)careerErr="Il ponte non ha ancora scritto dati"}
@@ -822,6 +830,16 @@ function renderAnalysis(){renderProgress();if(!$("anHours"))return;const A=analy
     if(L.length>=2){const l=L.slice(-2),m=(l[0]+l[1])/2,h=Math.max(1.5,Math.abs(l[0]-l[1])/2);t=`≈ <b>${m.toFixed(1)}/30</b> (fascia ${Math.max(0,m-h).toFixed(0)}–${Math.min(30,m+h).toFixed(0)}) [Stima sulle ultime 2 simulazioni]`}
     else if(L.length===1)t=`1 simulazione: ${L[0].toFixed(1)}/30 — serve almeno una seconda prova per una stima`;else t="Dati insufficienti per stimare il voto";
     return `<p><b>${s}</b>: ${t}<br><span class="mute">Scenario con programma completato: ${A.per[s].sims} prove a tempo previste; la stima si basa solo sui punteggi che registri, non sulle ore.</span></p>`}).join("")}
+/* ---------- dati e azioni del registro di apprendimento ---------- */
+window.STUDIOOS_STUDY={
+  snapshot:()=>({blocks:Object.values(index),runs:Object.values(runs),errors:Object.values(errors),state:syncState,career,pending:queue().length,rules:planMeta.rules||{},planAt:(LS.get("index",{})||{}).at||null}),
+  current:()=>({block:cur&&index[cur.id],run}),
+  checkpoint:async sample=>{if(!run||run.status!=="active")throw Error("Avvia una sessione per salvare il punto");const x=clone(advance(run,Date.now()));x.learning=x.learning||{schema:"learning/1",samples:[]};const block=index[x.blockId],topic=LEARNING?.units(block||{}).find(u=>u.id===sample.topicId);const at=Date.now();x.learning.samples=(x.learning.samples||[]).concat([{...sample,at,stage:"interval",topicId:topic?.id||null}]).slice(-200);await commit(x,"checkpoint");renderProgress()},
+  requestTutor:async text=>{$("pReq").value=text;show("piano");await sendReq()},
+  open:id=>openSession(id,(index[id]||{}).date),show,toast,
+  saveState:(id,value)=>put("state",id,{...value,key:id}),
+  saveError:value=>put("errors",value.id,value)
+};
 /* ---------- boot ---------- */
 const BOOT_HASH=location.hash;
 (async function boot(){applySettings();bindSettings();installHelp();applyPlanMeta();curView="";show(location.hash.slice(1)||"focus");
@@ -840,4 +858,5 @@ const BOOT_HASH=location.hash;
   try{const h=BOOT_HASH.match(/b=(R20-\d{4})/);if(h&&index[h[1]]){openSession(h[1],index[h[1]].date)}}catch(e){}
   if(run&&run.status==="active"){const b=index[run.blockId];openSession(run.blockId,b&&b.date,true);acquireWakeIf();checkGap()}
   setTimeout(()=>logNow(addDays(todayIso(),-1)),8000)})();
+
 

@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.7.1 · R13h.8";
+  var VERSION = "pwa-1.8.0 · R13h.9";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -558,4 +558,5 @@
     canWrite: function () { return !CFG.readOnly && !!token(); }, refresh: function () { return loadAll(0); },
     storagePrefix: window.STUDIOOS_DATA_PREFIX, cloudStatus: function () { return {ready:tabOK===true,readAt:lastCloudRead,writtenAt:lastCloudWrite||ls.get("cloudWriteAt",0),readOnly:CFG.readOnly}; }, _cfg: function () { return CFG; } };
 })();
+
 

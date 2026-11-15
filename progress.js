@@ -18,6 +18,9 @@
         const task=(/Come lavorare:\s*([\s\S]*?)(?=\n(?:Verifica finale:|VERIFICA FINALE:|Nota D-)|$)/i.exec(cons)||[])[1]||cons;
         out.push({a:"",b:"",t:(/Obiettivo:\s*([^\n]+)/i.exec(cons)||[])[1]||"Attività previste nella consegna del blocco",min:budget,source:task.trim(),coarse:true,k:"Blocco intero"})}
     }
+    // Nei piani precedenti un richiamo iniziale con orario non descrive tutta
+    // l'unità. Le quote esplicite restano il riferimento per la copertura.
+    if(!m){const explicit=[];for(const w of cons.matchAll(/(?:^|\n)Unità «([^»]+)»\. In questo blocco dedica (\d+) minuti netti alla quota[^\n]+(?:\n|$)([\s\S]*?)(?=\nUnità «|\nVerifica finale:|\nNota D-|$)/g))explicit.push({a:"",b:"",t:w[1],min:+w[2],source:w[0].trim(),k:kind(w[1])});if(explicit.length){const pauses=out.filter(s=>s.pause);out=explicit.concat(pauses)}}
     if(out.length)out.push({a:"",b:"",t:"Verifica finale: criterio di completamento (vedi sotto)",k:"Verifica",verify:true,source:criterion(cons)});
     return out;
   }
@@ -53,3 +56,4 @@
   }
   const api={kind,steps,minutes,keys,planKey,resolve,category,calculate};root.STUDIOOS_PROGRESS=api;if(typeof module!=="undefined"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
+

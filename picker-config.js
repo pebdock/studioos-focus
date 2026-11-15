@@ -70,3 +70,4 @@
   }
   window.STUDIOOS_PICKER_CONFIG = { valid: valid, load: load, save: save };
 })();
+

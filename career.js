@@ -58,3 +58,4 @@
   const api={CODES,parse,stats,freshness,bySubject,bookedOn,ago,STALE_MS,SOURCES,ALMAESAMI,windowState,appelli,appelliStatus,news};
   root.STUDIOOS_CAREER=api;if(typeof module!=="undefined"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
+
