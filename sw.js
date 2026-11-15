@@ -1,7 +1,7 @@
 /* STUDIOOS Focus · service worker della versione autonoma.
    Mette in cache solo i file dell'app (stessa origine). Le chiamate a Google non passano mai dalla cache.
    Pagine: rete prima (senza cache HTTP), copia locale se offline. File statici: copia locale subito e aggiornamento in background. */
-const VERSION = "studioos-focus-202611150343";
+const VERSION = "studioos-focus-202611150346";
 const CORE = ["./", "./index.html", "./app.js", "./adapter.js", "./manifest.webmanifest", "./setup.html", "./setup.js",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./icons/favicon-64.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE.map(u => new Request(u, { cache: "reload" }))))); });

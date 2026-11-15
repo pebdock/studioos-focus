@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.1.3 · R13h.3";
+  var VERSION = "pwa-1.1.4 · R13h.3";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -289,8 +289,8 @@
     var s = await g(SH + enc(id) + "?fields=properties.title,sheets.properties.title");
     var t = (s.sheets || []).map(function (x) { return x.properties.title; });
     var name = (s.properties && s.properties.title) || "";
-    if (t.indexOf("PROGRAMMA") >= 0 && t.indexOf("SISTEMA") >= 0) return { kind: "sheet", name: name };
     if (t.indexOf("FOCUS_LOG") >= 0 || t.indexOf("PIANO_PROPOSTE") >= 0) return { kind: "arch", name: name };
+    if (t.indexOf("PROGRAMMA") >= 0 && t.indexOf("SISTEMA") >= 0) return { kind: "sheet", name: name };
     return { kind: "", name: name };
   }
   async function discover() {

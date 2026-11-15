@@ -15,7 +15,8 @@
     var r = await fetch("https://sheets.googleapis.com/v4/spreadsheets/" + encodeURIComponent(id) + "?fields=properties.title,sheets.properties.title", { headers: { Authorization: "Bearer " + tok.t }, cache: "no-store", referrerPolicy: "no-referrer" });
     if (!r.ok) throw new Error("Google " + r.status);
     var s = await r.json(), t = (s.sheets || []).map(function (x) { return x.properties.title; });
-    var kind = t.indexOf("PROGRAMMA") >= 0 && t.indexOf("SISTEMA") >= 0 ? "sheet" : (t.indexOf("FOCUS_LOG") >= 0 || t.indexOf("PIANO_PROPOSTE") >= 0) ? "arch" : "";
+    /* l'archivio tecnico contiene anche vecchie schede PROGRAMMA/SISTEMA: i suoi marcatori hanno la precedenza */
+    var kind = (t.indexOf("FOCUS_LOG") >= 0 || t.indexOf("PIANO_PROPOSTE") >= 0) ? "arch" : (t.indexOf("PROGRAMMA") >= 0 && t.indexOf("SISTEMA") >= 0) ? "sheet" : "";
     return { kind: kind, name: (s.properties && s.properties.title) || "" };
   }
   async function picked(data) {
