@@ -1,6 +1,6 @@
 /* STUDIOOS Focus · service worker della versione autonoma.
    Mette in cache solo i file dell'app (stessa origine). Le chiamate a Google non passano mai dalla cache. */
-const VERSION = "studioos-focus-202611150326";
+const VERSION = "studioos-focus-202611150337";
 const CORE = ["./", "./index.html", "./app.js", "./adapter.js", "./manifest.webmanifest", "./setup.html", "./setup.js",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./icons/favicon-64.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE))); });

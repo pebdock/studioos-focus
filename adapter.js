@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.1.0 · R13h.3";
+  var VERSION = "pwa-1.1.1 · R13h.3";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -32,7 +32,8 @@
   var DECISIONS = ["APPROVATA", "RIFIUTATA", "RISPOSTA", "LETTA"];
 
   /* ---------- configurazione locale (mai in un URL) ---------- */
-  var CFG = ls.get("cfg2", null) || {};
+  var CFG = ls.get("cfg2", null) || { readOnly: true };
+  if (CFG.readOnly == null) CFG.readOnly = true;
   ls.del("cfg"); /* eventuale configurazione della 1.0 con link #cfg: non più usata */
   function saveCfg() { ls.set("cfg2", CFG); window.STUDIOOS_CFG = { sheet: CFG.sheet || "", arch: CFG.arch || "", cal: CFG.calOn ? (CFG.cal || "") : "" }; }
   function configured() { return !!(CFG.sheet && CFG.arch); }
@@ -149,6 +150,7 @@
         return { range: r.range, values: r.values || [] };
       }
       if (server === "Google Sheets" && tool === "update_values") {
+        if (CFG.readOnly) throw new Error("Sola lettura: registrazione nei fogli spenta");
         checkWrite(input.spreadsheetId, input.range, input.values);
         return g(SH + enc(input.spreadsheetId) + "/values/" + enc(input.range) + "?valueInputOption=RAW",
           { method: "PUT", body: JSON.stringify({ range: input.range, majorDimension: "ROWS", values: input.values }) });
@@ -174,6 +176,7 @@
     if (tabOK) return;
     var s = await g(SH + enc(CFG.arch) + "?fields=sheets.properties.title");
     var has = (s.sheets || []).some(function (x) { return x.properties && x.properties.title === TAB; });
+    if (!has && CFG.readOnly) { tabOK = "none"; return; }
     if (!has) {
       await g(SH + enc(CFG.arch) + ":batchUpdate", { method: "POST", body: JSON.stringify({ requests: [{ addSheet: { properties: { title: TAB, hidden: true, gridProperties: { rowCount: 500, columnCount: 6 } } } }] }) });
       await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A1:F1") + "?valueInputOption=RAW", { method: "PUT", body: JSON.stringify({ values: [["percorso", "aggiornato_ms", "json_1", "json_2", "json_3", "dispositivo"]] }) });
@@ -186,6 +189,7 @@
     if (loading) return loading;
     loading = (async function () {
       await ensureTab();
+      if (tabOK === "none") { rows = {}; rowsAt = Date.now(); return rows; }
       var r = await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A2:F") + "?valueRenderOption=UNFORMATTED_VALUE");
       var m = {};
       (r.values || []).forEach(function (v, i) {
@@ -198,6 +202,7 @@
   }
   function devName() { try { return String(JSON.parse(localStorage.getItem("sfocus.device")) || "").slice(0, 40); } catch (e) { return ""; } }
   async function setDoc(path, obj) {
+    if (CFG.readOnly) throw new Error("Sola lettura: archivio salvato solo su questo dispositivo");
     if (!RE_PATH.test(path)) throw new Error("Percorso d'archivio non valido");
     var m = await loadAll(60000);
     var js = JSON.stringify(obj);
@@ -326,6 +331,7 @@
       try { var s = await g(SH + enc(CFG.arch) + "?fields=sheets.properties.title"); var tt = (s.sheets || []).map(function (x) { return x.properties.title; }); out.push("Archivio: " + ["FOCUS_LOG", "PIANO_PROPOSTE", TAB].map(function (n) { return n + (tt.indexOf(n) >= 0 ? " ✓" : " —"); }).join(" · ")); }
       catch (e) { out.push("Archivio: ✗ " + e.message); }
     } else out.push("Archivio: non collegato");
+    out.push(CFG.readOnly ? "Registrazione nei fogli: spenta (sola lettura)" : "Registrazione nei fogli: attiva (solo campi previsti)");
     out.push(CFG.calOn ? "Controllo Calendar: attivo (sola lettura)" : "Controllo Calendar: spento");
     var le = ls.get("lastApiErr", ""); if (le) out.push("Ultimo errore Google: " + le);
     out.push("Versione " + VERSION + (navigator.serviceWorker && navigator.serviceWorker.controller ? " · funziona anche offline" : ""));
@@ -348,7 +354,10 @@
     if (!top || !card) return;
     var ok = !!token(), err = ls.get("authErr", "");
     var step = !ok ? 1 : !configured() ? 2 : 3;
-    if (step < 3 || err) {
+    if (step === 3 && CFG.readOnly && !err) {
+      top.hidden = false;
+      top.innerHTML = '<span><b>Sola lettura.</b> Focus legge il piano ma non scrive nei fogli (registro, FOCUS_LOG, archivio sessioni). Attivala quando usi la PWA al posto dell\'Artifact.</span> <button class="btn" data-pwa="settings">Impostazioni</button>';
+    } else if (step < 3 || err) {
       top.hidden = false;
       var txt = step === 1 ? "Passo 1 di 2 · Collega il tuo account Google: Focus vedrà solo i fogli STUDIOOS che autorizzi."
         : "Passo 2 di 2 · Collega i fogli STUDIOOS (piano D-035 e archivio tecnico).";
@@ -369,6 +378,7 @@
       '<div class="row" style="margin-top:6px">' + (ok ? '<button class="btn" data-pwa="diag">Verifica connessione</button><button class="btn" data-pwa="out">Disconnetti</button>' : '<button class="btn primary" data-pwa="in">Collega Google</button>') +
       (ok ? '<button class="btn" data-pwa="find">Cerca i fogli</button><a class="btn" href="setup.html">Scegli i fogli</a>' : "") + "</div>" +
       '<pre class="cons small" id="pwaDiag" hidden></pre>' +
+      (configured() ? '<p class="small"><b>Registrazione nei fogli:</b> ' + (CFG.readOnly ? 'spenta (sola lettura). <button class="btn" data-pwa="wr-on">Attiva</button><span id="pwaWr" hidden> Usa una sola versione per il timer (PWA o Artifact): le sessioni di questa app finiscono nella scheda FOCUS_DB, separata dall\'archivio dell\'Artifact. <button class="btn primary" data-pwa="wr-on-ok">Conferma attivazione</button></span>' : 'attiva. <button class="btn" data-pwa="wr-off">Torna a sola lettura</button>') + '</p>' : '') +
       '<label><input type="checkbox" id="pwaCal"' + (CFG.calOn ? " checked" : "") + '> Controllo con Google Calendar (facoltativo, sola lettura: chiede l\'accesso in lettura a tutti i calendari)</label>' +
       '<p class="small mute">' + esc(platformHelp()) + '</p>' +
       '<details><summary class="small">Configurazione avanzata</summary>' +
@@ -400,10 +410,14 @@
       else if (a === "out") { signOut(); }
       else if (a === "find") { runFind(); }
       else if (a === "dismiss") { ls.del("authErr"); renderPanel(); }
+      else if (a === "settings") { location.hash = "impostazioni"; }
+      else if (a === "wr-on") { var w = el("pwaWr"); if (w) w.hidden = false; }
+      else if (a === "wr-on-ok") { CFG.readOnly = false; saveCfg(); toast("Registrazione nei fogli attiva"); setTimeout(function () { location.reload(); }, 600); }
+      else if (a === "wr-off") { CFG.readOnly = true; saveCfg(); toast("Sola lettura"); setTimeout(function () { location.reload(); }, 600); }
       else if (a === "diag") { var d = el("pwaDiag"); d.hidden = false; d.textContent = "Verifico…"; try { d.textContent = (await diagnose()).join("\n"); } catch (x) { d.textContent = "Verifica non riuscita: " + x.message; } }
       else if (a === "choose") { CFG.sheet = el("pwaSelSheet").value; CFG.arch = el("pwaSelArch").value; CFG.names = { sheet: el("pwaSelSheet").selectedOptions[0].text, arch: el("pwaSelArch").selectedOptions[0].text }; delete CFG.choices; saveCfg(); location.reload(); }
       else if (a === "saveadv") { var k = el("pwaKey").value.trim(), p = el("pwaProj").value.trim(); CFG.pickerKey = /^[\w-]{20,60}$/.test(k) ? k : ""; CFG.project = /^\d{6,15}$/.test(p) ? p : ""; saveCfg(); toast(CFG.pickerKey && CFG.project ? "Salvato" : "Valori non validi o vuoti"); renderPanel(); }
-      else if (a === "reset") { delete CFG.sheet; delete CFG.arch; delete CFG.names; delete CFG.choices; saveCfg(); location.reload(); }
+      else if (a === "reset") { delete CFG.sheet; delete CFG.arch; delete CFG.names; delete CFG.choices; CFG.readOnly = true; saveCfg(); location.reload(); }
     });
     document.addEventListener("change", async function (e) {
       if (e.target && e.target.id === "pwaCal") {

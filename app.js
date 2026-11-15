@@ -341,7 +341,10 @@ function logRow(day){const rs=Object.values(runs).filter(r=>r.date===day&&r.stat
 let logTimer=null;function logSoon(){clearTimeout(logTimer);logTimer=setTimeout(logNow,90000)}
 async function logNow(day=todayIso()){if(!mcp)return;const row=3+Math.round((Date.parse(day+"T12:00:00Z")-Date.parse("2026-11-13T12:00:00Z"))/864e5);if(row<3||row>112)return;
   const v=logRow(day),sig=JSON.stringify(v.slice(3));if(LS.get("logsig."+day,"")===sig)return;
-  try{await call("Google Sheets","update_values",{spreadsheetId:ARCH_ID,range:`FOCUS_LOG!A${row}:X${row}`,values:[v]});LS.set("logsig."+day,sig)}catch(e){}}
+  if(!(v[4]||v[5]||v[6]||v[16]))return; /* nessuna attività registrata qui: non sovrascrivere la riga di un altro dispositivo */
+  try{const ex=(await archGet(`FOCUS_LOG!C${row}:E${row}`))[0]||[];
+    if(ex[0]&&!String(ex[0]).endsWith(deviceId)&&Number(ex[2]||0)>Number(v[4]||0)){LS.set("logskip."+day,{by:ex[0],min:ex[2],at:Date.now()});return}
+    await call("Google Sheets","update_values",{spreadsheetId:ARCH_ID,range:`FOCUS_LOG!A${row}:X${row}`,values:[v]});LS.set("logsig."+day,sig)}catch(e){}}
 /* ---------- errors, runs, stats, week, garden ---------- */
 function renderErrors(){if(!cur)return;const l=Object.values(errors).filter(e=>e.blockId===cur.id).sort((a,b)=>a.at-b.at);
   $("errList").innerHTML=l.length?l.map(e=>`<p>• ${esc(e.text)}${e.fix?" → <i>"+esc(e.fix)+"</i>":""} <span class="mute">${new Date(e.at).toLocaleDateString("it-IT")}</span></p>`).join(""):'<p class="mute">Nessun errore registrato per questo blocco.</p>'}
