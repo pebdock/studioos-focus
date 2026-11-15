@@ -397,8 +397,11 @@ async function openSession(id,dayHint,quiet){if(run&&run.status==="active"&&run.
   $("fTitle").textContent=cur.title||id;$("fTime").textContent=hm(cur.start)+"–"+hm(cur.end)+" · "+id;$("fFlag").textContent=cur.flag||"";
   $("detail").hidden=false;$("dCons").textContent="Caricamento della consegna da PROGRAMMA…";$("dCrit").textContent="";
   $("notes").value=run&&run.blockId===id&&run.notes?run.notes:LS.get("notes."+id,"");renderErrors();render();if(!quiet)show("focus");
-  const cached=LS.get("cons."+id,"");if(cached)applyCons(cached,b);
+  const fromSnapshot=typeof b.cons==="string",cached=fromSnapshot?b.cons:LS.get("cons."+id,"");
+  if(fromSnapshot||cached){$("dMat").textContent=b.mats||"";applyCons(cached,b);LS.set("cons."+id,cached)}
+  if(fromSnapshot)return; // The complete PROGRAMMA snapshot also works offline.
   if(b.row&&mcp){try{const [ef,h]=await Promise.all([sheetGet(`PROGRAMMA!E${b.row}:F${b.row}`),sheetGet(`PROGRAMMA!H${b.row}`)]);const arg=(ef[0]||[])[0]||"",cons=(ef[0]||[])[1]||"";
+    if(!cur||cur.id!==id)return;
     $("fTitle").textContent=arg||id;$("dMat").textContent=(h[0]||[])[0]||"";applyCons(cons,b);LS.set("cons."+id,cons)}
   catch(e){if(!cached)$("dCons").textContent="Consegna non leggibile ora (Sheets non raggiungibile). Usa la descrizione dell'evento in Calendar."}}
   else if(!cached)$("dCons").textContent="Consegna non disponibile senza connessione a Sheets."}
