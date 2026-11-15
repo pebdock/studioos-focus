@@ -1,0 +1,96 @@
+/* STUDIOOS Focus · prerequisiti mirati (2.0.1)
+   Il piano (colonna Consegna) apre i blocchi interessati con una riga
+   «PREREQUISITI MIRATI (R13i) · titolo · N′ dentro il blocco · codici · fonti» seguita da «Come: …».
+   Qui quella riga diventa: avviso nel check-in del blocco (hook di learning-ui.js), una finestra con
+   tracce, pagine, metodo e criterio, e una scheda in Studio › Materiali con i prossimi appuntamenti.
+   Il piano resta l'unica fonte: niente calendario scritto nel codice, nessun dato salvato, e i link
+   ai documenti arrivano solo dalla colonna Materiali del foglio privato (mai identificativi nel codice). */
+(function(root){
+  "use strict";
+  const doc=root.document;
+  const SRC={
+    R13:{file:"Fisica_Prerequisiti_Consolidamento_R13.pdf",short:"Scheda Fisica R13"},
+    R13i:{file:"Prerequisiti_Matematica_FIS_MDP_R13i.pdf",short:"Scheda R13i"},
+    T04:{file:"04 - Trig_Deriv_Integr.pdf",short:"Dispensa 04"}};
+  // codice → [titolo, scheda, pagina della traccia, pagina della soluzione]
+  const CATALOG={
+    E1:["Unità e ordini di grandezza","R13",3,6],E2:["Isolare una variabile","R13",3,6],E3:["Logaritmi e tempo caratteristico","R13",3,6],
+    E4:["Trigonometria e componenti","R13",3,6],E5:["Prodotti fra vettori","R13",3,6],E6:["Derivare una legge oraria","R13",3,6],
+    E7:["Regola della catena","R13",4,7],E8:["Integrare con condizioni iniziali","R13",4,7],E9:["Integrale e lavoro con segno","R13",4,7],
+    E10:["Derivata e integrale di 1/r","R13",4,7],E11:["Esponenziale e circuito RC","R13",4,7],E12:["Derivare un flusso","R13",4,7],
+    E13:["Derivata vettoriale e moto circolare","R13",5,8],E14:["Ponte al proiettile","R13",5,8],E15:["Integrale e densità","R13",5,8],
+    E16:["Derivate e piccoli errori","R13",5,8],
+    G1:["Flusso attraverso una superficie piana","R13i",2,5],G2:["Simmetria: sfera e cilindro","R13i",2,5],G3:["Sfera carica uniforme","R13i",2,5],
+    R1:["Equazione del circuito RC","R13i",2,5],R2:["Energia dissipata in carica","R13i",2,5],L1:["Prodotto vettoriale e Lorentz","R13i",2,5],
+    A1:["Circuitazione su una circonferenza","R13i",2,5],
+    S1:["Serie geometrica","R13i",3,6],S2:["Derivare la serie geometrica","R13i",3,6],S3:["Serie esponenziale e Poisson","R13i",3,6],
+    S4:["Binomio di Newton","R13i",3,6],I1:["Uniforme: polinomi su un intervallo","R13i",3,6],I2:["Integrale improprio: esponenziale","R13i",4,6],
+    I3:["Per parti: momenti dell'esponenziale","R13i",4,6],I4:["Da F alla densità","R13i",4,6],I5:["Standardizzare: cambio di variabile","R13i",4,6],
+    I6:["Integrale gaussiano e simmetria","R13i",4,6]};
+  const HEAD=/(?:^|\n)PREREQUISITI MIRATI(?:\s*\([^)\n]*\))?\s*·\s*([^\n]+)(?:\n([^\n]*))?/;
+  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const okUrl=u=>/^https:\/\/(?:drive|docs)\.google\.com\/[^\s"'<>]+$/i.test(u)?u:"";
+
+  function parse(cons){
+    const m=HEAD.exec(String(cons||""));if(!m)return null;
+    const parts=m[1].split(/\s+·\s+/).map(x=>x.trim()).filter(Boolean);if(parts.length<3)return null;
+    const title=parts[0],mm=/(\d+)\s*′/.exec(parts[1]||""),minutes=mm?+mm[1]:0;
+    const last=parts[parts.length-1],hasSrc=/\.pdf\b/i.test(last),codesTxt=parts.slice(2,hasSrc?-1:undefined).join(" · ");
+    const optional=new Set();for(const g of codesTxt.matchAll(/\(([^)]*se avanza[^)]*)\)/gi))for(const c of g[1].matchAll(/\b([EGRLASI]\d{1,2})\b/g))optional.add(c[1]);
+    const seen=new Set(),codes=[];for(const c of codesTxt.matchAll(/\b([EGRLASI]\d{1,2})\b/g))if(CATALOG[c[1]]&&!seen.has(c[1])){seen.add(c[1]);codes.push({code:c[1],optional:optional.has(c[1])})}
+    const extra=codesTxt.replace(/\([^)]*\)/g,"").split(/[,·]/).map(x=>x.trim()).filter(x=>x&&!/^[EGRLASI]\d{1,2}$/.test(x));
+    const how=/^\s*Come:/i.test(m[2]||"")?m[2].replace(/^\s*Come:\s*/i,"").trim():"";
+    return {title,minutes,codes,extra,sources:hasSrc?last:"",how};
+  }
+  function item(c){const k=CATALOG[c.code];return {code:c.code,label:k[0],source:k[1],file:SRC[k[1]].file,short:SRC[k[1]].short,page:k[2],sol:k[3],optional:c.optional,
+    title:c.code+": "+k[0]+(c.optional?" (se avanza)":"")}}
+  function forBlock(block){const p=parse(block&&block.cons);if(!p)return [];return p.codes.map(item).concat(p.extra.map(x=>({code:"",label:x,title:x,optional:false})))}
+  function links(block){const out=[],seen=new Set();
+    for(const raw of String(block&&block.mats||"").split(/\s*\|\s*|\n/)){const url=okUrl((/(https:\/\/\S+)/.exec(raw)||[])[1]||"");if(!url)continue;
+      for(const k of Object.keys(SRC))if(raw.includes(SRC[k].file)&&!seen.has(k)){seen.add(k);out.push({key:k,file:SRC[k].file,short:SRC[k].short,url})}}
+    return out}
+  function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+  function blocks(){try{return (root.STUDIOOS_STUDY&&root.STUDIOOS_STUDY.snapshot().blocks)||[]}catch(e){return []}}
+  function planned(list,from){return (list||[]).filter(b=>b&&b.stato!=="Rinviato"&&parse(b.cons)&&(!from||String(b.date)>=from)).sort((a,b)=>String(a.date+a.from).localeCompare(String(b.date+b.from)))}
+  const dm=d=>String(d||"").slice(8,10)+"/"+String(d||"").slice(5,7);
+
+  function body(b){const p=parse(b.cons),its=forBlock(b).filter(x=>x.code),ls=links(b);
+    return `<p class="eyebrow">Prima di questo argomento · ${esc(b.mat)} · ${esc(dm(b.date))} ${esc(b.from)}</p><h2 id="prqTitle">${esc(p.title)}</h2>
+      <p class="small mute">${p.minutes?esc(p.minutes)+"′ dentro il blocco, ":""}già compresi nei minuti del piano.</p>
+      <ul class="rel-list">${its.map(x=>`<li><b>${esc(x.code)} · ${esc(x.label)}${x.optional?' <span class="pill">se avanza</span>':""}</b><span>${esc(x.short)} · traccia p. ${esc(x.page)}, soluzione p. ${esc(x.sol)}</span></li>`).join("")}
+      ${forBlock(b).filter(x=>!x.code).map(x=>`<li><b>${esc(x.label)}</b><span>Vedi le fonti indicate nel blocco.</span></li>`).join("")}</ul>
+      ${p.how?`<p class="prq-how">${esc(p.how)}</p>`:""}
+      ${p.sources?`<p class="small mute">Fonti: ${esc(p.sources)}</p>`:""}
+      ${ls.length?`<div class="prq-links">${ls.map(l=>`<a class="btn ghost" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.short)} ↗</a>`).join("")}</div>`:""}
+      <p class="small mute">Prima tenta a foglio bianco, poi il richiamo, poi la soluzione. Se non regge, annotalo in Errori: non proseguire alla cieca.</p>`}
+  function open(id){if(!doc)return;const b=blocks().find(x=>x.id===id);if(!b||!parse(b.cons))return;
+    let d=doc.getElementById("prqDialog");
+    if(!d){d=doc.createElement("dialog");d.id="prqDialog";d.className="rel-dialog prq-dialog";d.setAttribute("aria-labelledby","prqTitle");
+      d.addEventListener("click",e=>{if(e.target===d||e.target.closest("[data-prq-close]"))close()});doc.body.appendChild(d)}
+    d.innerHTML=`<div class="rel-card">${body(b)}<div class="rel-actions"><button class="btn primary" type="button" data-prq-close>Chiudi</button></div></div>`;
+    if(typeof d.showModal==="function"&&!d.open)d.showModal();else d.setAttribute("open","")}
+  function close(){const d=doc&&doc.getElementById("prqDialog");if(d){if(typeof d.close==="function"&&d.open)d.close();else d.removeAttribute("open")}}
+
+  let limit=4,paintKey="";
+  function card(){if(!doc||doc.getElementById("prqCard"))return;const m=doc.getElementById("mList"),host=m&&m.closest("article");if(!host)return;
+    const c=doc.createElement("article");c.className="card prq-card";c.id="prqCard";
+    c.innerHTML=`<div class="row"><div class="sp"><span class="eyebrow">Prima degli argomenti</span><h2>Prerequisiti di matematica</h2></div></div><p class="small mute" id="prqInfo"></p><div id="prqList"></div>`;
+    host.before(c)}
+  function render(){const el=doc&&doc.getElementById("prqList");if(!el)return;const t=today(),all=planned(blocks()),next=all.filter(b=>String(b.date)>=t);
+    const key=t+"|"+limit+"|"+all.map(b=>b.id+b.date+b.from+(b.cons||"").length).join(",");if(key===paintKey)return;paintKey=key;
+    const info=doc.getElementById("prqInfo");
+    if(!all.length){info.textContent="Nessun prerequisito segnato nel piano.";el.innerHTML="";return}
+    info.textContent=`${all.length} momenti nel piano, ognuno subito prima dell'argomento che lo usa. Nessun minuto in più: sono dentro i blocchi.`;
+    el.innerHTML=next.slice(0,limit).map(b=>{const p=parse(b.cons),codes=p.codes.map(c=>c.code+(c.optional?"*":"")).join(", ");
+      return `<div class="prq-row" style="--sc:var(--${esc(b.mat)},var(--acc))"><span class="prq-when"><b>${esc(dm(b.date))}</b><small>${esc(b.from)}</small></span><span class="prq-main"><span class="prq-subj">${esc(b.mat)}</span><b>${esc(p.title)}</b><small>${esc(codes)}${p.minutes?" · "+esc(p.minutes)+"′":""}</small></span><button class="btn ghost" type="button" data-prereq-open="${esc(b.id)}">Dettagli</button></div>`}).join("")
+      +(next.length>limit?`<button class="btn ghost" type="button" id="prqMore">Mostra tutti (${next.length})</button>`:"")
+      +(!next.length?'<p class="study-empty">Tutti i prerequisiti in calendario sono già passati.</p>':"")
+      +(next.some(b=>parse(b.cons).codes.some(c=>c.optional))?'<p class="small mute">* se avanza tempo</p>':"")}
+  function schedule(){clearTimeout(schedule.t);schedule.t=setTimeout(render,60)}
+  function start(){card();render();
+    doc.addEventListener("click",e=>{const o=e.target.closest("[data-prereq-open]");if(o){e.preventDefault();open(o.getAttribute("data-prereq-open"))}if(e.target.id==="prqMore"){limit=1000;render()}});
+    for(const ev of ["studioos:data-refreshed","studioos:study-data","studioos:view"])root.addEventListener(ev,schedule);
+    let n=0;const t=setInterval(()=>{render();if(blocks().length||++n>60)clearInterval(t)},500)}
+  root.STUDIOOS_PREREQUISITES={parse,forBlock,links,planned,open,close,CATALOG,SRC,render};
+  if(doc){if(doc.readyState==="loading")doc.addEventListener("DOMContentLoaded",start);else start()}
+})(typeof window!=="undefined"?window:globalThis);

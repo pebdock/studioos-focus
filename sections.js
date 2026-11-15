@@ -16,7 +16,7 @@
       ["piano","Piano",v=>[card(v,"#wkLbl"),card(v,"#anInfo")]],
       ["esami","Esami",v=>[card(v,"#exams"),card(v,"#crTitle"),card(v,"#averageExam")]]]},
     "v-registro":{label:"Sezioni di Studio",def:"materiali",groups:[
-      ["materiali","Materiali",v=>[card(v,"#mList")]],
+      ["materiali","Materiali",v=>[card(v,"#prqList"),card(v,"#mList")].filter(Boolean)],
       ["ripasso","Ripasso",v=>[card(v,"#rvList"),byTitle(v,/^Errori/)]],
       ["registro","Registro",v=>[card(v,"#smList"),card(v,"#runList"),card(v,"#expTxt")]]]}
   };

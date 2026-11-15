@@ -1,11 +1,12 @@
-/* STUDIOOS Focus · note della versione definitiva (2.0.0).
+/* STUDIOOS Focus · note della versione definitiva (2.0.1: prerequisiti di matematica).
    Mostrate una sola volta dopo l'aggiornamento (mai durante una sessione attiva) e sempre
    disponibili in Opzioni › Informazioni. Nessun dato letto o scritto oltre a una chiave locale. */
 (function(root){
   "use strict";
   const doc=root.document;if(!doc)return;
-  const VERSION="2.0.0",KEY="sfocus_release_seen";
+  const VERSION="2.0.1",KEY="sfocus_release_seen";
   const NOTES=[
+    ["Prerequisiti (2.0.1)","Le basi di matematica che servono a Fisica e MDP (trigonometria, derivate, integrali, vettori, serie) sono nel piano subito prima dell'argomento che le usa, senza minuti in più. Le trovi nel check-in del blocco e in Studio › Materiali, con tracce, pagine e criterio."],
     ["Studio","Timer con pause intelligenti e respirazione guidata, check-in facoltativo (energia, concentrazione, motivazione, punto raggiunto), mini-verifica a fine blocco e registro per argomento. Il timer da solo non completa nulla."],
     ["Piano","Il piano resta il riferimento. Le proposte del tutor le approvi tu; lo script Google le applica entro un'ora solo se rispettano pasti, pause e limiti. Calendar si allinea da solo ogni ora."],
     ["Esami","Tutte le date pubblicate, anche non prenotate, con finestre d'iscrizione e link ad AlmaEsami. Si aggiornano ogni 3 ore anche a PC spento; prenotazioni e carriera arrivano dal ponte del PC quando è acceso."],
