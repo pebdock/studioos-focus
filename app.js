@@ -64,7 +64,7 @@ const storageKey=k=>(k==="device"||k==="settings"?"sfocus.":DATA_PREFIX)+k;
 let localSaveFailed=false;
 const LS={get(k,d){try{const v=localStorage.getItem(storageKey(k));return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(storageKey(k),JSON.stringify(v));return true}catch(e){localSaveFailed=true;return false}},remove(k){try{localStorage.removeItem(storageKey(k))}catch(e){localSaveFailed=true}}};
 const deviceId=LS.get("device",null)||(()=>{const d="dev-"+Math.random().toString(36).slice(2,10);LS.set("device",d);return d})();
-const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,nogame:false,rm:false,theme:"auto",look:"auto",breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
+const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,rm:false,theme:"auto",look:"auto",breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
 let mcp=null,db=null,index={},dayEvents=[],calDay={},curDay=todayIso(),wkRef=todayIso(),runs={},errors={},syncState={},cur=null,run=null,wake=null,actx=null,stars=0,liveOK=false,lastKey="",lastSec=-1,STEPS=[];
 const UA=navigator.userAgent||"";
 const isApple=/iPhone|iPad|iPod|Macintosh|Mac OS X/.test(UA)&&!/Windows|Android/.test(UA);
@@ -101,14 +101,15 @@ async function loadIndex(){
   const idx={};for(let k=0;k<i.length;k++){const id=(i[k]||[])[3];if(!/^R20-\d{4}$/.test(id||""))continue;const A=a[k]||[];
     if(!okDate(A[0])||!okHM(A[1])||!okHM(A[2]))continue;idx[id]={id,row:k+6,date:A[0],from:A[1],to:A[2],mat:okMat(A[3]),arg:(e[k]||[])[0]||"",min:Math.max(0,Math.min(900,Number((g[k]||[])[0]||0)||0)),apri:safeUrl((i[k]||[])[0]),stato:(i[k]||[])[1]||"",fatti:Math.max(0,Number((i[k]||[])[2]||0)||0),mats:(hh[k]||[])[0]||""}}
   index=idx;LS.set("index",{at:Date.now(),idx});chip("cSh","ok","Sheets ✓")}
+function calTip(t){const c=$("cCal");if(c)c.title=t}
 async function loadDay(day){
   if(!dayEvents.length)$("sessions").innerHTML='<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   let cal=null;
-  if(!CAL_ID){chip("cCal","","Calendar: da collegare")}
+  if(!CAL_ID){chip("cCal","","Calendar: non configurato");calTip("Nessun calendario scelto: Impostazioni › Collega Google Calendar")}
   else if(mcp){try{const p=await call("Google Calendar","list_events",{calendarId:CAL_ID,startTime:day+"T00:00:00",endTime:addDays(day,1)+"T00:00:00",pageSize:80,orderBy:"startTime",timeZone:"Europe/Rome"});
     cal={};for(const ev of ((p&&(p.events||p.items))||[])){const m=/\[R20:(R20-\d{4})\]/.exec((ev.summary||"")+" "+(ev.description||""));if(!m)continue;
       cal[m[1]]={start:Date.parse(ev.start&&(ev.start.dateTime||ev.start.date)),end:Date.parse(ev.end&&(ev.end.dateTime||ev.end.date)),title:ev.summary||""}}
-    chip("cCal","ok","Calendar ✓");LS.set("cal."+day,cal)}catch(err){chip("cCal","bad","Calendar ✗");cal=LS.get("cal."+day,null)}}
+    const nEv=Object.keys(cal).length;chip("cCal","ok",nEv?`Calendar ✓ ${nEv} eventi`:"Calendar ✓ · nessun evento");calTip(`Letto alle ${new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})}: ${nEv} eventi STUDIOOS il ${day}`);LS.set("cal."+day,cal)}catch(err){const em=String(err&&err.message||err),auth=/\b(401|403)\b|non attivo|autorizz|scope|Collega/i.test(em);chip("cCal","bad",auth?"Calendar: non autorizzato":"Calendar: errore");calTip((auth?"Accesso a Calendar mancante o scaduto: ricollega Google Calendar. ":"Lettura non riuscita: ")+em.slice(0,140));cal=LS.get("cal."+day,null)}}
   calDay=cal||{};const blocks=Object.values(index).filter(b=>b.date===day);
   dayEvents=blocks.map(b=>{const s=at(day,b.from),en=at(day,b.to),c=calDay[b.id];let flag="";
     if(cal&&b.stato!=="Rinviato"){if(!c)flag="Non ancora in Calendar";else if(Math.abs(c.start-s)>60000||Math.abs(c.end-en)>60000)flag=`Calendar ${hm(c.start)}–${hm(c.end)}: vale PROGRAMMA`}
@@ -145,7 +146,7 @@ function reportSave(){
   const n=queue().length,local=window.STUDIOOS_ADAPTER&&!canCloudWrite();
   const readOnly=window.STUDIOOS_ADAPTER&&window.STUDIOOS_ADAPTER.cloudStatus().readOnly;
   const txt=localSaveFailed?"Memoria locale piena: esporta un backup":n?(navigator.onLine===false?"Salvato qui · in attesa della rete":local?(readOnly?"Salvato qui · sincronizzazione da attivare":"Salvato qui · ricollega Google"):flushing?"Salvataggio su Google…":"Salvato qui · in coda"):(local?(readOnly?"Sola lettura · copia locale":"Accesso scaduto · ricollega Google"):lastCloudSave?"Salvato su Google · "+hm(lastCloudSave):"Pronto per sincronizzare");
-  const indicator=$("syncTxt");if(indicator)indicator.textContent=txt;
+  const indicator=$("syncTxt");if(indicator){indicator.textContent=txt;const relog=!!(local&&!readOnly&&window.STUDIOOS_ADAPTER);if(indicator.classList)indicator.classList.toggle("relog",relog);indicator.title=relog?"Tocca per ricollegare Google: i dati in coda restano qui":"";indicator.onclick=relog?()=>window.STUDIOOS_ADAPTER.signIn():null;if(indicator.setAttribute)indicator.setAttribute("role",relog?"button":"status")}
   const dot=$("syncDot");if(dot)dot.className="syncdot"+(!local&&!n&&!localSaveFailed&&liveOK?" on":"");
   window.dispatchEvent(new CustomEvent("studioos:sync-status",{detail:{pending:n,savedAt:lastCloudSave,localOnly:!!local,busy:!!flushing,localSaveFailed,text:txt}}));
 }
@@ -200,7 +201,7 @@ function adopt(live,src){
     if(closed&&SYNC.terminal(closed)&&(!runs[closed.runId]||SYNC.compare("runs/"+closed.runId,closed,runs[closed.runId])>=0))runs[closed.runId]=clone(closed);
     if(run&&run.status==="active"&&live.ended===run.runId){
       if(!closed||!SYNC.terminal(closed)){refreshSync();return}
-      run=null;saveLocal();saveCaches();releaseWake();render();renderDay();renderToday();renderRuns();renderStats();renderGarden();
+      run=null;saveLocal();saveCaches();releaseWake();render();renderDay();renderToday();renderRuns();renderStats();
       toast(closed.status==="discarded"?"Sessione scartata sull'altro dispositivo: non conta":"Sessione confermata sull'altro dispositivo");
     }
     return;
@@ -389,7 +390,7 @@ async function confirmRun(){const out=$("mdOut").value,ev=$("mdEv").value.trim()
   await commit(x,"confirm");closeSheet("mDone");releaseWake();const id=x.blockId;run=null;saveLocal();LS.set("notes."+id,"");
   $("mdEv").value="";$("mdSelf").checked=false;$("mdDiff").value="";$("mdRedo").value="";$("mdRev").value="";
   for(const [k,lab] of [["redo","Da rifare"],["review","Da ripassare"]])if(study[k]){const e={id:uid(),blockId:id,runId:x.runId,materia:x.materia,text:lab+": "+study[k],fix:study.diff||"",at:Date.now()};await put("errors",e.id,e)}
-  buzz([20,40,20]);renderDay();renderStats();renderGarden();renderRuns();renderWeek();render();renderToday();toast("Sessione confermata");logNow();askRegister(id,out)}
+  buzz([20,40,20]);renderDay();renderStats();renderRuns();renderWeek();render();renderToday();toast("Sessione confermata");logNow();askRegister(id,out)}
 async function dropRun(){if(!run||run.status!=="active")return;clearTimeout(window.__nt);const x=clone(run);if(cur&&cur.id===x.blockId)x.notes=$("notes").value;x.status="discarded";x.phase="done";await commit(x,"discard");closeSheet("mDone");releaseWake();run=null;saveLocal();render();renderDay();logNow()}
 let regCtx=null;
 async function askRegister(id,out){const b=index[id];if(!b)return;const focusMin=Math.round(netForBlock(id)/60);let sh;
@@ -427,7 +428,7 @@ async function logNow(day=todayIso()){if(!mcp)return;const row=3+Math.round((Dat
   try{const ex=(await archGet(`FOCUS_LOG!C${row}:E${row}`))[0]||[];
     if(ex[0]&&!String(ex[0]).endsWith(deviceId)&&Number(ex[2]||0)>Number(v[4]||0)){LS.set("logskip."+day,{by:ex[0],min:ex[2],at:Date.now()});return}
     await call("Google Sheets","update_values",{spreadsheetId:ARCH_ID,range:`FOCUS_LOG!A${row}:X${row}`,values:[v]});LS.set("logsig."+day,sig)}catch(e){}}
-/* ---------- errors, runs, stats, week, garden ---------- */
+/* ---------- errors, runs, stats, week ---------- */
 function renderErrors(){if(!cur)return;const l=Object.values(errors).filter(e=>e.blockId===cur.id).sort((a,b)=>a.at-b.at);
   $("errList").innerHTML=l.length?l.map(e=>`<p>• ${esc(e.text)}${e.fix?" → <i>"+esc(e.fix)+"</i>":""} <span class="mute">${new Date(e.at).toLocaleDateString("it-IT")}</span></p>`).join(""):'<p class="mute">Nessun errore registrato per questo blocco.</p>'}
 async function addError(){const t=$("eTxt").value.trim();if(!t||!cur)return;const e={id:uid(),blockId:cur.id,runId:run&&run.runId,materia:cur.mat,text:t,fix:$("eFix").value.trim(),at:Date.now()};
@@ -453,15 +454,11 @@ function renderWeek(){const m=monday(wkRef),days=[...Array(7)].map((_,i)=>addDay
   const t=todayIso();$("exams").innerHTML=EXAMS.map(([d,s,k])=>{const n=d?Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(t+"T12:00:00Z"))/864e5):null;
     return `<div class="exam"><span><b style="color:var(--${s})">${s}</b> · ${esc(k)}</span><b>${d?(n>0?n+" giorni · "+dayLabel(d,{day:"numeric",month:"short"}):n===0?"oggi":"svolto"):"—"}</b></div>`}).join("")+'<p class="mute small">Date dagli appelli già pubblicati in SCADENZE. Ricontrollale sulle pagine UniBo prima dell\'iscrizione.</p>'}
 function hash(s){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return (h>>>0)/4294967295}
-function renderGarden(){const svg=$("garden"),W=svg.clientWidth||600,H=150;const conf=Object.values(runs).filter(r=>r.status==="confirmed").sort((a,b)=>a.confirmedAt-b.confirmedAt).slice(-60);
-  let s=`<rect x="0" y="${H-14}" width="${W}" height="14" rx="7" fill="var(--line)"/>`;for(const r of conf){const x=10+hash(r.runId)*(W-20),m=workSec(r,Date.now())/60,h=Math.min(110,14+m*.9),c=`var(--${r.materia},#888)`,v=r.outcome==="Verificato autonomamente";
-    s+=`<g class="plant" style="animation-delay:-${(hash(r.runId+"d")*6).toFixed(1)}s"><line x1="${x}" y1="${H-14}" x2="${x}" y2="${H-14-h}" stroke="var(--ok)" stroke-width="2"/><circle cx="${x}" cy="${H-14-h}" r="${v?8:5}" fill="${c}"/>${v?`<circle cx="${x}" cy="${H-14-h}" r="3" fill="#fff"/>`:""}</g>`}
-  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.innerHTML=conf.length?s:`<text x="12" y="70" fill="var(--mute)" font-size="13">Il giardino cresce con le sessioni confermate, non con il solo timer.</text>`}
 /* ---------- navigation, sheets, gestures ---------- */
 function moveInd(){const t=document.querySelector('.tab[aria-selected="true"]'),i=$("tabInd");if(!t)return;i.style.left=t.offsetLeft+"px";i.style.width=t.offsetWidth+"px"}
 let curView="focus";
-function show(v,dir){if(!VIEWS.includes(v))v="focus";if(v===curView&&$("v-"+v).classList.contains("on"))return;const doIt=()=>{curView=v;VIEWS.forEach(x=>{$("v-"+x).classList.toggle("on",x===v);$("t-"+x).setAttribute("aria-selected",x===v)});moveInd();
-  try{if(location.hash!=="#"+v)history.replaceState(null,"","#"+v)}catch(e){}if(v==="settimana"){renderWeek();renderGarden();renderAnalysis()}if(v==="registro"){renderAllErr();renderRuns();renderMats();renderReviews();renderSims()}if(v==="piano"){renderPlan();loadPlan()}render()};
+function show(v,dir){if(window.__nt&&run&&run.status==="active")persistSession();if(!VIEWS.includes(v))v="focus";if(v===curView&&$("v-"+v).classList.contains("on"))return;const doIt=()=>{curView=v;VIEWS.forEach(x=>{$("v-"+x).classList.toggle("on",x===v);$("t-"+x).setAttribute("aria-selected",x===v)});moveInd();
+  try{if(location.hash!=="#"+v)history.replaceState(null,"","#"+v)}catch(e){}if(v==="settimana"){renderWeek();renderAnalysis()}if(v==="registro"){renderAllErr();renderRuns();renderMats();renderReviews();renderSims()}if(v==="piano"){renderPlan();loadPlan()}render()};
   if(document.startViewTransition&&document.visibilityState==="visible"&&!settings.rm&&!matchMedia("(prefers-reduced-motion: reduce)").matches){try{const vt=document.startViewTransition(doIt);vt.ready&&vt.ready.catch(()=>{});vt.finished&&vt.finished.catch(()=>{})}catch(e){doIt()}}else doIt()}
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{show(t.dataset.v);buzz(6)});
 window.addEventListener("hashchange",()=>{const h=location.hash.match(/b=(R20-\d{4})/);if(h&&index[h[1]]){openSession(h[1],index[h[1]].date);return}show(location.hash.slice(1))});
@@ -477,9 +474,9 @@ document.querySelectorAll(".sheet").forEach(s=>{s.addEventListener("click",e=>{i
   window.addEventListener("pointerup",()=>{if(y0===null)return;c.style.transition="";if(dy>110)closeSheet(s.id);else c.style.transform="";y0=null})});
 window.addEventListener("scroll",()=>{document.querySelector(".top").classList.toggle("compact",window.scrollY>36)},{passive:true});
 /* ---------- settings ---------- */
-function applySettings(){LS.set("settings",settings);document.body.classList.toggle("nogame",settings.nogame);document.body.classList.toggle("rm",settings.rm);
+function applySettings(){LS.set("settings",settings);document.body.classList.toggle("rm",settings.rm);
   document.documentElement.classList.toggle("light",settings.theme==="light");document.documentElement.classList.toggle("dark",settings.theme==="dark");applyLook()}
-function bindSettings(){const m={sWork:"work",sBreak:"brk",sSound:"sound",sVol:"vol",sTheme:"theme",sLook:"look",sNight:"night",sAmb:"amb",sAmbVol:"ambVol"},c={sAuto:"auto",sResume:"resume",sGame:"nogame",sRm:"rm",sBreathe:"breathe",sHaptic:"haptic",sSmart:"smart",sWake:"wake"};
+function bindSettings(){const m={sWork:"work",sBreak:"brk",sSound:"sound",sVol:"vol",sTheme:"theme",sLook:"look",sNight:"night",sAmb:"amb",sAmbVol:"ambVol"},c={sAuto:"auto",sResume:"resume",sRm:"rm",sBreathe:"breathe",sHaptic:"haptic",sSmart:"smart",sWake:"wake"};
   for(const [id,k] of Object.entries(m)){$(id).value=settings[k];$(id).onchange=()=>{settings[k]=$(id).type==="number"||$(id).type==="range"?Number($(id).value):$(id).value;applySettings()}}
   for(const [id,k] of Object.entries(c)){$(id).checked=!!settings[k];$(id).onchange=()=>{settings[k]=$(id).checked;applySettings();if(k==="wake")settings.wake?acquireWakeIf():releaseWake()}}}
 function installHelp(){const ios=`<b>iPhone e iPad (Safari)</b><ol><li>Apri questa pagina in Safari ${window.STUDIOOS_PWA?"dal suo indirizzo":"dal suo link claude.ai"}.</li><li>Tocca Condividi, poi «Aggiungi alla schermata Home» e attiva «Apri come app web» se compare.</li><li>Per lo StandBy: metti il telefono in orizzontale sul supporto, apri Focus e tocca StandBy.</li></ol>`,
@@ -502,6 +499,7 @@ $("goDay").onclick=()=>show("giorno");
 $("dPrev").onclick=()=>{curDay=addDays(curDay,-1);loadDay(curDay)};$("dNext").onclick=()=>{curDay=addDays(curDay,1);loadDay(curDay)};$("dToday").onclick=()=>{curDay=todayIso();loadDay(curDay)};
 $("wPrev").onclick=()=>{wkRef=addDays(wkRef,-7);renderWeek()};$("wNext").onclick=()=>{wkRef=addDays(wkRef,7);renderWeek()};
 $("bReload").onclick=async()=>{try{await loadIndex()}catch(e){chip("cSh","bad","Sheets ✗")}loadDay(curDay);toast("Dati aggiornati")};
+$("notes").addEventListener("change",()=>{if(window.__nt&&run&&run.status==="active")persistSession()});
 $("notes").oninput=()=>{const notes=$("notes").value;if(cur)LS.set("notes."+cur.id,notes);if(run&&run.status==="active"&&cur&&cur.id===run.blockId){const id=run.runId;clearTimeout(window.__nt);window.__nt=setTimeout(()=>{if(!run||run.status!=="active"||run.runId!==id)return;const x=clone(run);x.notes=notes;commit(x,"notes")},2000)}};
 $("bErr").onclick=addError;$("eFilter").onchange=renderAllErr;$("eSearch").oninput=renderAllErr;$("bTest").onclick=()=>{unlockAudio();tone(settings.sound);buzz(30)};
 $("bNotif").onclick=async()=>{try{const p=await Notification.requestPermission();$("bNotif").textContent=p==="granted"?"Notifiche attive":"Notifiche non consentite"}catch(e){$("bNotif").textContent="Notifiche non disponibili in questa vista"}};
@@ -512,7 +510,7 @@ $("bCopy").onclick=async()=>{try{await navigator.clipboard.writeText($("expTxt")
 $("impFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());let n=0;for(const r of d.runs||[])if(r.runId&&(!runs[r.runId]||(r.updatedAt||0)>(runs[r.runId].updatedAt||0))){await put("runs",r.runId,r);n++}
   for(const x of d.errors||[])if(x.id&&(!errors[x.id]||(x.updatedAt||0)>(errors[x.id].updatedAt||0))){await put("errors",x.id,x);n++}
   for(const s of d.state||[])if(s&&s.key&&s.key!=="live"&&(!syncState[s.key]||(s.updatedAt||0)>(syncState[s.key].updatedAt||0))){await put("state",s.key,s);n++}
-  toast(n+" record ripristinati");renderToday();renderReviews();renderSims();renderDay();renderStats();renderGarden();renderRuns();renderAllErr()}catch(err){toast("File di backup non valido")}};
+  toast(n+" record ripristinati");renderToday();renderReviews();renderSims();renderDay();renderStats();renderRuns();renderAllErr()}catch(err){toast("File di backup non valido")}};
 document.addEventListener("keydown",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;const k=e.key.toLowerCase();
   if(e.key===" "){e.preventDefault();run&&run.status==="active"?pauseRun():(cur&&startRun())}else if(k==="c")openDone();else if(k==="o")toggleOled();else if(k==="s")$("standby").classList.contains("on")?closeStandby():openStandby();else if(k==="e")extendRun();
   else if(k==="h")document.body.classList.toggle("showctl");else if(k==="f")$("bFull").click();else if(/^[1-6]$/.test(k))show(VIEWS[+k-1]);
@@ -531,7 +529,7 @@ window.addEventListener("studioos:archive-update",()=>{if(document.visibilitySta
 window.addEventListener("studioos:calendar-config",e=>{CAL_ID=e.detail.id||"";if(mcp)loadDay(curDay)});
 window.addEventListener("storage",e=>{if(e.key&&e.key.startsWith(DATA_PREFIX+"outbox.")&&e.newValue===null)delete memoryOutbox[e.key.slice((DATA_PREFIX+"outbox.").length)];if(e.key&&e.key.startsWith(DATA_PREFIX))reportSave()});
 setInterval(flush,30000);setInterval(()=>{renderNext();renderToday();timeline($("tlMini"),dayEvents);timeline($("tlDay"),dayEvents)},60000);
-window.addEventListener("resize",()=>{moveInd();renderGarden()});
+window.addEventListener("resize",()=>{moveInd()});
 
 /* ---------- R13g · canale con le attività pianificate (PIANO_PROPOSTE) ---------- */
 let plan=LS.get("plan",{rows:[],at:0}),planBusy=false;
@@ -699,12 +697,12 @@ const BOOT_HASH=location.hash;
   const to=ms=>new Promise(r=>setTimeout(()=>r(null),ms));
   try{mcp=await Promise.race([window.claude&&window.claude.use?window.claude.use("mcp"):null,to(10000)])}catch(e){mcp=null}
   try{db=await Promise.race([window.claude&&window.claude.use?window.claude.use("db"):null,to(10000)])}catch(e){db=null}
-  if(!mcp){chip("cCal","bad","Calendar ✗");chip("cSh",Object.keys(index).length?"warn":"bad",Object.keys(index).length?"Sheets: copia locale":"Sheets ✗")}
+  if(!mcp){chip("cCal","bad",CAL_ID?"Calendar: non autorizzato":"Calendar: non configurato");calTip(CAL_ID?"Google non collegato o accesso scaduto: Impostazioni › Collega Google":"Nessun calendario scelto");chip("cSh",Object.keys(index).length?"warn":"bad",Object.keys(index).length?"Sheets: copia locale":"Sheets ✗")}
   if(db){try{await loadArchive();await flush()}catch(e){chip("cDb","warn","Archivio: solo locale")}
     try{const s=await db.doc("state/live").get();if(s.exists)adopt(s.data(),"init")}catch(e){}subscribeLive()}
   else{chip("cDb","bad","Archivio ✗ (solo locale)");syncUI(false,bc?"Sync tra schede":"Sync assente")}
   if(mcp){try{await loadIndex()}catch(e){const k=Object.keys(index).length;chip("cSh",k?"warn":"bad",k?"Sheets: copia locale":"Sheets ✗")}}
-  await loadDay(curDay);renderGarden();renderStats();renderWeek();renderRuns();renderAllErr();renderPlan();renderToday();if(mcp){loadPlan();setInterval(loadPlan,600000)}
+  await loadDay(curDay);renderStats();renderWeek();renderRuns();renderAllErr();renderPlan();renderToday();if(mcp){loadPlan();setInterval(loadPlan,600000)}
   try{const h=BOOT_HASH.match(/b=(R20-\d{4})/);if(h&&index[h[1]]){openSession(h[1],index[h[1]].date)}}catch(e){}
   if(run&&run.status==="active"){const b=index[run.blockId];openSession(run.blockId,b&&b.date,true);acquireWakeIf();checkGap()}
   setTimeout(()=>logNow(addDays(todayIso(),-1)),8000)})();

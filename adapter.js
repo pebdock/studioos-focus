@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.2.0 · R13h.3";
+  var VERSION = "pwa-1.2.1 · R13h.3";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -400,7 +400,10 @@
       catch (e) { out.push("Archivio: ✗ " + e.message); }
     } else out.push("Archivio: non collegato");
     out.push(CFG.readOnly ? "Registrazione nei fogli: spenta (sola lettura)" : "Registrazione nei fogli: attiva (solo campi previsti)");
-    out.push(CFG.calOn&&CFG.cal ? "Calendar: «"+(CFG.calendarName||"calendario selezionato")+"» · sola lettura" : "Calendar: da collegare");
+    if(!(CFG.calOn&&CFG.cal)) out.push("Calendar: non configurato (facoltativo)");
+    else if(!t||!hasScope(S_CAL)) out.push("Calendar «"+(CFG.calendarName||"calendario selezionato")+"»: non autorizzato · ricollega Google Calendar");
+    else { try { var d0=new Date();d0.setHours(0,0,0,0);var qs=new URLSearchParams({singleEvents:"true",maxResults:"50",timeMin:d0.toISOString(),timeMax:new Date(d0.getTime()+864e5).toISOString(),fields:"items(summary,description)"});var ev=await g(CAL+"calendars/"+enc(CFG.cal)+"/events?"+qs.toString());var nn=(ev.items||[]).filter(function(x){return /\[R20:R20-\d{4}\]/.test((x.summary||"")+" "+(x.description||""));}).length;out.push("Calendar «"+(CFG.calendarName||"calendario selezionato")+"»: lettura riuscita · "+(nn?nn+" eventi STUDIOOS oggi":"nessun evento STUDIOOS oggi")+" · sola lettura"); }
+      catch (e) { out.push("Calendar «"+(CFG.calendarName||"calendario selezionato")+"»: ✗ "+e.message); } }
     out.push(lastCloudWrite?"Ultimo salvataggio verificato: "+new Date(lastCloudWrite).toLocaleTimeString("it-IT"):"Nessuna nuova scrittura verificata in questa apertura");
     var le = ls.get("lastApiErr", ""); if (le) out.push("Ultimo errore Google: " + le);
     out.push("Versione " + VERSION + (navigator.serviceWorker && navigator.serviceWorker.controller ? " · funziona anche offline" : ""));

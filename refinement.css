@@ -123,3 +123,18 @@ body.oled #focusCard{padding:18px}body.oled #timer{color:#f2f2f2}body.oled .cont
 body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(forced-colors:active){.card,.pill,.btn,.tab,.pwa-save,.pwa-calendar{border:1px solid CanvasText}.tab[aria-selected=true]{outline:2px solid Highlight}.syncdot{background:CanvasText}}
+
+/* R13h.4 · stato di sincronizzazione: ricollegamento con un tocco */
+#syncTxt.relog{text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+
+/* 15/11 · audit di presentazione (320/390/430 px e desktop): nessuno scorrimento orizzontale, bersagli ≈44 px */
+.view.on{grid-template-columns:minmax(0,1fr)}
+.card{grid-template-columns:minmax(0,1fr);overflow-wrap:break-word}
+.row>span.sp{flex:1 1 12rem}
+#anFeas,#anEx,#anGrade{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+.matl .sel,.prop .sel,.sess .sel{overflow-wrap:anywhere}
+#dPrev,#dNext,#wPrev,#wNext{min-width:44px}
+.tab{min-height:44px}
+#mSearch,.matl input,#pwaKey,#pwaProj{min-height:44px}
+#island::after{content:"";position:absolute;inset:-7px -4px}
+@media(max-width:420px){.daynav{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px}#dToday{order:1;grid-column:1/-1;justify-self:center}}

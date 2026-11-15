@@ -177,10 +177,6 @@ input[type=text],input[type=number],textarea,select,input[type=search]{width:100
 .exam{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
 .exam:first-child{border-top:0}.exam b{font-variant-numeric:tabular-nums}
 .banner{border-radius:18px;padding:12px 14px;border:1px solid var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--surface));margin-bottom:12px}
-#garden{width:100%;height:150px}
-.plant{transform-origin:bottom;animation:sway 6s ease-in-out infinite}
-@keyframes sway{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
-.nogame #gardenCard,.nogame .gami{display:none!important}
 .install{display:grid;gap:6px;font-size:.9rem}.install ol{margin:0;padding-left:1.2em}
 
 /* ---------- modals (sheet) ---------- */
@@ -399,7 +395,6 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
     <h3>Esercizi, verifiche e simulazioni</h3><div id="anEx" class="small"></div>
     <h3>Stima del voto</h3><div id="anGrade" class="small"></div></article>
   <article class="card"><h3>Appelli</h3><div id="exams"></div></article>
-  <article class="card gami" id="gardenCard"><div class="row"><h3 class="sp">Focus Garden</h3><span class="mute small">cresce solo con sessioni confermate</span></div><svg id="garden" role="img" aria-label="Giardino delle sessioni confermate"></svg></article>
 </section>
 
 <!-- ================= REGISTRO ================= -->
@@ -460,7 +455,6 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
     <div class="row"><div class="sp"><label for="sLook">Stile</label><select id="sLook"><option value="auto">Automatico (vetro su Apple, standard altrove)</option><option value="glass">Vetro (Liquid Glass)</option><option value="std">Standard</option></select></div>
       <div class="sp"><label for="sTheme">Tema</label><select id="sTheme"><option value="auto">Come il sistema</option><option value="light">Chiaro</option><option value="dark">Scuro</option></select></div></div>
     <div class="row"><div class="sp"><label for="sNight">StandBy notturno (rosso)</label><select id="sNight"><option value="auto">Automatico 22:00–07:00</option><option value="on">Sempre</option><option value="off">Mai</option></select></div></div>
-    <label><input id="sGame" type="checkbox"> Nascondi Garden</label>
     <label><input id="sRm" type="checkbox"> Riduci le animazioni</label>
     <p class="small mute" id="platInfo"></p>
   </article>
