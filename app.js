@@ -381,7 +381,8 @@ function timeline(el,evs){const S=420,E=1350,span=E-S,p=x=>Math.max(0,Math.min(1
 function renderDay(){const lbl=dayLabel(curDay);$("dLabel").textContent=lbl;$("miniLbl").textContent=curDay===todayIso()?"Oggi":lbl;
   const act=dayEvents.filter(e=>!e.rinv),pl=act.reduce((t,e)=>t+((index[e.id]||{}).min||0),0),reg=act.reduce((t,e)=>t+Math.max(statusOf(e.id).sheetMin,statusOf(e.id).focusMin),0);
   $("dayKpi").innerHTML=`<div class="kpi"><b>${act.length}</b><span>blocchi attivi</span></div><div class="kpi"><b>${Math.floor(pl/60)}h ${String(pl%60).padStart(2,"0")}</b><span>netti pianificati</span></div><div class="kpi"><b>${reg}</b><span>min registrati</span></div><div class="kpi"><b>${dayEvents.filter(e=>e.flag).length}</b><span>da controllare in Calendar</span></div>`;
-  $("sessions").innerHTML=dayEvents.length?dayEvents.map(e=>sessHTML(e,false)).join(""):'<p class="mute">Nessun blocco STUDIOOS in questo giorno.</p>';
+  const historical=dayEvents.filter(e=>e.rinv);
+  $("sessions").innerHTML=(act.length?act.map(e=>sessHTML(e,false)).join(""):'<p class="mute">Nessun blocco attivo in questo giorno.</p>')+(historical.length?`<details class="past-sessions"><summary>${historical.length} blocchi rinviati o da riallineare</summary><div>${historical.map(e=>sessHTML(e,false)).join("")}</div></details>`:"");
   $("mini").innerHTML=act.length?act.map(e=>sessHTML(e,true)).join(""):'<p class="mute">Nessun blocco attivo.</p>';
   timeline($("tlDay"),dayEvents);timeline($("tlMini"),dayEvents)}
 function nextBlock(){const now=Date.now(),today=todayIso();return Object.values(index).filter(b=>b.stato!=="Rinviato"&&b.date>=today).map(b=>({b,s:at(b.date,b.from),e:at(b.date,b.to)})).filter(x=>x.e>now).sort((x,y)=>x.s-y.s)[0]}
