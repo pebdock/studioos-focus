@@ -65,7 +65,7 @@ const storageKey=k=>(k==="device"||k==="settings"?"sfocus.":DATA_PREFIX)+k;
 let localSaveFailed=false;
 const LS={get(k,d){try{const v=localStorage.getItem(storageKey(k));return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(storageKey(k),JSON.stringify(v));return true}catch(e){localSaveFailed=true;return false}},remove(k){try{localStorage.removeItem(storageKey(k))}catch(e){localSaveFailed=true}}};
 const deviceId=LS.get("device",null)||(()=>{const d="dev-"+Math.random().toString(36).slice(2,10);LS.set("device",d);return d})();
-const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,rm:false,theme:"auto",look:"auto",atmosphere:"cozy",breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
+const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,rm:false,theme:"auto",look:"auto",atmosphere:"cozy",motion:"elastic",breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
 let mcp=null,db=null,index={},dayEvents=[],calDay={},curDay=todayIso(),wkRef=todayIso(),runs={},errors={},syncState={},cur=null,run=null,wake=null,actx=null,stars=0,liveOK=false,lastKey="",lastSec=-1,STEPS=[];
 const UA=navigator.userAgent||"";
 const isApple=/iPhone|iPad|iPod|Macintosh|Mac OS X/.test(UA)&&!/Windows|Android/.test(UA);
@@ -294,7 +294,7 @@ function frame(){frame.handle=null;frame.timer=null;const now=Date.now();let d=r
   if(d&&d!==run){const k=keyOf(d);if(k!==lastKey){const fresh=now-(d.phaseStart||0)<15000;lastKey=k;if(fresh)onTransition(d)}
     if(!frame.pend&&(!run.by||run.by===deviceId)){frame.pend=setTimeout(()=>{frame.pend=null;if(!run||run.status!=="active")return;const dd=advance(run,Date.now());if(dd!==run&&document.visibilityState==="visible")commit(clone(dd),"auto")},400+Math.random()*2200)}}
   if(d&&d.phase==="work"&&d.phaseEnd&&d.cfg&&d.cfg.auto){const rem=d.phaseEnd-now;if(rem<=60000&&rem>50000&&frame.warn!==d.phaseEnd){frame.warn=d.phaseEnd;if(document.visibilityState==="visible")tone("soft");toast(d.curBrk?"Pausa tra 1 minuto: chiudi il passaggio":"Fine del ciclo tra 1 minuto")}}
-  const sec=Math.floor(now/1000);paintRing(d,now);if(sec!==lastSec){lastSec=sec;paintText(d,now)}
+  const sec=Math.floor(now/1000);if(sec!==lastSec||frame.lastRing==null||now-frame.lastRing>=1000/60-1){paintRing(d,now);frame.lastRing=now}if(sec!==lastSec){lastSec=sec;paintText(d,now)}
   if(document.visibilityState==="visible"){
     const smooth=d&&d.phase==="work"&&$("v-focus").classList.contains("on")&&!settings.rm&&!matchMedia("(prefers-reduced-motion: reduce)").matches;
     if(smooth)frame.handle=requestAnimationFrame(frame);
@@ -516,7 +516,7 @@ function show(v,dir){if(window.__nt&&run&&run.status==="active")persistSession()
   try{if(location.hash!=="#"+v)history.replaceState(null,"","#"+v)}catch(e){}if(v==="settimana"){renderWeek();renderAnalysis()}if(v==="registro"){renderAllErr();renderRuns();renderMats();renderReviews();renderSims()}if(v==="piano"){renderPlan();loadPlan()}render()};
   doIt()}
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{show(t.dataset.v);buzz(6)});
-navController=window.STUDIOOS_NAV.mount($("tabbar"),{select:v=>{show(v);buzz(6)},reducedMotion:()=>settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches});
+navController=window.STUDIOOS_NAV.mount($("tabbar"),{select:v=>{show(v);buzz(6)},reducedMotion:()=>settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches,strength:()=>settings.motion==="soft"?.45:1});
 window.addEventListener("hashchange",()=>{const h=location.hash.match(/b=(R20-\d{4})/);if(h&&index[h[1]]){openSession(h[1],index[h[1]].date);return}show(location.hash.slice(1))});
 // Page changes use explicit tabs; horizontal swipes keep their native behavior.
 $('tabbar').addEventListener('keydown',e=>{
@@ -533,9 +533,9 @@ document.querySelectorAll(".sheet").forEach(s=>{s.addEventListener("click",e=>{i
   window.addEventListener("pointerup",()=>{if(y0===null)return;c.style.transition="";if(dy>110)closeSheet(s.id);else c.style.transform="";y0=null});window.addEventListener("pointercancel",()=>{c.style.transition="";c.style.transform="";y0=null})});
 window.addEventListener("scroll",()=>{document.querySelector(".top").classList.toggle("compact",window.scrollY>36)},{passive:true});
 /* ---------- settings ---------- */
-function applySettings(){LS.set("settings",settings);document.body.classList.toggle("rm",settings.rm);document.documentElement.dataset.atmosphere=settings.atmosphere==="essential"?"essential":"cozy";
+function applySettings(){LS.set("settings",settings);document.body.classList.toggle("rm",settings.rm);document.documentElement.dataset.atmosphere=settings.atmosphere==="essential"?"essential":"cozy";document.documentElement.dataset.motion=settings.motion==="soft"?"soft":"elastic";
   document.documentElement.classList.toggle("light",settings.theme==="light");document.documentElement.classList.toggle("dark",settings.theme==="dark");applyLook()}
-function bindSettings(){const m={sWork:"work",sBreak:"brk",sSound:"sound",sVol:"vol",sTheme:"theme",sLook:"look",sAtmosphere:"atmosphere",sNight:"night",sAmb:"amb",sAmbVol:"ambVol"},c={sAuto:"auto",sResume:"resume",sRm:"rm",sBreathe:"breathe",sHaptic:"haptic",sSmart:"smart",sWake:"wake"};
+function bindSettings(){const m={sWork:"work",sBreak:"brk",sSound:"sound",sVol:"vol",sTheme:"theme",sLook:"look",sAtmosphere:"atmosphere",sMotion:"motion",sNight:"night",sAmb:"amb",sAmbVol:"ambVol"},c={sAuto:"auto",sResume:"resume",sRm:"rm",sBreathe:"breathe",sHaptic:"haptic",sSmart:"smart",sWake:"wake"};
   for(const [id,k] of Object.entries(m)){$(id).value=settings[k];$(id).onchange=()=>{settings[k]=$(id).type==="number"||$(id).type==="range"?Number($(id).value):$(id).value;applySettings()}}
   for(const [id,k] of Object.entries(c)){$(id).checked=!!settings[k];$(id).onchange=()=>{settings[k]=$(id).checked;applySettings();if(k==="wake")settings.wake?acquireWakeIf():releaseWake()}}}
 function installHelp(){const ios=`<b>iPhone e iPad (Safari)</b><ol><li>Apri questa pagina in Safari ${window.STUDIOOS_PWA?"dal suo indirizzo":"dal suo link claude.ai"}.</li><li>Tocca Condividi, poi «Aggiungi alla schermata Home» e attiva «Apri come app web» se compare.</li><li>Per lo StandBy: metti il telefono in orizzontale sul supporto, apri Focus e tocca StandBy.</li></ol>`,
@@ -562,7 +562,7 @@ $("notes").addEventListener("change",()=>{if(window.__nt&&run&&run.status==="act
 $("notes").oninput=()=>{const notes=$("notes").value;if(cur)LS.set("notes."+cur.id,notes);if(run&&run.status==="active"&&cur&&cur.id===run.blockId){const id=run.runId;clearTimeout(window.__nt);window.__nt=setTimeout(()=>{if(!run||run.status!=="active"||run.runId!==id)return;const x=clone(run);x.notes=notes;commit(x,"notes")},2000)}};
 $("bErr").onclick=addError;$("eFilter").onchange=renderAllErr;$("eSearch").oninput=renderAllErr;$("bTest").onclick=()=>{unlockAudio();tone(settings.sound);buzz(30)};
 $("bNotif").onclick=async()=>{try{const p=await Notification.requestPermission();$("bNotif").textContent=p==="granted"?"Notifiche attive":"Notifiche non consentite"}catch(e){$("bNotif").textContent="Notifiche non disponibili in questa vista"}};
-$("bExport").onclick=async()=>{const txt=JSON.stringify({app:"STUDIOOS Focus R13h.4 PWA",exportedAt:new Date().toISOString(),device:deviceId,runs:Object.values(runs),errors:Object.values(errors),state:Object.values(syncState).filter(s=>s&&s.key!=="live")});$("expTxt").value=txt;
+$("bExport").onclick=async()=>{const txt=JSON.stringify({app:"STUDIOOS Focus R13h.5 PWA",exportedAt:new Date().toISOString(),device:deviceId,runs:Object.values(runs),errors:Object.values(errors),state:Object.values(syncState).filter(s=>s&&s.key!=="live")});$("expTxt").value=txt;
   let dl=null;try{dl=await (window.claude&&window.claude.use?window.claude.use("downloads"):null)}catch(err){dl=null}
   if(dl){try{await dl.save({filename:"STUDIOOS_Focus_archivio_"+todayIso()+".json",data:txt});toast("Archivio salvato ("+Object.keys(runs).length+" sessioni, "+Object.keys(errors).length+" errori)")}catch(err){toast("Salvataggio non riuscito: copia il testo dal riquadro",5000)}}};
 $("bCopy").onclick=async()=>{try{await navigator.clipboard.writeText($("expTxt").value);$("bCopy").textContent="Copiato"}catch(e){$("expTxt").select();$("bCopy").textContent="Seleziona e copia"}};
