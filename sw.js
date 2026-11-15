@@ -1,8 +1,8 @@
 /* STUDIOOS Focus · service worker della versione autonoma.
    Mette in cache solo i file dell'app (stessa origine). Le chiamate a Google non passano mai dalla cache.
    Ogni aggiornamento serve un pacchetto completo: HTML e script della stessa versione. */
-const VERSION = "studioos-focus-202611151822";
-const CORE = ["./", "./index.html", "./app.js", "./sync.js", "./progress.js", "./career.js", "./motion.js", "./navigation.js", "./refinement.css", "./interaction.css", "./ios.css", "./adapter.js", "./picker-config.js", "./manifest.webmanifest", "./setup.html", "./setup.js",
+const VERSION = "studioos-focus-202611151919";
+const CORE = ["./", "./index.html", "./app.js", "./sync.js", "./progress.js", "./career.js", "./motion.js", "./navigation.js", "./refinement.css", "./interaction.css", "./ios.css", "./liquid.css", "./liquid.js", "./adapter.js", "./picker-config.js", "./manifest.webmanifest", "./setup.html", "./setup.js",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./icons/favicon-64.png"];
 const CORE_URLS = new Set(CORE.map(path => new URL(path, self.location.href).href));
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE.map(u => new Request(u, { cache: "reload" }))))); });

@@ -146,7 +146,7 @@ async function refreshData(force=false){
   lastDataRefresh=Date.now();
   dataRefreshing=(async()=>{try{
     const today=todayIso();if(today!==lastDataDay){if(curDay===lastDataDay)curDay=today;lastDataDay=today;}
-    $("todayLbl").textContent=dayLabel(today)+" · D-035";
+    $("todayLbl").textContent=dayLabel(today);
     const changed=await loadIndex();await loadDay(curDay);
     if(changed){
       if(cur){const b=index[cur.id];if(b){Object.assign(cur,{mat:b.mat,start:at(b.date,b.from),end:at(b.date,b.to),title:b.arg,rinv:b.stato==="Rinviato"});
@@ -313,6 +313,7 @@ function paintRing(d,now){const p=phaseInfo(d,now),pl=cur?planned(cur):(d?d.plan
   $("ringNet").style.strokeDasharray=C2;$("ringNet").style.strokeDashoffset=C2*(1-(pl?Math.min(1,net/60/pl):0));
 }
 function paintText(d,now){const p=phaseInfo(d,now),pl=cur?planned(cur):(d?d.plannedMin:0),net=d?workSec(d,now):0;
+  if(window.STUDIOOS_LIQUID)window.STUDIOOS_LIQUID.update({subject:(d&&d.materia)||(cur&&cur.mat)||"",progress:pl?Math.min(1,net/60/pl):0,phase:d?(d.phase||"work"):"idle",active:!!d});
   $("timer").textContent=fmt(p.main);$("phase").textContent=p.ph;
   $("netInfo").textContent="Netto "+Math.floor(net/60)+" / "+pl+" min"+(d&&d.declaredExtraSec?" (+"+Math.round(d.declaredExtraSec/60)+" dichiarati)":"");
   $("breath").hidden=!(d&&d.phase==="break"&&settings.breathe);
@@ -806,7 +807,7 @@ function renderAnalysis(){renderProgress();if(!$("anHours"))return;const A=analy
 const BOOT_HASH=location.hash;
 (async function boot(){applySettings();bindSettings();installHelp();applyPlanMeta();curView="";show(location.hash.slice(1)||"focus");
   runs=LS.get("cacheRuns",{});errors=LS.get("cacheErr",{});syncState=Object.assign(LS.get("cacheState",{}),syncState);for(const [col,id,obj] of queue()){const target=col==="runs"?runs:col==="errors"?errors:syncState;if(!target[id]||SYNC.compare(col+"/"+id,obj,target[id])>=0)target[id]=obj}const ci=LS.get("index",null);if(ci){index=ci.idx;if(curView==="settimana"){renderWeek();renderAnalysis()}else renderProgress()}
-  $("todayLbl").textContent=dayLabel(todayIso())+" · D-035";const loc=LS.get("active",null);if(loc&&loc.run&&loc.run.status==="active"&&!SYNC.terminal(runs[loc.run.runId])){const cached=runs[loc.run.runId];run=cached&&SYNC.compare("runs/"+cached.runId,cached,loc.run)>0?cached:loc.run;lastKey=keyOf(advance(run,Date.now()))}
+  $("todayLbl").textContent=dayLabel(todayIso());const loc=LS.get("active",null);if(loc&&loc.run&&loc.run.status==="active"&&!SYNC.terminal(runs[loc.run.runId])){const cached=runs[loc.run.runId];run=cached&&SYNC.compare("runs/"+cached.runId,cached,loc.run)>0?cached:loc.run;lastKey=keyOf(advance(run,Date.now()))}
   requestAnimationFrame(frame);if(Object.keys(index).length)await loadDay(curDay);
   const to=ms=>new Promise(r=>setTimeout(()=>r(null),ms));
   try{mcp=await Promise.race([window.claude&&window.claude.use?window.claude.use("mcp"):null,to(10000)])}catch(e){mcp=null}
