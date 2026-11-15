@@ -186,3 +186,17 @@ a.pill{text-decoration:none}
 #mMore,#topicMore{margin-top:10px;width:100%}
 .sec-nav .lg-seg button{font-size:.8rem;padding-inline:4px}
 #v-piano .chips .chipbtn{font-size:.8rem;padding:7px 11px;min-height:36px}
+
+/* 2.0.0 · note della versione definitiva */
+.rel-dialog{border:0;padding:0;background:none;max-width:min(560px,calc(100vw - 24px));width:100%;max-height:calc(100dvh - 32px);color:inherit}
+.rel-dialog::backdrop{background:rgb(10 8 20 / .38);-webkit-backdrop-filter:blur(10px) saturate(140%);backdrop-filter:blur(10px) saturate(140%)}
+.rel-card{background:var(--surface,#fff);color:var(--ink,inherit);border:1px solid var(--line);border-radius:var(--r-sheet,34px);padding:26px 22px 20px;box-shadow:0 30px 80px -30px rgb(0 0 0 / .55);max-height:calc(100dvh - 32px);overflow:auto;-webkit-overflow-scrolling:touch}
+.rel-card h2{margin:4px 0 14px;font-size:1.35rem;line-height:1.2}
+.rel-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.rel-list li{display:grid;gap:2px;padding:10px 12px;border-radius:var(--r-inner,16px);background:color-mix(in srgb,var(--line) 26%,transparent)}
+.rel-list b{font-size:.86rem}.rel-list span{font-size:.84rem;line-height:1.45;color:var(--mute)}
+.rel-bye{margin:16px 2px 4px;line-height:1.55}.rel-sign{margin:0 2px 8px;color:var(--mute);font-style:italic}
+.rel-actions{display:flex;justify-content:flex-end;position:sticky;bottom:-20px;margin:0 -22px -20px;padding:14px 22px 20px;background:linear-gradient(to bottom,transparent,var(--surface,#fff) 38%)}
+.rel-actions .btn{min-width:140px;min-height:44px}
+@media (prefers-reduced-motion:no-preference){.rel-dialog[open] .rel-card{animation:relIn .42s var(--spring-ease,cubic-bezier(.2,.9,.25,1.1)) both}}
+@keyframes relIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}

@@ -157,7 +157,7 @@ async function refreshData(force=false){
       renderNext();renderToday();renderWeek();renderAnalysis();renderPlanRules();renderStats();render();
       if(curView==="registro"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement&&document.activeElement.tagName||""))renderMats();
     }
-    await loadPlan();await loadPlanMeta();if(typeof loadCareer==="function")loadCareer();
+    await loadPlan();await loadPlanMeta();if(typeof loadCareer==="function")loadCareer();if(typeof loadCloudAppelli==="function")loadCloudAppelli();
     window.dispatchEvent(new CustomEvent("studioos:data-refreshed",{detail:{at:Date.now(),changed}}));
   }catch(error){chip("cSh",Object.keys(index).length?"warn":"bad",Object.keys(index).length?"Sheets: copia locale":"Sheets: errore");if($("cSh"))$("cSh").title="Aggiornamento non riuscito: "+String(error.message||error).slice(0,160);}})();
   try{return await dataRefreshing}finally{dataRefreshing=null}
@@ -513,7 +513,7 @@ function renderWeek(){const m=monday(wkRef),days=[...Array(7)].map((_,i)=>addDay
     return `<div class="wk"><b style="color:var(--${s})">${s}</b><div class="meter" style="background:color-mix(in srgb,var(--${s}) 16%,transparent)"><i style="width:${Math.min(100,d/p*100)}%;background:var(--${s})"></i></div><span class="v">${d}/${p} min</span></div>`}).join("")||'<p class="mute">Nessun blocco in questa settimana.</p>';
   renderExams()}
 /* Date d'esame sempre visibili: appelli del piano (SCADENZE) e appelli pubblici letti dal ponte, anche se non prenotati. */
-function renderExams(){const el=$("exams");if(!el)return;const t=todayIso(),S=career&&career.summary,has=!!(S&&S.appelli&&CAREER&&CAREER.appelli);
+function renderExams(){const el=$("exams");if(!el)return;const t=todayIso(),S=examSummary(),has=!!(S&&S.appelli&&CAREER&&CAREER.appelli);
   const fmt=d=>dayLabel(d,{day:"numeric",month:"short"}),dd=d=>d?d.slice(8,10)+"/"+d.slice(5,7):"",AE=(CAREER&&CAREER.ALMAESAMI)||"https://almaesami.unibo.it/";
   const chip=a=>a.booked?'<span class="pill ok booked">✓ prenotato</span>':a.state==="aperta"?`<span class="pill warn">iscrizioni fino al ${dd(a.to)}</span>`:a.state==="non_aperta"?`<span class="pill">iscrizioni dal ${dd(a.from)}</span>`:a.state==="chiusa"?'<span class="pill">iscrizioni chiuse</span>':"";
   el.innerHTML=SUBJ.map(s=>{const plan=EXAMS.filter(x=>x[1]===s),list=has?CAREER.appelli(S,s,t):[];
@@ -697,13 +697,13 @@ function renderToday(){if(!$("todayCard"))return;const now=Date.now(),today=toda
   const recB=[...new Set(rec.map(b=>b.id))].map(id=>index[id]),dueN=dueErrors().length,nPend=(plan.rows||[]).filter(pend).length;
   $("tdTodo").innerHTML=(recB.length?`<p><b>Da recuperare:</b> ${recB.slice(0,5).map(b=>`<a href="#" data-go="${b.id}" data-day="${b.date}">${esc(b.mat)} ${b.date.slice(8)}/${b.date.slice(5,7)}</a>`).join(" · ")} <span class="mute">(chiedi una ridistribuzione in Piano)</span></p>`:"")+(dueN?`<p><b>Ripassi di oggi:</b> ${dueN} ${dueN===1?"errore":"errori"} da rifare · <a href="#" id="goRv">apri Studio</a></p>`:"");
   const tp=$("tdPend");tp.hidden=!nPend;tp.textContent=nPend+" dal tutor";
-  const S=career&&career.summary,open=S&&CAREER&&CAREER.appelli?CAREER.appelli(S,null,today).filter(a=>a.state==="aperta"&&!a.booked):[],seen=new Set();
+  const S=examSummary(),open=S&&CAREER&&CAREER.appelli?CAREER.appelli(S,null,today).filter(a=>a.state==="aperta"&&!a.booked):[],seen=new Set();
   $("tdExams").innerHTML=EXAMS.filter(x=>x[0]&&x[0]>=today).slice(0,4).map(([d,m,t])=>`<span class="pill${bookingFor(m,d)?" booked":""}" style="border-color:var(--${m})">${bookingFor(m,d)?"✓ ":""}${m} ${t} · ${Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(today+"T12:00:00Z"))/864e5)} g</span>`).join("")
     +open.filter(a=>!seen.has(a.subject)&&seen.add(a.subject)).map(a=>`<a class="pill warn" href="${CAREER.ALMAESAMI}" target="_blank" rel="noopener" title="Appello del ${a.date.split("-").reverse().join("/")}: iscrizioni aperte, non risulti prenotato">${a.subject} iscrizioni aperte · fino al ${a.to.slice(8,10)}/${a.to.slice(5,7)}</a>`).join("");
   renderNews()}
 /* Novità appelli dal ponte (nuove date, iscrizioni aperte o in chiusura): restano visibili 14 giorni o fino a «Visto». */
 function renderNews(){const host=$("tdExams");if(!host||!CAREER||!CAREER.news)return;let box=$("tdNews");if(!box){box=document.createElement("div");box.id="tdNews";box.className="td-news";host.after(box)}
-  const seen=new Set(LS.get("newsSeen",[])),list=career?CAREER.news(career.summary,Date.now(),14).filter(e=>!seen.has(e.id)):[];
+  const seen=new Set(LS.get("newsSeen",[])),S=examSummary(),list=S?CAREER.news(S,Date.now(),14).filter(e=>!seen.has(e.id)):[];
   box.innerHTML=list.slice(0,4).map(e=>`<div class="td-new"><span>🔔 ${esc(e.msg)}</span><button class="chipbtn" data-news="${esc(e.id)}">Visto</button></div>`).join("");
   box.querySelectorAll("[data-news]").forEach(b=>b.onclick=()=>{const v=LS.get("newsSeen",[]);v.push(b.dataset.news);LS.set("newsSeen",v.slice(-200));renderNews()})}
 async function startStudy(){unlockAudio();if(run&&run.status==="active"){const b=index[run.blockId];await openSession(run.blockId,b&&b.date,true);show("focus");$("focusCard").scrollIntoView({behavior:settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});return}
@@ -793,6 +793,11 @@ const CAREER=window.STUDIOOS_CAREER;let career=LS.get("career",null),careerBusy=
 function localIso(){return LEARNING?LEARNING.clock(Date.now()):todayIso()+"T"+hm(Date.now())}
 function fmtCareerWhen(v){const raw=String(v||""),ms=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw)?at(raw.slice(0,10),raw.slice(11)):Date.parse(raw),d=new Date(ms);return Number.isFinite(d.getTime())?d.toLocaleString("it-IT",{timeZone:"Europe/Rome",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).replace(","," "):"—"}
 function bookingFor(subject,date){return career&&CAREER&&date?CAREER.bookedOn(career.summary,subject,date):null}
+/* Appelli pubblici anche a PC spento: appelli.json è aggiornato ogni 3 ore da GitHub Actions nello stesso sito. */
+let cloudAp=LS.get("cloudAp",null),cloudAt=0;
+function examSummary(){const s=career&&career.summary;return CAREER&&CAREER.mergeCloud?CAREER.mergeCloud(s,cloudAp):s}
+async function loadCloudAppelli(force=false){if(!/^https?:$/.test(location.protocol)||navigator.onLine===false)return;if(!force&&Date.now()-cloudAt<600000)return;cloudAt=Date.now();
+  try{const r=await fetch("appelli.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j&&Array.isArray(j.items)&&j.checkedAt!==(cloudAp&&cloudAp.checkedAt)){cloudAp=j;LS.set("cloudAp",j);renderExamsOnly()}}catch(e){}}
 async function loadCareer(force=false){if(!mcp||!CAREER||navigator.onLine===false){renderCareer();return}if(careerBusy)return careerBusy;if(!force&&Date.now()-lastCareerAttempt<180000)return;lastCareerAttempt=Date.now();
   careerBusy=(async()=>{try{const st=CAREER.parse(await archGet("UNIBO_STATO!A1:J2"));careerErr="";if(st){career=Object.assign(st,{readAt:Date.now()});LS.set("career",career)}else if(!career)careerErr="Il ponte non ha ancora scritto dati"}
     catch(e){careerErr=/range|400|not found/i.test(String(e&&e.message||e))?"Scheda UNIBO_STATO non trovata nell'archivio":"Lettura non riuscita: resta l'ultima copia"}
@@ -860,7 +865,7 @@ const BOOT_HASH=location.hash;
     try{const s=await db.doc("state/live").get();if(s.exists)adopt(s.data(),"init")}catch(e){}subscribeLive()}
   else{chip("cDb","bad","Archivio ✗ (solo locale)");syncUI(false,bc?"Sync tra schede":"Sync assente")}
   if(mcp){try{await loadIndex()}catch(e){const k=Object.keys(index).length;chip("cSh",k?"warn":"bad",k?"Sheets: copia locale":"Sheets ✗")}}
-  await loadDay(curDay);renderStats();renderWeek();renderRuns();renderAllErr();renderPlan();renderToday();renderProgress();renderPlanRules();dataReady=true;lastDataRefresh=Date.now();if(mcp){loadPlan();loadPlanMeta();loadCareer()}
+  await loadDay(curDay);renderStats();renderWeek();renderRuns();renderAllErr();renderPlan();renderToday();renderProgress();renderPlanRules();dataReady=true;lastDataRefresh=Date.now();if(mcp){loadPlan();loadPlanMeta();loadCareer()}if(typeof loadCloudAppelli==="function")loadCloudAppelli();
   try{const h=BOOT_HASH.match(/b=(R20-\d{4})/);if(h&&index[h[1]]){openSession(h[1],index[h[1]].date)}}catch(e){}
   if(run&&run.status==="active"){const b=index[run.blockId];openSession(run.blockId,b&&b.date,true);acquireWakeIf();checkGap()}
   setTimeout(()=>logNow(addDays(todayIso(),-1)),8000)})();

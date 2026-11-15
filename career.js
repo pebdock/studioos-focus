@@ -52,9 +52,19 @@
     return list.map(x=>Object.assign({},x,{state:windowState(x,today||""),booked:!!bookedOn(summary,x.subject,x.date)}));
   }
   function appelliStatus(summary){const a=summary&&summary.appelli;if(!a)return {level:"none",label:"Appelli pubblici non ancora letti dal PC"};
-    return {level:a.status==="ok"?"ok":"partial",label:(a.status==="ok"?"Appelli pubblici letti ":"Ultima lettura riuscita ")+(a.at?new Date(a.at).toLocaleString("it-IT",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"mai")+(a.status!=="ok"&&a.error?" · "+a.error:"")}}
+    return {level:a.status==="ok"?"ok":"partial",label:(a.status==="ok"?(a.origin==="cloud"?"Appelli pubblici controllati in automatico (anche a PC spento), ultimo aggiornamento ":"Appelli pubblici letti "):"Ultima lettura riuscita ")+(a.at?new Date(a.at).toLocaleString("it-IT",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"mai")+(a.status!=="ok"&&a.error?" · "+a.error:"")}}
   function news(summary,nowMs,days){const lim=(nowMs||Date.now())-(days||14)*864e5;
-    return ((summary&&summary.eventi)||[]).filter(e=>!e.silent&&Date.parse(e.at)>=lim)}
-  const api={CODES,parse,stats,freshness,bySubject,bookedOn,ago,STALE_MS,SOURCES,ALMAESAMI,windowState,appelli,appelliStatus,news};
+    return ((summary&&summary.eventi)||[]).filter(e=>!e.silent&&Date.parse(e.at)>=lim&&!(/^iscrizioni_/.test(e.kind||"")&&bookedOn(summary,e.subject,e.date)))}
+  /* Appelli dal cloud (appelli.json, GitHub Actions ogni 3 ore, PC spento): vince la lettura più recente;
+     gli eventi si uniscono per id. Prenotazioni e carriera restano solo dal ponte del PC. */
+  function mergeCloud(summary,cloud){
+    if(!cloud||!Array.isArray(cloud.items)||(cloud.status!=="ok"&&!cloud.items.length))return summary||null;
+    const s=Object.assign({},summary||{}),a=s.appelli,at=cloud.checkedAt||null;
+    if(!a||!a.at||(cloud.items.length&&at&&Date.parse(at)>=Date.parse(a.at)))s.appelli={status:cloud.status==="ok"?"ok":"errore",at,lastAttempt:at,data:cloud.items,error:cloud.error||undefined,origin:"cloud"};
+    const ids=new Set((s.eventi||[]).map(e=>e.id));
+    s.eventi=[...(s.eventi||[]),...(cloud.eventi||[]).filter(e=>e&&e.id&&!ids.has(e.id))].sort((x,y)=>String(y.at).localeCompare(String(x.at))).slice(0,80);
+    return s;
+  }
+  const api={CODES,parse,stats,freshness,bySubject,bookedOn,ago,STALE_MS,SOURCES,ALMAESAMI,windowState,appelli,appelliStatus,news,mergeCloud};
   root.STUDIOOS_CAREER=api;if(typeof module!=="undefined"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
