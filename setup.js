@@ -41,7 +41,7 @@
     cfg = get("cfg2") || {};
     if (got.sheet) { cfg.sheet = got.sheet.id; } if (got.arch) { cfg.arch = got.arch.id; }
     cfg.names = { sheet: got.sheet ? got.sheet.name : (cfg.names && cfg.names.sheet) || "", arch: got.arch ? got.arch.name : (cfg.names && cfg.names.arch) || "" };
-    delete cfg.choices; set("cfg2", cfg);
+    delete cfg.choices; set("cfg2", cfg);try{localStorage.removeItem(P+"authErr");}catch(e){}
     var miss = [];
     if (!cfg.sheet) miss.push("il piano (foglio con le schede PROGRAMMA e SISTEMA)");
     if (!cfg.arch) miss.push("l'archivio tecnico (foglio con FOCUS_LOG e PIANO_PROPOSTE)");

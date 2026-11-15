@@ -1,5 +1,5 @@
 "use strict";
-const CAL_ID=(window.STUDIOOS_CFG||{}).cal||"";
+let CAL_ID=(window.STUDIOOS_CFG||{}).cal||"";
 const SHEET_ID=(window.STUDIOOS_CFG||{}).sheet||"";
 const ARCH_ID=(window.STUDIOOS_CFG||{}).arch||"";
 const SUBJ=["MDP","BD","MN","FIS","OOP","RETI"];
@@ -58,7 +58,11 @@ function actResume(x,t){if((x.phase==="paused"&&t-x.phaseStart>=5*MIN)||x.phase=
 function actExtend(x,t){if(x.phase!=="work"||x.ext||!x.phaseEnd)return x;x.phaseEnd+=10*MIN;x.ext=true;x.extCount=(x.extCount||0)+1;return x}
 /*END ENGINE*/
 const $=id=>document.getElementById(id);
-const LS={get(k,d){try{const v=localStorage.getItem("sfocus."+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem("sfocus."+k,JSON.stringify(v))}catch(e){}}};
+const SYNC=window.STUDIOOS_SYNC;
+const DATA_PREFIX=window.STUDIOOS_DATA_PREFIX||"sfocus.";
+const storageKey=k=>(k==="device"||k==="settings"?"sfocus.":DATA_PREFIX)+k;
+let localSaveFailed=false;
+const LS={get(k,d){try{const v=localStorage.getItem(storageKey(k));return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(storageKey(k),JSON.stringify(v));return true}catch(e){localSaveFailed=true;return false}},remove(k){try{localStorage.removeItem(storageKey(k))}catch(e){localSaveFailed=true}}};
 const deviceId=LS.get("device",null)||(()=>{const d="dev-"+Math.random().toString(36).slice(2,10);LS.set("device",d);return d})();
 const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,nogame:false,rm:false,theme:"auto",look:"auto",breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
 let mcp=null,db=null,index={},dayEvents=[],calDay={},curDay=todayIso(),wkRef=todayIso(),runs={},errors={},syncState={},cur=null,run=null,wake=null,actx=null,stars=0,liveOK=false,lastKey="",lastSec=-1,STEPS=[];
@@ -67,7 +71,7 @@ const isApple=/iPhone|iPad|iPod|Macintosh|Mac OS X/.test(UA)&&!/Windows|Android/
 const isIOS=/iPhone|iPad|iPod/.test(UA)||(/Macintosh/.test(UA)&&navigator.maxTouchPoints>1);
 const isAndroid=/Android/.test(UA),isWin=/Windows/.test(UA);
 const devName=isIOS?"iPhone/iPad":isApple?"Mac":isWin?"Windows":isAndroid?"Android":"Altro";
-const bc=(()=>{try{return new BroadcastChannel("sfocus")}catch(e){return null}})();
+const bc=(()=>{try{return new BroadcastChannel("sfocus:"+DATA_PREFIX)}catch(e){return null}})();
 /* ---------- utils ---------- */
 function todayIso(d=new Date()){return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Rome",year:"numeric",month:"2-digit",day:"2-digit"}).format(d)}
 function addDays(iso,n){const d=new Date(iso+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
@@ -100,7 +104,7 @@ async function loadIndex(){
 async function loadDay(day){
   if(!dayEvents.length)$("sessions").innerHTML='<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   let cal=null;
-  if(!CAL_ID){chip("cCal","","Calendar: non usato")}
+  if(!CAL_ID){chip("cCal","","Calendar: da collegare")}
   else if(mcp){try{const p=await call("Google Calendar","list_events",{calendarId:CAL_ID,startTime:day+"T00:00:00",endTime:addDays(day,1)+"T00:00:00",pageSize:80,orderBy:"startTime",timeZone:"Europe/Rome"});
     cal={};for(const ev of ((p&&(p.events||p.items))||[])){const m=/\[R20:(R20-\d{4})\]/.exec((ev.summary||"")+" "+(ev.description||""));if(!m)continue;
       cal[m[1]]={start:Date.parse(ev.start&&(ev.start.dateTime||ev.start.date)),end:Date.parse(ev.end&&(ev.end.dateTime||ev.end.date)),title:ev.summary||""}}
@@ -112,39 +116,117 @@ async function loadDay(day){
   for(const [id,c] of Object.entries(calDay))if(!blocks.find(b=>b.id===id)){const b=index[id];dayEvents.push({id,mat:(b&&b.mat)||(SUBJ.find(x=>c.title.includes(x))||""),start:c.start,end:c.end,title:c.title.replace(/\s*\[R20:[^\]]+\]/,""),rinv:true,flag:b?`In PROGRAMMA il ${dayLabel(b.date,{day:"numeric",month:"short"})}: evento da riallineare`:"Non presente in PROGRAMMA",ghost:true})}
   dayEvents.sort((x,y)=>x.start-y.start);renderDay();renderStats();renderNext();if(typeof renderToday==="function")renderToday()}
 /* ---------- archive (db) ---------- */
-function queue(){return LS.get("queue",[])}
-const wq={};
+const memoryOutbox={};
+function queue(){
+  let result=LS.get("queue",[]);if(!Array.isArray(result))result=[];
+  try{for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&key.startsWith(DATA_PREFIX+"outbox.")){const item=JSON.parse(localStorage.getItem(key));if(item&&item[2])result=SYNC.enqueue(result,item)}}}catch(e){}
+  for(const entry of Object.values(memoryOutbox))result=SYNC.enqueue(result,entry);
+  return result;
+}
+const wq={};let flushing=null,flushTimer=null,lastCloudSave=LS.get("cloudSavedAt",0),syncPulling=null;
 async function dbSet(path,obj){if(!db)throw new Error("no db");const prev=wq[path]||Promise.resolve();const p=prev.catch(()=>{}).then(()=>db.doc(path).set(obj));wq[path]=p;return p}
-async function put(col,id,obj){obj.updatedAt=Date.now();(col==="runs"?runs:col==="errors"?errors:syncState)[id]=obj;if(col==="state")LS.set("cacheState",syncState);
-  if(!db){const q=queue();q.push([col,id,obj]);LS.set("queue",q);showQ();return}
-  try{await dbSet(col+"/"+id,obj)}catch(e){const q=queue();q.push([col,id,obj]);LS.set("queue",q);chip("cDb","warn","Archivio: coda locale")}showQ()}
-async function flush(){if(!db)return;const q=queue();if(!q.length)return;const rest=[];for(const [c,i,o] of q){try{await dbSet(c+"/"+i,o)}catch(e){rest.push([c,i,o])}}LS.set("queue",rest);showQ();if(!rest.length)chip("cDb","ok","Archivio ✓")}
-function showQ(){const n=queue().length;const c=$("cQ");c.hidden=!n;c.textContent=n+" in coda"}
+function storeOutbox(entry){const op=SYNC.operation(entry);memoryOutbox[op]=clone(entry);LS.set("outbox."+op,entry);showQ()}
+function acknowledgeOutbox(entry){
+  const path=entry[0]+"/"+entry[1];
+  const obsolete=item=>item&&item[0]+"/"+item[1]===path&&SYNC.compare(path,item[2],entry[2])<=0;
+  for(const [id,item] of Object.entries(memoryOutbox))if(obsolete(item))delete memoryOutbox[id];
+  try{const remove=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&key.startsWith(DATA_PREFIX+"outbox.")&&obsolete(JSON.parse(localStorage.getItem(key))))remove.push(key)}for(const key of remove)localStorage.removeItem(key)}catch(e){}
+  const legacy=LS.get("queue",[]);LS.set("queue",Array.isArray(legacy)?legacy.filter(item=>!obsolete(item)):[]);
+}
+function scheduleFlush(){clearTimeout(flushTimer);flushTimer=setTimeout(()=>flush(),80)}
+function saveCaches(){LS.set("cacheRuns",runs);LS.set("cacheErr",errors);LS.set("cacheState",syncState)}
+async function put(col,id,obj){
+  obj=clone(obj);obj.updatedAt=Date.now();obj.__opId=uid();
+  (col==="runs"?runs:col==="errors"?errors:syncState)[id]=obj;saveCaches();
+  storeOutbox([col,id,obj]);scheduleFlush();return obj;
+}
+function canCloudWrite(){return !window.STUDIOOS_ADAPTER||window.STUDIOOS_ADAPTER.canWrite()}
+function reportSave(){
+  const n=queue().length,local=window.STUDIOOS_ADAPTER&&!canCloudWrite();
+  const readOnly=window.STUDIOOS_ADAPTER&&window.STUDIOOS_ADAPTER.cloudStatus().readOnly;
+  const txt=localSaveFailed?"Memoria locale piena: esporta un backup":n?(navigator.onLine===false?"Salvato qui · in attesa della rete":local?(readOnly?"Salvato qui · sincronizzazione da attivare":"Salvato qui · ricollega Google"):flushing?"Salvataggio su Google…":"Salvato qui · in coda"):(local?(readOnly?"Sola lettura · copia locale":"Accesso scaduto · ricollega Google"):lastCloudSave?"Salvato su Google · "+hm(lastCloudSave):"Pronto per sincronizzare");
+  const indicator=$("syncTxt");if(indicator)indicator.textContent=txt;
+  const dot=$("syncDot");if(dot)dot.className="syncdot"+(!local&&!n&&!localSaveFailed&&liveOK?" on":"");
+  window.dispatchEvent(new CustomEvent("studioos:sync-status",{detail:{pending:n,savedAt:lastCloudSave,localOnly:!!local,busy:!!flushing,localSaveFailed,text:txt}}));
+}
+async function flush(){
+  if(flushing)return flushing;
+  if(!db||!canCloudWrite()||navigator.onLine===false){reportSave();return}
+  flushing=(async()=>{
+    /* Session snapshots are acknowledged before publishing their live pointer. */
+    const batch=queue().slice().sort((a,b)=>(a[0]==="state"&&a[1]==="live"?1:0)-(b[0]==="state"&&b[1]==="live"?1:0));
+    for(const entry of batch){
+      const [col,id,obj]=entry;
+      if(!queue().some(item=>SYNC.operation(item)===SYNC.operation(entry)))continue;
+      try{
+        const ack=await dbSet(col+"/"+id,obj);
+        if(ack&&ack.accepted===false&&ack.current){
+          if(col==="runs"){runs[id]=ack.current;if(run&&run.runId===id&&SYNC.terminal(ack.current))adopt({run:null,ended:id,endedRun:ack.current},"reconcile")}
+          else if(col==="state"&&id==="live")adopt(ack.current,"reconcile");
+          else (col==="errors"?errors:syncState)[id]=ack.current;
+        }
+        /* Re-read the queue: a newer edit may have arrived during the request. */
+        acknowledgeOutbox(entry);lastCloudSave=Date.now();LS.set("cloudSavedAt",lastCloudSave);saveCaches();
+      }catch(e){chip("cDb","warn","Archivio: salvataggio in attesa");break}
+    }
+    showQ();if(!queue().length)chip("cDb","ok","Archivio ✓");
+  })();
+  reportSave();try{await flushing}finally{flushing=null;reportSave()}
+}
+function showQ(){const n=queue().length,c=$("cQ");c.hidden=!n;c.textContent=n+" in attesa";reportSave()}
 async function getAll(col){const res=await db.collection(col).get();const arr=Array.isArray(res)?res:(res&&(res.docs||res.items))||[];return arr.map(d=>typeof d.data==="function"?d.data():(d&&d.data&&typeof d.data==="object"?d.data:d)).filter(Boolean)}
-async function loadArchive(){for(const [col,tgt,key] of [["runs",runs,"runId"],["errors",errors,"id"],["state",syncState,"key"]]){const list=await getAll(col);for(const o of list){const k=o[key];if(k&&(!tgt[k]||(o.updatedAt||0)>=(tgt[k].updatedAt||0)))tgt[k]=o}}
-  LS.set("cacheRuns",runs);LS.set("cacheErr",errors);LS.set("cacheState",syncState);chip("cDb","ok","Archivio ✓")}
+async function loadArchive(){
+  for(const [col,tgt,key] of [["runs",runs,"runId"],["errors",errors,"id"],["state",syncState,"key"]]){
+    const list=await getAll(col);for(const o of list){const k=o[key];if(k&&(!tgt[k]||SYNC.compare(col+"/"+k,o,tgt[k])>=0))tgt[k]=o}
+  }
+  saveCaches();chip("cDb","ok","Archivio ✓");
+}
 /* ---------- live sync (tutti i dispositivi e le schede) ---------- */
-function syncUI(on,txt){liveOK=on;$("syncDot").className="syncdot"+(on?" on":"");$("syncTxt").textContent=txt}
-async function commit(x,why){x.rev=(x.rev||0)+1;x.at=Date.now();x.by=deviceId;x.byName=devName;run=x;runs[x.runId]=x;saveLocal();
-  const live={key:"live",run:x.status==="active"?x:null,ended:x.status!=="active"?x.runId:null,at:x.at,by:deviceId};
+function syncUI(on,txt){liveOK=on;reportSave();if(!on&&!queue().length&&canCloudWrite())$("syncTxt").textContent=txt}
+async function commit(x,why){
+  x=clone(x);x.rev=(x.rev||0)+1;x.at=x.updatedAt=Date.now();x.by=deviceId;x.byName=devName;x.__opId=uid();
+  run=x;runs[x.runId]=clone(x);saveLocal();
+  const live={key:"live",run:x.status==="active"?clone(x):null,ended:x.status!=="active"?x.runId:null,
+    endedStatus:x.status!=="active"?x.status:null,endedRun:x.status!=="active"?clone(x):null,at:x.at,updatedAt:x.at,by:deviceId,__opId:uid()};
+  syncState.live=live;saveCaches();
+  storeOutbox(["runs",x.runId,clone(x)]);storeOutbox(["state","live",live]);
   try{bc&&bc.postMessage({t:"live",live})}catch(e){}
-  if(db){try{await dbSet("state/live",live);syncUI(true,"Sincronizzato")}catch(e){syncUI(false,"Sync in attesa")}}
-  put("runs",x.runId,clone(x));logSoon()}
-function adopt(live,src){if(!live)return;const r=live.run;
-  if(!r){if(run&&run.status==="active"&&live.by!==deviceId&&(live.ended===run.runId||(run.at||0)<(live.at||0))){const was=run;run=null;saveLocal();releaseWake();render();renderDay();renderToday();toast("Sessione chiusa su un altro dispositivo");if(was&&runs[was.runId])runs[was.runId].status="confirmed"}return}
+  scheduleFlush();logSoon();
+}
+function adopt(live,src){
+  if(!live)return;live=SYNC.normalizeLive(live,runs);const r=live.run;
+  if(!r){
+    const closed=live.endedRun||(live.ended&&runs[live.ended]);
+    if(closed&&SYNC.terminal(closed)&&(!runs[closed.runId]||SYNC.compare("runs/"+closed.runId,closed,runs[closed.runId])>=0))runs[closed.runId]=clone(closed);
+    if(run&&run.status==="active"&&live.ended===run.runId){
+      if(!closed||!SYNC.terminal(closed)){refreshSync();return}
+      run=null;saveLocal();saveCaches();releaseWake();render();renderDay();renderToday();renderRuns();renderStats();renderGarden();
+      toast(closed.status==="discarded"?"Sessione scartata sull'altro dispositivo: non conta":"Sessione confermata sull'altro dispositivo");
+    }
+    return;
+  }
+  if(SYNC.terminal(runs[r.runId]))return;
   const mine=run&&run.runId===r.runId;
-  if(mine&&!((r.rev||0)>(run.rev||0)||((r.rev||0)===(run.rev||0)&&(r.at||0)>(run.at||0))))return;
+  if(mine&&SYNC.compare("runs/"+r.runId,r,run)<=0)return;
   if(!mine&&run&&run.status==="active"&&(run.at||0)>(r.at||0))return;
-  const first=!run||run.runId!==r.runId;run=r;runs[r.runId]=r;saveLocal();
+  const first=!run||run.runId!==r.runId;run=clone(r);runs[r.runId]=clone(r);saveLocal();saveCaches();
   if(first||!cur||cur.id!==r.blockId){const b=index[r.blockId];openSession(r.blockId,b&&b.date,true)}
+  if(document.activeElement!==$("notes")&&r.notes!=null)$("notes").value=r.notes;
   if(live.by!==deviceId&&src!=="init")toast(first?`Sessione ${r.materia||""} in corso su ${r.byName||"un altro dispositivo"}`:`Aggiornato da ${r.byName||"un altro dispositivo"}`,2200);
-  lastKey=keyOf(advance(run,Date.now()));acquireWakeIf();render();if(first&&typeof renderToday==="function")renderToday()}
-function subscribeLive(){if(!db)return;let t=setTimeout(()=>syncUI(false,"Sync non raggiungibile"),10000);
-  try{db.doc("state/live").onSnapshot(snap=>{clearTimeout(t);syncUI(true,snap.metadata&&snap.metadata.fromCache?"Sync (cache)":"Sincronizzato");if(snap.exists)adopt(snap.data(),"snap")},
-    e=>{clearTimeout(t);syncUI(false,"Sync interrotto")})}catch(e){syncUI(false,"Sync non disponibile")}}
+  lastKey=keyOf(advance(run,Date.now()));acquireWakeIf();render();if(first&&typeof renderToday==="function")renderToday();
+}
+function subscribeLive(){if(!db)return;let t=setTimeout(()=>syncUI(false,"Connessione in attesa"),10000);
+  try{db.doc("state/live").onSnapshot(snap=>{clearTimeout(t);syncUI(true,snap.metadata&&snap.metadata.fromCache?"Copia locale":"Connesso");if(snap.exists)adopt(snap.data(),"snap")},
+    e=>{clearTimeout(t);syncUI(false,"Salvato qui · collegamento da ripristinare")})}catch(e){syncUI(false,"Salvato su questo dispositivo")}}
+async function refreshSync(){
+  if(syncPulling)return syncPulling;
+  syncPulling=(async()=>{if(!db)return;try{await loadArchive();const s=await db.doc("state/live").get();if(s.exists)adopt(s.data(),"refresh");await flush();renderRuns();renderStats();renderToday();renderAllErr();renderReviews();renderSims();paintSteps()}catch(e){reportSave()}})();
+  try{await syncPulling}finally{syncPulling=null}
+}
 bc&&(bc.onmessage=e=>{if(e.data&&e.data.t==="live")adopt(e.data.live,"bc")});
+
 /* ---------- sessione: azioni ---------- */
-function saveLocal(){LS.set("active",run&&run.status==="active"?{run}:null)}
+function saveLocal(){LS.set("active",run&&run.status==="active"?{run}:null);saveCaches()}
 function planned(c){return (index[c.id]&&index[c.id].min)||Math.round((c.end-c.start)/60000)}
 function dayConfirmedMin(day,exclude){return Math.round(Object.values(runs).filter(r=>r.date===day&&r.status==="confirmed"&&r.runId!==exclude).reduce((t,r)=>t+workSec(r,Date.now())+(r.declaredExtraSec||0),0)/60)}
 function schedFor(c,startAt){const b=index[c.id];if(!b||!STEPS.length)return[];const shift=Math.max(0,startAt-at(b.date,b.from));
@@ -162,7 +244,7 @@ function keyOf(x){return x?x.phase+"|"+x.phaseStart:""}
 const C1=2*Math.PI*132,C2=2*Math.PI*114;
 function frame(){const now=Date.now();let d=run&&run.status==="active"?advance(run,now):null;
   if(d&&d!==run){const k=keyOf(d);if(k!==lastKey){const fresh=now-(d.phaseStart||0)<15000;lastKey=k;if(fresh)onTransition(d)}
-    if(!frame.pend){frame.pend=setTimeout(()=>{frame.pend=null;const dd=advance(run,Date.now());if(dd!==run&&document.visibilityState==="visible")commit(clone(dd),"auto")},400+Math.random()*2200)}}
+    if(!frame.pend&&(!run.by||run.by===deviceId)){frame.pend=setTimeout(()=>{frame.pend=null;if(!run||run.status!=="active")return;const dd=advance(run,Date.now());if(dd!==run&&document.visibilityState==="visible")commit(clone(dd),"auto")},400+Math.random()*2200)}}
   if(d&&d.phase==="work"&&d.phaseEnd&&d.cfg&&d.cfg.auto){const rem=d.phaseEnd-now;if(rem<=60000&&rem>50000&&frame.warn!==d.phaseEnd){frame.warn=d.phaseEnd;if(document.visibilityState==="visible")tone("soft");toast(d.curBrk?"Pausa tra 1 minuto: chiudi il passaggio":"Fine del ciclo tra 1 minuto")}}
   const sec=Math.floor(now/1000);paintRing(d,now);if(sec!==lastSec){lastSec=sec;paintText(d,now)}
   if(document.visibilityState==="visible")requestAnimationFrame(frame);else frame.idle=true}
@@ -224,7 +306,7 @@ function alarm(msg){if(document.visibilityState==="visible")tone(settings.sound)
 async function acquireWake(){try{if(navigator.wakeLock&&!wake){wake=await navigator.wakeLock.request("screen");wake.addEventListener&&wake.addEventListener("release",()=>{wake=null})}}catch(e){wake=null}}
 function acquireWakeIf(){if(settings.wake&&run&&run.status==="active")acquireWake()}
 function releaseWake(){try{wake&&wake.release()}catch(e){}wake=null}
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){acquireWakeIf();flush();checkGap();renderNext();if(frame.idle){frame.idle=false;requestAnimationFrame(frame)}}else{LS.set("seen",Date.now());logNow()}});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){acquireWakeIf();refreshSync();checkGap();renderNext();if(frame.idle){frame.idle=false;requestAnimationFrame(frame)}}else{persistSession();LS.set("seen",Date.now());logNow()}});
 setInterval(()=>{if(document.visibilityState==="visible")LS.set("seen",Date.now())},20000);
 function checkGap(){if(!run||run.status!=="active")return;const seen=LS.get("seen",0),d=advance(run,Date.now());if(!seen||d.phase!=="work")return;const gap=Date.now()-seen;
   if(gap<20*MIN||(run.at||0)>seen||run.by!==deviceId)return;const b=$("recover");b.hidden=false;
@@ -301,14 +383,14 @@ function drawStars(){$("mdStars").innerHTML=[1,2,3,4,5].map(n=>`<button class="b
 $("mdStars").addEventListener("click",e=>{const b=e.target.closest("[data-s]");if(b){stars=+b.dataset.s;drawStars();buzz(6)}});
 async function confirmRun(){const out=$("mdOut").value,ev=$("mdEv").value.trim();
   if(out==="Verificato autonomamente"&&(!ev||!$("mdSelf").checked)){$("mdInfo").textContent="Per «Verificato autonomamente» servono la prova osservabile e la conferma di averla svolta senza aiuti.";return}
-  const x=clone(advance(run,Date.now()));if(x.phase==="work")actPause(x,Date.now());
+  if(!run||run.status!=="active")return;clearTimeout(window.__nt);const x=clone(advance(run,Date.now()));if(x.phase==="work")actPause(x,Date.now());
   const study={diff:$("mdDiff").value.trim(),redo:$("mdRedo").value.trim(),review:$("mdRev").value.trim()};
   Object.assign(x,{status:"confirmed",outcome:out,evidence:ev,selfCheck:$("mdSelf").checked,focusScore:stars||null,notes:$("notes").value,study,confirmedAt:Date.now(),phase:"done"});
   await commit(x,"confirm");closeSheet("mDone");releaseWake();const id=x.blockId;run=null;saveLocal();LS.set("notes."+id,"");
   $("mdEv").value="";$("mdSelf").checked=false;$("mdDiff").value="";$("mdRedo").value="";$("mdRev").value="";
   for(const [k,lab] of [["redo","Da rifare"],["review","Da ripassare"]])if(study[k]){const e={id:uid(),blockId:id,runId:x.runId,materia:x.materia,text:lab+": "+study[k],fix:study.diff||"",at:Date.now()};await put("errors",e.id,e)}
   buzz([20,40,20]);renderDay();renderStats();renderGarden();renderRuns();renderWeek();render();renderToday();toast("Sessione confermata");logNow();askRegister(id,out)}
-async function dropRun(){const x=clone(run);x.status="discarded";x.phase="done";await commit(x,"discard");closeSheet("mDone");releaseWake();run=null;saveLocal();render();renderDay();logNow()}
+async function dropRun(){if(!run||run.status!=="active")return;clearTimeout(window.__nt);const x=clone(run);if(cur&&cur.id===x.blockId)x.notes=$("notes").value;x.status="discarded";x.phase="done";await commit(x,"discard");closeSheet("mDone");releaseWake();run=null;saveLocal();render();renderDay();logNow()}
 let regCtx=null;
 async function askRegister(id,out){const b=index[id];if(!b)return;const focusMin=Math.round(netForBlock(id)/60);let sh;
   try{sh=await sheetGet(`PROGRAMMA!J${b.row}:L${b.row}`)}catch(e){$("mrInfo").textContent="Sheets non raggiungibile: la sessione resta nell'archivio Focus e potrai scriverla dopo.";regCtx=null;openSheet("mReg");return}
@@ -420,7 +502,7 @@ $("goDay").onclick=()=>show("giorno");
 $("dPrev").onclick=()=>{curDay=addDays(curDay,-1);loadDay(curDay)};$("dNext").onclick=()=>{curDay=addDays(curDay,1);loadDay(curDay)};$("dToday").onclick=()=>{curDay=todayIso();loadDay(curDay)};
 $("wPrev").onclick=()=>{wkRef=addDays(wkRef,-7);renderWeek()};$("wNext").onclick=()=>{wkRef=addDays(wkRef,7);renderWeek()};
 $("bReload").onclick=async()=>{try{await loadIndex()}catch(e){chip("cSh","bad","Sheets ✗")}loadDay(curDay);toast("Dati aggiornati")};
-$("notes").oninput=()=>{if(cur)LS.set("notes."+cur.id,$("notes").value);if(run&&run.status==="active"){clearTimeout(window.__nt);window.__nt=setTimeout(()=>{const x=clone(run);x.notes=$("notes").value;commit(x,"notes")},2000)}};
+$("notes").oninput=()=>{const notes=$("notes").value;if(cur)LS.set("notes."+cur.id,notes);if(run&&run.status==="active"&&cur&&cur.id===run.blockId){const id=run.runId;clearTimeout(window.__nt);window.__nt=setTimeout(()=>{if(!run||run.status!=="active"||run.runId!==id)return;const x=clone(run);x.notes=notes;commit(x,"notes")},2000)}};
 $("bErr").onclick=addError;$("eFilter").onchange=renderAllErr;$("eSearch").oninput=renderAllErr;$("bTest").onclick=()=>{unlockAudio();tone(settings.sound);buzz(30)};
 $("bNotif").onclick=async()=>{try{const p=await Notification.requestPermission();$("bNotif").textContent=p==="granted"?"Notifiche attive":"Notifiche non consentite"}catch(e){$("bNotif").textContent="Notifiche non disponibili in questa vista"}};
 $("bExport").onclick=async()=>{const txt=JSON.stringify({app:"STUDIOOS Focus R13h.3 PWA",exportedAt:new Date().toISOString(),device:deviceId,runs:Object.values(runs),errors:Object.values(errors),state:Object.values(syncState).filter(s=>s&&s.key!=="live")});$("expTxt").value=txt;
@@ -435,7 +517,20 @@ document.addEventListener("keydown",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target
   if(e.key===" "){e.preventDefault();run&&run.status==="active"?pauseRun():(cur&&startRun())}else if(k==="c")openDone();else if(k==="o")toggleOled();else if(k==="s")$("standby").classList.contains("on")?closeStandby():openStandby();else if(k==="e")extendRun();
   else if(k==="h")document.body.classList.toggle("showctl");else if(k==="f")$("bFull").click();else if(/^[1-6]$/.test(k))show(VIEWS[+k-1]);
   else if(e.key==="Escape"){document.querySelectorAll(".sheet.on").forEach(m=>closeSheet(m.id));document.body.classList.remove("oled");closeStandby()}});
-window.addEventListener("online",flush);setInterval(flush,30000);setInterval(()=>{renderNext();renderToday();timeline($("tlMini"),dayEvents);timeline($("tlDay"),dayEvents)},60000);
+function persistSession(){
+  clearTimeout(window.__nt);
+  if(run&&run.status==="active"){
+    const x=clone(run);if(cur&&cur.id===x.blockId)x.notes=$("notes").value;
+    if(x.notes!==run.notes)commit(x,"notes");else{runs[x.runId]=x;saveLocal();storeOutbox(["runs",x.runId,x]);const live=syncState.live;if(live&&live.run&&live.run.runId===x.runId)storeOutbox(["state","live",live])}
+  }else saveCaches();
+}
+window.addEventListener("pagehide",persistSession);window.addEventListener("pageshow",refreshSync);window.addEventListener("focus",refreshSync);
+window.addEventListener("online",refreshSync);window.addEventListener("offline",reportSave);
+window.addEventListener("studioos:sync-now",refreshSync);
+window.addEventListener("studioos:archive-update",()=>{if(document.visibilityState==="visible"){clearTimeout(window.__archiveRefresh);window.__archiveRefresh=setTimeout(refreshSync,150)}});
+window.addEventListener("studioos:calendar-config",e=>{CAL_ID=e.detail.id||"";if(mcp)loadDay(curDay)});
+window.addEventListener("storage",e=>{if(e.key&&e.key.startsWith(DATA_PREFIX+"outbox.")&&e.newValue===null)delete memoryOutbox[e.key.slice((DATA_PREFIX+"outbox.").length)];if(e.key&&e.key.startsWith(DATA_PREFIX))reportSave()});
+setInterval(flush,30000);setInterval(()=>{renderNext();renderToday();timeline($("tlMini"),dayEvents);timeline($("tlDay"),dayEvents)},60000);
 window.addEventListener("resize",()=>{moveInd();renderGarden()});
 
 /* ---------- R13g · canale con le attività pianificate (PIANO_PROPOSTE) ---------- */
@@ -598,8 +693,8 @@ function renderAnalysis(){if(!$("anHours"))return;const A=analysisData(),now=Dat
 /* ---------- boot ---------- */
 const BOOT_HASH=location.hash;
 (async function boot(){applySettings();bindSettings();installHelp();curView="";show(location.hash.slice(1)||"focus");
-  runs=LS.get("cacheRuns",{});errors=LS.get("cacheErr",{});syncState=Object.assign(LS.get("cacheState",{}),syncState);const ci=LS.get("index",null);if(ci)index=ci.idx;
-  $("todayLbl").textContent=dayLabel(todayIso())+" · D-035";const loc=LS.get("active",null);if(loc&&loc.run&&loc.run.status==="active"){run=loc.run;lastKey=keyOf(advance(run,Date.now()))}
+  runs=LS.get("cacheRuns",{});errors=LS.get("cacheErr",{});syncState=Object.assign(LS.get("cacheState",{}),syncState);for(const [col,id,obj] of queue()){const target=col==="runs"?runs:col==="errors"?errors:syncState;if(!target[id]||SYNC.compare(col+"/"+id,obj,target[id])>=0)target[id]=obj}const ci=LS.get("index",null);if(ci)index=ci.idx;
+  $("todayLbl").textContent=dayLabel(todayIso())+" · D-035";const loc=LS.get("active",null);if(loc&&loc.run&&loc.run.status==="active"&&!SYNC.terminal(runs[loc.run.runId])){const cached=runs[loc.run.runId];run=cached&&SYNC.compare("runs/"+cached.runId,cached,loc.run)>0?cached:loc.run;lastKey=keyOf(advance(run,Date.now()))}
   requestAnimationFrame(frame);if(Object.keys(index).length)await loadDay(curDay);
   const to=ms=>new Promise(r=>setTimeout(()=>r(null),ms));
   try{mcp=await Promise.race([window.claude&&window.claude.use?window.claude.use("mcp"):null,to(10000)])}catch(e){mcp=null}

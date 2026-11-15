@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.1.5 · R13h.3";
+  var VERSION = "pwa-1.2.0 · R13h.3";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -35,9 +35,14 @@
   var CFG = ls.get("cfg2", null) || { readOnly: true };
   if (CFG.readOnly == null) CFG.readOnly = true;
   ls.del("cfg"); /* eventuale configurazione della 1.0 con link #cfg: non più usata */
-  function saveCfg() { ls.set("cfg2", CFG); window.STUDIOOS_CFG = { sheet: CFG.sheet || "", arch: CFG.arch || "", cal: CFG.calOn ? (CFG.cal || "") : "" }; }
+  function saveCfg() {
+    ls.set("cfg2", CFG); window.STUDIOOS_CFG = { sheet: CFG.sheet || "", arch: CFG.arch || "", cal: CFG.calOn ? (CFG.cal || "") : "" };
+    window.dispatchEvent(new CustomEvent("studioos:calendar-config",{detail:{id:window.STUDIOOS_CFG.cal}}));
+  }
   function configured() { return !!(CFG.sheet && CFG.arch); }
   window.STUDIOOS_PWA = true;
+  window.STUDIOOS_DATA_PREFIX = window.STUDIOOS_SYNC.prefix(CFG);
+  try { window.STUDIOOS_SYNC.migrate(localStorage, window.STUDIOOS_DATA_PREFIX); } catch (e) {}
   saveCfg();
 
   /* ---------- ritorno da Google (OAuth 2.0 per app web lato client, con redirect) ---------- */
@@ -75,7 +80,7 @@
     var redirect = location.origin + location.pathname.replace(/[^/]*$/, "");
     var u = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
       client_id: CLIENT_ID, redirect_uri: redirect, response_type: "token", scope: scopes,
-      state: nonce, prompt: opts.consent ? "consent" : ""
+      state: nonce, include_granted_scopes: "true", prompt: opts.consent ? "consent" : ""
     }).toString().replace(/&prompt=$/, "");
     location.assign(u);
   }
@@ -123,7 +128,7 @@
   }
 
   /* ---------- contratto delle scritture ---------- */
-  function int(x) { return typeof x === "number" ? x : (/^\d+$/.test(String(x)) ? Number(x) : NaN); }
+  function int(x) { return typeof x === "number" ? (Number.isInteger(x) ? x : NaN) : (/^\d+$/.test(String(x)) ? Number(x) : NaN); }
   var WRITE_RULES = [
     { file: "sheet", re: /^PROGRAMMA!J(\d+):K\1$/, ok: function (m, v) { var n = +m[1]; return n >= 6 && n <= 427 && v.length === 1 && v[0].length === 2 && STATES.indexOf(v[0][0]) >= 0 && int(v[0][1]) >= 0 && int(v[0][1]) <= 900; } },
     { file: "arch", re: /^FOCUS_LOG!A(\d+):X\1$/, ok: function (m, v) { return +m[1] >= 3 && +m[1] <= 400 && v.length === 1 && v[0].length <= 24 && /^\d{4}-\d{2}-\d{2}$/.test(v[0][0]); } },
@@ -161,99 +166,140 @@
         var qs = new URLSearchParams({ singleEvents: "true", orderBy: "startTime", maxResults: String(Math.min(250, input.pageSize || 100)), timeZone: tz });
         if (input.startTime) qs.set("timeMin", toRfc(input.startTime, tz));
         if (input.endTime) qs.set("timeMax", toRfc(input.endTime, tz));
-        var ev = await g(CAL + "calendars/" + enc(input.calendarId) + "/events?" + qs.toString());
-        return { events: (ev.items || []).map(function (e) { return { summary: e.summary || "", description: e.description || "", start: e.start, end: e.end }; }) };
+        var items = [], page = "";
+        do { if(page)qs.set("pageToken",page);var ev=await g(CAL+"calendars/"+enc(input.calendarId)+"/events?"+qs.toString());items=items.concat(ev.items||[]);page=ev.nextPageToken||""; } while(page);
+        return { events: items.filter(function(e){return e.status!=="cancelled";}).map(function (e) { return { summary: e.summary || "", description: e.description || "", start: e.start, end: e.end }; }) };
       }
       throw new Error("Funzione non disponibile nella versione autonoma: " + server + " · " + tool);
     }
   };
 
-  /* ---------- archivio: scheda nascosta FOCUS_DB nel foglio archivio ---------- */
-  var rows = null, rowsAt = 0, loading = null, tabOK = false, chain = Promise.resolve();
+  /* ---------- archivio: journal di snapshot, compatibile con FOCUS_DB precedente ---------- */
+  var SYNC = window.STUDIOOS_SYNC;
+  var rows = null, rowsAt = 0, loading = null, tabOK = false, writerReady = false, chain = Promise.resolve();
+  var nextRow = 2, seenOps = new Set(), lastCloudRead = 0, lastCloudWrite = 0;
   var CH = 45000;
   var RE_PATH = /^(runs|errors|state)\/[\w.:-]{1,120}$/;
   async function ensureTab() {
-    if (tabOK) return;
+    if ((tabOK === true && (CFG.readOnly || writerReady)) || (tabOK === "none" && CFG.readOnly)) return;
     var s = await g(SH + enc(CFG.arch) + "?fields=sheets.properties.title");
     var has = (s.sheets || []).some(function (x) { return x.properties && x.properties.title === TAB; });
     if (!has && CFG.readOnly) { tabOK = "none"; return; }
     if (!has) {
-      await g(SH + enc(CFG.arch) + ":batchUpdate", { method: "POST", body: JSON.stringify({ requests: [{ addSheet: { properties: { title: TAB, hidden: true, gridProperties: { rowCount: 500, columnCount: 6 } } } }] }) });
-      await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A1:F1") + "?valueInputOption=RAW", { method: "PUT", body: JSON.stringify({ values: [["percorso", "aggiornato_ms", "json_1", "json_2", "json_3", "dispositivo"]] }) });
+      try {
+        await g(SH + enc(CFG.arch) + ":batchUpdate", { method: "POST", body: JSON.stringify({ requests: [{ addSheet: { properties: { title: TAB, hidden: true, gridProperties: { rowCount: 500, columnCount: 6 } } } }] }) });
+        await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A1:F1") + "?valueInputOption=RAW", { method: "PUT", body: JSON.stringify({ values: [["percorso", "aggiornato_ms", "json_1", "json_2", "json_3", "dispositivo"]] }) });
+      } catch (error) {
+        /* A second device can create the tab while this request is in flight. */
+        var verify = await g(SH + enc(CFG.arch) + "?fields=sheets.properties.title");
+        if (!(verify.sheets || []).some(function (x) { return x.properties.title === TAB; })) throw error;
+      }
+    }
+    if (!CFG.readOnly) {
+      var header = await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A1:F1"));
+      var first = (header.values || [])[0] || [];
+      if (!first.length) await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A1:F1") + "?valueInputOption=RAW", {method:"PUT",body:JSON.stringify({values:[["percorso","aggiornato_ms","json_1","json_2","json_3","dispositivo"]]})});
+      else if (first[0] !== "percorso") throw new Error("La prima riga dell'archivio non è riconosciuta: nessun dato è stato sostituito");
+      writerReady = true;
     }
     tabOK = true;
   }
-  function parseRow(v) { try { return JSON.parse((v[2] || "") + (v[3] || "") + (v[4] || "")); } catch (e) { return null; } }
+  function parseRow(v) {
+    try {
+      var record = JSON.parse((v[2] || "") + (v[3] || "") + (v[4] || ""));
+      return record && record.sfocus === 2 && record.data ? { obj: record.data, op: record.op } : { obj: record, op: "legacy-" + SYNC.fingerprint(v) };
+    } catch (e) { return null; }
+  }
+  function archiveRuns() {
+    var result = {};
+    Object.keys(rows || {}).forEach(function (path) { if (path.indexOf("runs/") === 0) result[path.slice(5)] = rows[path].obj; });
+    return result;
+  }
   async function loadAll(maxAge) {
     if (rows && Date.now() - rowsAt < (maxAge == null ? 4000 : maxAge)) return rows;
     if (loading) return loading;
     loading = (async function () {
       await ensureTab();
-      if (tabOK === "none") { rows = {}; rowsAt = Date.now(); return rows; }
-      var r = await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A2:F") + "?valueRenderOption=UNFORMATTED_VALUE");
-      var m = {};
-      (r.values || []).forEach(function (v, i) {
-        var p = v[0]; if (!p || !RE_PATH.test(p)) return; var o = parseRow(v); if (!o) return; var u = Number(v[1]) || 0;
-        if (!m[p] || u >= m[p].upd) m[p] = { row: i + 2, upd: u, obj: o };
+      if (!rows) rows = {};
+      if (tabOK === "none") { rowsAt = Date.now(); return rows; }
+      /* Append-only records allow incremental reads without overwriting another device. */
+      var start = nextRow;
+      var r = await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A" + start + ":F") + "?valueRenderOption=UNFORMATTED_VALUE");
+      var values = r.values || [];
+      var changed = [];
+      values.forEach(function (v, i) {
+        var path = v[0], parsed = parseRow(v);
+        if (!RE_PATH.test(path || "") || !parsed || !parsed.obj) return;
+        seenOps.add(parsed.op);
+        if (!rows[path] || SYNC.compare(path, parsed.obj, rows[path].obj) >= 0) {
+          rows[path] = { row: start + i, upd: Number(v[1]) || 0, obj: parsed.obj, op: parsed.op };changed.push(path);
+        }
       });
-      rows = m; rowsAt = Date.now(); return m;
+      nextRow = start + values.length;
+      rowsAt = lastCloudRead = Date.now();
+      if(changed.length)window.dispatchEvent(new CustomEvent("studioos:archive-update",{detail:{paths:changed}}));
+      return rows;
     })();
     try { return await loading; } finally { loading = null; }
   }
   function devName() { try { return String(JSON.parse(localStorage.getItem("sfocus.device")) || "").slice(0, 40); } catch (e) { return ""; } }
   async function setDoc(path, obj) {
-    if (CFG.readOnly) throw new Error("Sola lettura: archivio salvato solo su questo dispositivo");
+    if (CFG.readOnly) throw new Error("Sola lettura: la sessione resta salvata su questo dispositivo");
     if (!RE_PATH.test(path)) throw new Error("Percorso d'archivio non valido");
-    var m = await loadAll(60000);
-    var js = JSON.stringify(obj);
-    if (js.length > 3 * CH) throw new Error("Record troppo grande per l'archivio (" + js.length + " caratteri)");
-    var u = Number(obj && obj.updatedAt) || Date.now();
-    var ex = m[path];
-    if (ex && ex.upd > u && path !== "state/live") return; /* più recente già salvato: niente sovrascrittura all'indietro */
-    var vals = [[path, u, js.slice(0, CH), js.slice(CH, 2 * CH), js.slice(2 * CH), devName()]];
-    if (ex && ex.row) {
-      await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A" + ex.row + ":F" + ex.row) + "?valueInputOption=RAW", { method: "PUT", body: JSON.stringify({ values: vals }) });
-      ex.upd = u; ex.obj = obj;
-    } else {
-      var r = await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A:F") + ":append?valueInputOption=RAW&insertDataOption=INSERT_ROWS", { method: "POST", body: JSON.stringify({ values: vals }) });
-      var mm = /!A(\d+)/.exec((r.updates && r.updates.updatedRange) || "");
-      m[path] = { row: mm ? +mm[1] : 0, upd: u, obj: obj };
+    var m = await loadAll(0), current = m[path], op = obj.__opId || SYNC.fingerprint(path + "\n" + JSON.stringify(obj));
+    if (path === "state/live" && obj.run) {
+      var normalized = SYNC.normalizeLive(obj, archiveRuns());
+      if (!normalized.run) return { accepted: false, current: normalized, verified: true };
     }
+    if (current && SYNC.compare(path, current.obj, obj) > 0) return { accepted: false, current: SYNC.copy(current.obj), verified: true };
+    if (seenOps.has(op)) return { accepted: true, current: current && SYNC.copy(current.obj), verified: true };
+    var js = JSON.stringify({ sfocus: 2, op: op, data: obj });
+    if (js.length > 3 * CH) throw new Error("Sessione troppo grande per l'archivio: esporta un backup");
+    var u = SYNC.stamp(obj) || Date.now();
+    var vals = [[path, u, js.slice(0, CH), js.slice(CH, 2 * CH), js.slice(2 * CH), devName()]];
+    var r = await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A:F") + ":append?valueInputOption=RAW&insertDataOption=INSERT_ROWS", { method: "POST", body: JSON.stringify({ values: vals }) });
+    var match = /!A(\d+)/.exec((r.updates && r.updates.updatedRange) || "");
+    if (!match) throw new Error("Google non ha confermato la riga salvata: riprovo dalla coda locale");
+    var writtenRow = +match[1];
+    var readback = await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A" + writtenRow + ":F" + writtenRow) + "?valueRenderOption=UNFORMATTED_VALUE");
+    var value = (readback.values || [])[0] || [], verified = parseRow(value);
+    if (value[0] !== path || !verified || verified.op !== op || JSON.stringify(verified.obj) !== JSON.stringify(obj)) throw new Error("Rilettura del salvataggio non riuscita: la sessione resta in coda");
+    seenOps.add(op); lastCloudWrite = Date.now(); ls.set("cloudWriteAt", lastCloudWrite);
+    if (!current || SYNC.compare(path, obj, current.obj) >= 0) rows[path] = { row: writtenRow, upd: u, obj: SYNC.copy(obj), op: op };
+    /* Do not advance nextRow here: a concurrent append before ours must still be read. */
+    return { accepted: true, current: SYNC.copy(obj), verified: true };
   }
   function snap(o, cache) { return { exists: !!o, data: function () { return o; }, metadata: { fromCache: !!cache } }; }
   function watch(path, cb, err) {
-    var stop = false, last = null, lastFull = 0;
+    var stop = false, last = "", timer = null, busy = false;
     async function tick() {
-      if (stop) return;
+      if (stop || busy) return;
+      busy = true; clearTimeout(timer);
       try {
-        var ex = rows && rows[path], o = null, u = 0;
-        if (ex && ex.row) {
-          var r = await g(SH + enc(CFG.arch) + "/values/" + enc(TAB + "!A" + ex.row + ":F" + ex.row) + "?valueRenderOption=UNFORMATTED_VALUE");
-          var v = (r.values || [])[0] || [];
-          if (v[0] === path) { u = Number(v[1]) || 0; o = parseRow(v); if (o) { ex.obj = o; ex.upd = u; } }
-          else { rowsAt = 0; }
-        } else if (Date.now() - lastFull > 15000) {
-          lastFull = Date.now(); var m = await loadAll(0); if (m[path]) { o = m[path].obj; u = m[path].upd; }
-        } else { u = last == null ? 0 : last; }
-        if (last === null || u !== last) { last = u; cb(snap(o, false)); }
+        var m = await loadAll(0), value = m[path] ? m[path].obj : null;
+        if (path === "state/live") value = SYNC.normalizeLive(value, archiveRuns());
+        var signature = SYNC.fingerprint(value);
+        if (last !== signature) { last = signature; cb(snap(value, false)); }
       } catch (e) { if (err) err(e); }
-      finally { if (!stop) setTimeout(tick, document.hidden ? 60000 : 8000); }
+      finally { busy = false; if (!stop) timer = setTimeout(tick, document.hidden ? 45000 : 8000); }
     }
+    function wake() { if (!document.hidden) tick(); }
+    document.addEventListener("visibilitychange", wake); window.addEventListener("online", wake); window.addEventListener("pageshow", wake);
     tick();
-    return function () { stop = true; };
+    return function () { stop = true; clearTimeout(timer); document.removeEventListener("visibilitychange", wake); window.removeEventListener("online", wake); window.removeEventListener("pageshow", wake); };
   }
   var db = {
     collection: function (col) {
       return { get: async function () {
         var m = await loadAll();
-        return Object.keys(m).filter(function (p) { return p.indexOf(col + "/") === 0; })
-          .map(function (p) { return { id: p.slice(col.length + 1), data: function () { return m[p].obj; } }; });
+        return Object.keys(m).filter(function (path) { return path.indexOf(col + "/") === 0; })
+          .map(function (path) { return { id: path.slice(col.length + 1), data: function () { return SYNC.copy(m[path].obj); } }; });
       } };
     },
     doc: function (path) {
       return {
-        get: async function () { var m = await loadAll(); var e = m[path]; return snap(e ? e.obj : null, false); },
-        set: function (obj) { var p = chain.then(function () { return setDoc(path, obj); }); chain = p.catch(function () {}); return p; },
+        get: async function () { var m = await loadAll(0), value = m[path] && m[path].obj; if (path === "state/live") value = SYNC.normalizeLive(value, archiveRuns()); return snap(SYNC.copy(value), false); },
+        set: function (obj) { var payload = SYNC.copy(obj); var p = chain.then(function () { return setDoc(path, payload); }); chain = p.catch(function () {}); return p; },
         onSnapshot: function (cb, err) { return watch(path, cb, err); }
       };
     }
@@ -314,9 +360,31 @@
     return msg;
   }
   async function findCalendar() {
-    var r = await g(CAL + "users/me/calendarList?minAccessRole=reader&fields=items(id,summary)");
-    var list = (r.items || []).filter(function (c) { return /studio/i.test(c.summary || ""); });
+    var list = [], page = "";
+    do {
+      var qs=new URLSearchParams({minAccessRole:"reader",maxResults:"250",fields:"nextPageToken,items(id,summary,primary)"});
+      if(page)qs.set("pageToken",page);
+      var r=await g(CAL+"users/me/calendarList?"+qs.toString());list=list.concat(r.items||[]);page=r.nextPageToken||"";
+    }while(page);
     return list;
+  }
+  async function sharePreferences() {
+    if(window.STUDIOOS_PICKER_CONFIG&&window.STUDIOOS_PICKER_CONFIG.valid(CFG)&&token()&&CFG.arch) {
+      try {await window.STUDIOOS_PICKER_CONFIG.save(tokObj(),CFG);return true;} catch(e){return false;}
+    }
+    return false;
+  }
+  async function connectCalendar(quiet) {
+    CFG.calOn=true;saveCfg();
+    if(!hasScope(S_CAL)){signIn({cal:true});return;}
+    try {
+      var list=await findCalendar();CFG.calChoices=list;
+      var selected=list.find(function(c){return c.id===CFG.cal;});
+      if(!selected){var study=list.filter(function(c){return /studio/i.test(c.summary||"");});if(study.length===1)selected=study[0];}
+      if(selected){var changed=CFG.cal!==selected.id;CFG.cal=selected.id;CFG.calendarName=selected.summary;saveCfg();if(!quiet||changed)await sharePreferences();if(!quiet)toast("Calendar «"+selected.summary+"» collegato in sola lettura");}
+      else {delete CFG.cal;saveCfg();toast(list.length?"Scegli il calendario di studio nell'elenco":"Nessun calendario leggibile trovato");}
+    } catch(error){setErr("Calendar: "+error.message);}
+    renderPanel();
   }
   async function diagnose() {
     var out = [];
@@ -332,7 +400,8 @@
       catch (e) { out.push("Archivio: ✗ " + e.message); }
     } else out.push("Archivio: non collegato");
     out.push(CFG.readOnly ? "Registrazione nei fogli: spenta (sola lettura)" : "Registrazione nei fogli: attiva (solo campi previsti)");
-    out.push(CFG.calOn ? "Controllo Calendar: attivo (sola lettura)" : "Controllo Calendar: spento");
+    out.push(CFG.calOn&&CFG.cal ? "Calendar: «"+(CFG.calendarName||"calendario selezionato")+"» · sola lettura" : "Calendar: da collegare");
+    out.push(lastCloudWrite?"Ultimo salvataggio verificato: "+new Date(lastCloudWrite).toLocaleTimeString("it-IT"):"Nessuna nuova scrittura verificata in questa apertura");
     var le = ls.get("lastApiErr", ""); if (le) out.push("Ultimo errore Google: " + le);
     out.push("Versione " + VERSION + (navigator.serviceWorker && navigator.serviceWorker.controller ? " · funziona anche offline" : ""));
     return out;
@@ -367,6 +436,8 @@
           '<button class="btn" data-pwa="dismiss">Ok</button>');
     } else { top.hidden = true; top.innerHTML = ""; }
     if (card.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    var wasOpen=!!(card.querySelector("details")&&card.querySelector("details").open);
+    var previousDiag=el("pwaDiag"),diagText=previousDiag&&!previousDiag.hidden?previousDiag.textContent:"";
     var ch = CFG.choices, choice = "";
     if (ch && (ch.sheet.length > 1 || ch.arch.length > 1)) {
       choice = '<label for="pwaSelSheet">Piano</label><select id="pwaSelSheet">' + ch.sheet.map(function (x) { return '<option value="' + esc(x.id) + '"' + (x.id === CFG.sheet ? " selected" : "") + ">" + esc(x.name) + "</option>"; }).join("") + "</select>" +
@@ -378,8 +449,12 @@
       '<div class="row" style="margin-top:6px">' + (ok ? '<button class="btn" data-pwa="diag">Verifica connessione</button><button class="btn" data-pwa="out">Disconnetti</button>' : '<button class="btn primary" data-pwa="in">Collega Google</button>') +
       (ok ? '<button class="btn" data-pwa="find">Cerca i fogli</button><a class="btn" href="setup.html">Scegli i fogli</a>' : "") + "</div>" +
       '<pre class="cons small" id="pwaDiag" hidden></pre>' +
-      (configured() ? '<p class="small"><b>Registrazione nei fogli:</b> ' + (CFG.readOnly ? 'spenta (sola lettura). <button class="btn" data-pwa="wr-on">Attiva</button><span id="pwaWr" hidden> Usa una sola versione per il timer (PWA o Artifact): le sessioni di questa app finiscono nella scheda FOCUS_DB, separata dall\'archivio dell\'Artifact. <button class="btn primary" data-pwa="wr-on-ok">Conferma attivazione</button></span>' : 'attiva. <button class="btn" data-pwa="wr-off">Torna a sola lettura</button>') + '</p>' : '') +
-      '<label><input type="checkbox" id="pwaCal"' + (CFG.calOn ? " checked" : "") + '> Controllo con Google Calendar (facoltativo, sola lettura: chiede l\'accesso in lettura a tutti i calendari)</label>' +
+      '<div class="pwa-save"><span class="pwa-save-label">Le tue sessioni</span><p id="pwaSaveState" role="status" aria-live="polite">Controllo dei salvataggi…</p><button class="btn" data-pwa="sync-now">Sincronizza ora</button><p class="small mute">Puoi passare a un altro dispositivo dopo «Salvato su Google». Alla riapertura recupero la sessione; senza rete conservo le modifiche qui e le invio quando torni online.</p></div>' +
+      (configured() ? '<p class="small"><b>Registrazione nei fogli:</b> ' + (CFG.readOnly ? 'spenta su questo dispositivo. <button class="btn" data-pwa="wr-on">Attiva</button><span id="pwaWr" hidden> Le sessioni si salvano nel tuo archivio Google e l\'attivazione segue lo stesso archivio sugli altri dispositivi. Il registro PROGRAMMA richiede sempre la tua conferma. Usa la PWA come timer operativo. <button class="btn primary" data-pwa="wr-on-ok">Conferma attivazione</button></span>' : 'attiva. <button class="btn" data-pwa="wr-off">Solo salvataggio locale qui</button>') + '</p>' : '') +
+      '<div class="pwa-calendar"><label><input type="checkbox" id="pwaCal"' + (CFG.calOn ? " checked" : "") + '> Confronta il piano con Google Calendar</label><p class="small mute">Solo lettura. Google richiede accesso in lettura ai calendari; Focus usa quello che scegli e non modifica gli eventi.</p>' +
+      (CFG.calOn&&CFG.cal?'<p class="small">Collegato a <b>'+esc(CFG.calendarName||"calendario selezionato")+'</b>.</p>':"")+
+      '<div class="row"><button class="btn" data-pwa="cal-connect">'+(CFG.calOn&&CFG.cal?"Cambia calendario":"Collega Google Calendar")+'</button></div>'+
+      (CFG.calChoices&&CFG.calChoices.length?'<label for="pwaCalSelect">Calendario di studio</label><select id="pwaCalSelect"><option value="">Scegli un calendario…</option>'+CFG.calChoices.map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===CFG.cal?' selected':'')+'>'+esc(c.summary||c.id)+'</option>';}).join("")+'</select>':"")+'</div>'+
       '<p class="small mute">' + esc(platformHelp()) + '</p>' +
       '<details><summary class="small">Configurazione avanzata</summary>' +
       '<p class="small mute">La configurazione del selettore si recupera con lo stesso account Google. Questi campi servono per il primo collegamento: il salvataggio la rende disponibile anche agli altri dispositivi tramite i metadati privati dell\'archivio autorizzato.</p>' +
@@ -387,7 +462,12 @@
       '<label for="pwaProj">Numero del progetto</label><input id="pwaProj" inputmode="numeric" autocomplete="off" value="' + esc(CFG.project || "") + '">' +
       '<div class="row"><button class="btn" data-pwa="saveadv">Salva</button><button class="btn" data-pwa="reset">Scollega i fogli da questo dispositivo</button></div></details>' +
       '<p class="small mute">' + esc(VERSION) + ' · archivio sessioni nella scheda nascosta ' + TAB + ' del foglio archivio.</p>';
+    if(wasOpen&&card.querySelector("details"))card.querySelector("details").open=true;
+    if(diagText){el("pwaDiag").hidden=false;el("pwaDiag").textContent=diagText;}
+    updateSavePanel();
   }
+  var appSaveStatus=null;
+  function updateSavePanel(){var target=el("pwaSaveState");if(target){target.textContent=appSaveStatus?appSaveStatus.text:CFG.readOnly?"Salvataggio locale · attiva Google per sincronizzare":"Archivio Google collegato";target.dataset.state=appSaveStatus&&appSaveStatus.pending?"pending":CFG.readOnly?"local":"saved";}}
   function toast(t) { var box = el("toasts"); if (!box) return; var d = document.createElement("div"); d.className = "toast"; d.textContent = t; box.appendChild(d); setTimeout(function () { d.remove(); }, 5000); }
   async function runFind() {
     try { toast("Cerco i fogli autorizzati…"); var m = await autoConfigure(); ls.del("authErr"); if (m) setErr(m); else { toast("Fogli collegati: ricarico"); setTimeout(function () { location.reload(); }, 600); } }
@@ -412,10 +492,12 @@
       else if (a === "dismiss") { ls.del("authErr"); renderPanel(); }
       else if (a === "settings") { location.hash = "impostazioni"; }
       else if (a === "wr-on") { var w = el("pwaWr"); if (w) w.hidden = false; }
-      else if (a === "wr-on-ok") { CFG.readOnly = false; saveCfg(); toast("Registrazione nei fogli attiva"); setTimeout(function () { location.reload(); }, 600); }
-      else if (a === "wr-off") { CFG.readOnly = true; saveCfg(); toast("Sola lettura"); setTimeout(function () { location.reload(); }, 600); }
+      else if (a === "wr-on-ok") { CFG.readOnly = false;CFG.writesOverride=false;saveCfg();await sharePreferences();toast("Salvataggio e sincronizzazione attivi");window.dispatchEvent(new CustomEvent("studioos:sync-now"));renderPanel(); }
+      else if (a === "wr-off") { CFG.readOnly = true;CFG.writesOverride=true;saveCfg();toast("Su questo dispositivo salvo solo in locale");window.dispatchEvent(new CustomEvent("studioos:sync-now"));renderPanel(); }
+      else if (a === "sync-now") { window.dispatchEvent(new CustomEvent("studioos:sync-now"));toast("Controllo i salvataggi e gli altri dispositivi…"); }
+      else if (a === "cal-connect") { await connectCalendar(); }
       else if (a === "diag") { var d = el("pwaDiag"); d.hidden = false; d.textContent = "Verifico…"; try { d.textContent = (await diagnose()).join("\n"); } catch (x) { d.textContent = "Verifica non riuscita: " + x.message; } }
-      else if (a === "choose") { CFG.sheet = el("pwaSelSheet").value; CFG.arch = el("pwaSelArch").value; CFG.names = { sheet: el("pwaSelSheet").selectedOptions[0].text, arch: el("pwaSelArch").selectedOptions[0].text }; delete CFG.choices; saveCfg(); location.reload(); }
+      else if (a === "choose") { CFG.sheet = el("pwaSelSheet").value; CFG.arch = el("pwaSelArch").value; CFG.names = { sheet: el("pwaSelSheet").selectedOptions[0].text, arch: el("pwaSelArch").selectedOptions[0].text }; delete CFG.choices;ls.del("authErr");saveCfg(); location.reload(); }
       else if (a === "saveadv") {
         var k = el("pwaKey").value.trim(), p = el("pwaProj").value.trim(); CFG.pickerKey = /^[\w-]{20,60}$/.test(k) ? k : ""; CFG.project = /^\d{6,15}$/.test(p) ? p : ""; saveCfg();
         if (window.STUDIOOS_PICKER_CONFIG && window.STUDIOOS_PICKER_CONFIG.valid(CFG) && token() && CFG.arch) {
@@ -428,21 +510,23 @@
     });
     document.addEventListener("change", async function (e) {
       if (e.target && e.target.id === "pwaCal") {
-        if (e.target.checked) {
-          if (!hasScope(S_CAL)) { CFG.calOn = true; saveCfg(); signIn({ cal: true }); return; }
-          try { var l = await findCalendar(); if (l.length) { CFG.cal = l[0].id; CFG.calOn = true; saveCfg(); toast("Calendar «" + l[0].summary + "» collegato in sola lettura"); setTimeout(function () { location.reload(); }, 800); } else { e.target.checked = false; toast("Nessun calendario «Studio» trovato"); } }
-          catch (x) { e.target.checked = false; toast("Calendar non raggiungibile: " + x.message); }
-        } else { CFG.calOn = false; saveCfg(); toast("Controllo Calendar spento"); setTimeout(function () { location.reload(); }, 600); }
+        if (e.target.checked) await connectCalendar();
+        else {CFG.calOn=false;saveCfg();await sharePreferences();toast("Confronto con Calendar spento");renderPanel();}
+      }
+      if(e.target&&e.target.id==="pwaCalSelect"){
+        var selected=(CFG.calChoices||[]).find(function(c){return c.id===e.target.value;});
+        if(selected){CFG.cal=selected.id;CFG.calOn=true;CFG.calendarName=selected.summary;saveCfg();await sharePreferences();toast("Calendar «"+selected.summary+"» collegato");renderPanel();}
       }
     });
+    window.addEventListener("studioos:sync-status",function(e){appSaveStatus=e.detail;updateSavePanel();});
     setInterval(renderPanel, 60000);
     /* La configurazione del Picker segue l'account, anche se i fogli sono già collegati. */
-    if (token() && (!CFG.pickerKey || !CFG.project) && window.STUDIOOS_PICKER_CONFIG) {
-      window.STUDIOOS_PICKER_CONFIG.load(tokObj(), CFG).then(function () { saveCfg(); renderPanel(); }).catch(function () {});
+    if (token() && window.STUDIOOS_PICKER_CONFIG) {
+      window.STUDIOOS_PICKER_CONFIG.load(tokObj(), CFG,{refresh:true,preferences:true}).then(function () { saveCfg(); renderPanel();window.dispatchEvent(new CustomEvent("studioos:sync-now"));if(CFG.calOn&&hasScope(S_CAL))connectCalendar(true); }).catch(function () {});
     }
     /* dopo l'accesso: collega i fogli e, se richiesto, il calendario */
     if (token() && !configured()) runFind();
-    if (token() && CFG.calOn && !CFG.cal && hasScope(S_CAL)) findCalendar().then(function (l) { if (l.length) { CFG.cal = l[0].id; saveCfg(); location.reload(); } }).catch(function () {});
+    if (token() && CFG.calOn && hasScope(S_CAL) && !window.STUDIOOS_PICKER_CONFIG) connectCalendar(true);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
 
@@ -451,7 +535,7 @@
     var reloading = false;
     navigator.serviceWorker.addEventListener("controllerchange", function () {
       if (reloading) return;
-      var active = null; try { active = JSON.parse(localStorage.getItem("sfocus.active")); } catch (e) {}
+      var active = null; try { active = JSON.parse(localStorage.getItem(window.STUDIOOS_DATA_PREFIX+"active")); } catch (e) {}
       if (active && active.run) { toast("Nuova versione installata: verrà usata alla prossima apertura."); return; }
       reloading = true; location.reload();
     });
@@ -465,5 +549,7 @@
     });
   }
 
-  window.STUDIOOS_ADAPTER = { version: VERSION, toRfc: toRfc, signIn: signIn, signOut: signOut, configured: configured, diagnose: diagnose, checkWrite: checkWrite, _cfg: function () { return CFG; } };
+  window.STUDIOOS_ADAPTER = { version: VERSION, toRfc: toRfc, signIn: signIn, signOut: signOut, configured: configured, diagnose: diagnose, checkWrite: checkWrite,
+    canWrite: function () { return !CFG.readOnly && !!token(); }, refresh: function () { return loadAll(0); },
+    storagePrefix: window.STUDIOOS_DATA_PREFIX, cloudStatus: function () { return {ready:tabOK===true,readAt:lastCloudRead,writtenAt:lastCloudWrite||ls.get("cloudWriteAt",0),readOnly:CFG.readOnly}; }, _cfg: function () { return CFG; } };
 })();

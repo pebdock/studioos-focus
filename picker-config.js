@@ -5,7 +5,7 @@
   "use strict";
   var CLIENT = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var DRIVE = "https://www.googleapis.com/drive/v3/files";
-  var FIELDS = { client: "sfocus.picker.client", key: "sfocus.picker.key", project: "sfocus.picker.project" };
+  var FIELDS = { client: "sfocus.picker.client", key: "sfocus.picker.key", project: "sfocus.picker.project", calendar:"sfocus.calendar", calOn:"sfocus.calendar.on", save:"sfocus.save" };
   function valid(cfg) {
     return !!(cfg && /^AIza[\w-]{35}$/.test(cfg.pickerKey || "") && /^\d{6,15}$/.test(cfg.project || "") && cfg.project === CLIENT.split("-")[0]);
   }
@@ -23,9 +23,10 @@
     if (!response.ok) throw new Error("Configurazione del selettore: Google " + response.status);
     return response.json();
   }
-  async function load(tok, cfg) {
+  async function load(tok, cfg, options) {
     cfg = cfg || {};
-    if (valid(cfg)) return cfg;
+    options = options || {};
+    if (valid(cfg) && !options.refresh) return cfg;
     var page = "";
     do {
       var query = new URLSearchParams({
@@ -34,12 +35,17 @@
       });
       if (page) query.set("pageToken", page);
       var result = await request(DRIVE + "?" + query.toString(), tok);
-      var files = result.files || [];
+      var files = (result.files || []).sort(function(a,b){return Number(b.id===cfg.arch)-Number(a.id===cfg.arch);});
       for (var i = 0; i < files.length; i++) {
         var p = files[i].appProperties || {};
         var candidate = { pickerKey: p[FIELDS.key], project: p[FIELDS.project] };
         if (p[FIELDS.client] === CLIENT && valid(candidate)) {
           cfg.pickerKey = candidate.pickerKey; cfg.project = candidate.project;
+          if (options.preferences && files[i].id === cfg.arch) {
+            if (!cfg.writesOverride && p[FIELDS.save] === "1") cfg.readOnly = false;
+            if (cfg.calOn == null && p[FIELDS.calOn] != null) cfg.calOn = p[FIELDS.calOn] === "1";
+            if (!cfg.cal && typeof p[FIELDS.calendar] === "string" && p[FIELDS.calendar].length <= 240) cfg.cal = p[FIELDS.calendar];
+          }
           return cfg;
         }
       }
@@ -52,6 +58,9 @@
     var url = DRIVE + "/" + encodeURIComponent(cfg.arch) + "?fields=appProperties";
     var old = await request(url, tok), properties = Object.assign({}, old.appProperties || {});
     properties[FIELDS.client] = CLIENT; properties[FIELDS.key] = cfg.pickerKey; properties[FIELDS.project] = cfg.project;
+    if (cfg.readOnly === false) properties[FIELDS.save] = "1";
+    if (cfg.calOn != null) properties[FIELDS.calOn] = cfg.calOn ? "1" : "0";
+    if (cfg.cal) properties[FIELDS.calendar] = new TextEncoder().encode(FIELDS.calendar + cfg.cal).length <= 124 ? cfg.cal : null;
     await request(url, tok, { appProperties: properties });
     var check = (await request(url, tok)).appProperties || {};
     if (check[FIELDS.client] !== CLIENT || check[FIELDS.key] !== cfg.pickerKey || check[FIELDS.project] !== cfg.project) {
