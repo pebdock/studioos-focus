@@ -1,7 +1,7 @@
 /* STUDIOOS Focus · service worker della versione autonoma.
    Mette in cache solo i file dell'app (stessa origine). Le chiamate a Google non passano mai dalla cache.
    Ogni aggiornamento serve un pacchetto completo: HTML e script della stessa versione. */
-const VERSION = "studioos-focus-202611151652";
+const VERSION = "studioos-focus-202611151655";
 const CORE = ["./", "./index.html", "./app.js", "./sync.js", "./progress.js", "./navigation.js", "./refinement.css", "./interaction.css", "./adapter.js", "./picker-config.js", "./manifest.webmanifest", "./setup.html", "./setup.js",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png", "./icons/favicon-64.png"];
 const CORE_URLS = new Set(CORE.map(path => new URL(path, self.location.href).href));

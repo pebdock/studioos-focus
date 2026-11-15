@@ -11,7 +11,7 @@
     // Older plans describe quotas without clock times. Keep existing pauses intact.
     if(!out.some(s=>minutes(s)>0)){
       const legacy=cons.split(/ATTIVITÀ NELL'ORDINE[^\n]*:\s*\n/i)[1]?.split(/\nMATERIALI ESATTI/i)[0]||"";
-      for(const l of legacy.split("\n")){const w=/^-\s*(\d+)\s*min,\s*provenienza\s+[^:]+:\s*(.+)$/.exec(l.trim());if(w)out.push({a:"",b:"",t:w[2].slice(0,240),min:+w[1],source:l.trim(),k:kind(w[2])})}
+      for(const l of legacy.split("\n")){const w=/^-\s*(\d+)\s*min,\s*provenienza\s+(R20-\d+)\s+\(«(.+?)»\):\s*(.+)$/.exec(l.trim());if(w)out.push({a:"",b:"",t:w[3],min:+w[1],source:l.trim(),k:kind(w[4])})}
       if(!out.some(s=>minutes(s)>0)){const units=cons.matchAll(/(?:^|\n)Unità «([^»]+)»\. In questo blocco dedica (\d+) minuti netti alla quota[^\n]+(?:\n|$)([\s\S]*?)(?=\nUnità «|\nVerifica finale:|\nNota D-|$)/g);
         for(const w of units)out.push({a:"",b:"",t:w[1],min:+w[2],source:w[0].trim(),k:kind(w[1])})}
       if(!out.some(s=>minutes(s)>0)&&budget>0&&cons.trim()){
