@@ -1,1 +1,333 @@
-{"v":1,"source":"Pagine pubbliche UniBo · GitHub Actions ogni 3 ore","checkedAt":null,"changedAt":null,"status":"in_attesa","error":null,"items":[],"eventi":[]}
+{
+ "v": 1,
+ "source": "Pagine pubbliche UniBo · GitHub Actions ogni 3 ore",
+ "checkedAt": "2026-11-15T22:56:20.951Z",
+ "changedAt": "2026-11-15T22:56:20.951Z",
+ "status": "ok",
+ "error": null,
+ "items": [
+  {
+   "code": "10906",
+   "name": "BASI DI DATI",
+   "teacher": "FRANCO ANNALISA",
+   "date": "2027-01-07",
+   "time": "10:00",
+   "type": "Altro",
+   "from": "2026-10-29",
+   "to": "2027-01-05",
+   "room": "Laboratorio informatico 3.1 Piano primo (livello 3) Ex-Zuccherificio – Edificio 1, Ingresso Via dell’Università 50 Via dell’Università, 50, Cesena",
+   "notes": "",
+   "component": "",
+   "subject": "BD",
+   "key": "10906|2027-01-07|10:00|altro",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/annalisa.franco/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "77776",
+   "name": "MATEMATICA DISCRETA E PROBABILITÀ",
+   "teacher": "CASELLI FABRIZIO",
+   "date": "2027-01-11",
+   "time": "09:00",
+   "type": "Scritto",
+   "from": "2026-12-01",
+   "to": "2027-01-09",
+   "room": "Aula 2.12",
+   "notes": "Per la prova è consentito utilizzare una calcolatrice con al più 30 tasti o una calcolatrice scientifica (non grafica) tra quelle ammesse per l'esame di maturità la cui lista può essere trovata ad esempio qui https://www.studenti.it/maturita-2025-calcolatrici-ammesse-alle-prove.html",
+   "component": "",
+   "subject": "MDP",
+   "key": "77776|2027-01-11|09:00|scritto",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/fabrizio.caselli/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "77776",
+   "name": "MATEMATICA DISCRETA E PROBABILITÀ",
+   "teacher": "CASELLI FABRIZIO",
+   "date": "2027-01-11",
+   "time": "11:00",
+   "type": "Scritto",
+   "from": "2026-12-01",
+   "to": "2027-01-09",
+   "room": "Aula 2.12",
+   "notes": "Per la prova è consentito utilizzare una calcolatrice con al più 30 tasti o una calcolatrice scientifica (non grafica) tra quelle ammesse per l'esame di maturità la cui lista può essere trovata ad esempio qui https://www.studenti.it/maturita-2025-calcolatrici-ammesse-alle-prove.html",
+   "component": "",
+   "subject": "MDP",
+   "key": "77776|2027-01-11|11:00|scritto",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli"
+   ]
+  },
+  {
+   "code": "77776",
+   "name": "MATEMATICA DISCRETA E PROBABILITÀ",
+   "teacher": "CASELLI FABRIZIO",
+   "date": "2027-01-13",
+   "time": "09:00",
+   "type": "Orale",
+   "from": "2026-12-29",
+   "to": "2027-01-12",
+   "room": "Aula 2.1",
+   "notes": "",
+   "component": "",
+   "subject": "MDP",
+   "key": "77776|2027-01-13|09:00|orale",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/fabrizio.caselli/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "B2561",
+   "name": "METODI NUMERICI PER L'INTELLIGENZA ARTIFICIALE",
+   "teacher": "LAZZARO DAMIANA",
+   "date": "2027-01-14",
+   "time": "09:00",
+   "type": "Scritto",
+   "from": "2026-12-30",
+   "to": "2027-01-12",
+   "room": "Laboratorio informatico 3.1 Piano primo (livello 3) Ex-Zuccherificio – Edificio 1, Ingresso Via dell’Università 50 Via dell’Università, 50, Cesena",
+   "notes": "",
+   "component": "",
+   "subject": "MN",
+   "key": "B2561|2027-01-14|09:00|scritto",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/damiana.lazzaro/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "10906",
+   "name": "BASI DI DATI",
+   "teacher": "FRANCO ANNALISA",
+   "date": "2027-01-19",
+   "time": "10:00",
+   "type": "Scritto",
+   "from": "2026-10-29",
+   "to": "2027-01-17",
+   "room": "Aula 2.9 Piano terra (livello 2) Ex-Zuccherificio – Edificio 1, Ingresso Via Machiavelli Via dell’Università, 50, Cesena",
+   "notes": "",
+   "component": "",
+   "subject": "BD",
+   "key": "10906|2027-01-19|10:00|scritto",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/annalisa.franco/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "77776",
+   "name": "MATEMATICA DISCRETA E PROBABILITÀ",
+   "teacher": "CASELLI FABRIZIO",
+   "date": "2027-01-25",
+   "time": "09:00",
+   "type": "Scritto",
+   "from": "2026-12-18",
+   "to": "2027-01-23",
+   "room": "Aula 2.12",
+   "notes": "Per la prova è consentito utilizzare una calcolatrice con al più 30 tasti o una calcolatrice scientifica (non grafica) tra quelle ammesse per l'esame di maturità la cui lista può essere trovata ad esempio qui https://www.studenti.it/maturita-2025-calcolatrici-ammesse-alle-prove.html",
+   "component": "",
+   "subject": "MDP",
+   "key": "77776|2027-01-25|09:00|scritto",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/fabrizio.caselli/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "77776",
+   "name": "MATEMATICA DISCRETA E PROBABILITÀ",
+   "teacher": "CASELLI FABRIZIO",
+   "date": "2027-01-27",
+   "time": "09:00",
+   "type": "Orale",
+   "from": "2027-01-12",
+   "to": "2027-01-26",
+   "room": "Aula 2.1",
+   "notes": "",
+   "component": "",
+   "subject": "MDP",
+   "key": "77776|2027-01-27|09:00|orale",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/fabrizio.caselli/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "B2561",
+   "name": "METODI NUMERICI PER L'INTELLIGENZA ARTIFICIALE",
+   "teacher": "LAZZARO DAMIANA",
+   "date": "2027-02-01",
+   "time": "14:00",
+   "type": "Scritto",
+   "from": "2027-01-17",
+   "to": "2027-01-30",
+   "room": "Laboratorio informatico 3.3 Piano primo (livello 3) Ex-Zuccherificio – Edificio 1, Ingresso Via dell’Università 50 Via dell’Università, 50, Cesena",
+   "notes": "",
+   "component": "",
+   "subject": "MN",
+   "key": "B2561|2027-02-01|14:00|scritto",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/damiana.lazzaro/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "10906",
+   "name": "BASI DI DATI",
+   "teacher": "FRANCO ANNALISA",
+   "date": "2027-02-02",
+   "time": "14:30",
+   "type": "Altro",
+   "from": "2026-10-29",
+   "to": "2027-01-31",
+   "room": "Laboratorio informatico 3.3 Piano primo (livello 3) Ex-Zuccherificio – Edificio 1, Ingresso Via dell’Università 50 Via dell’Università, 50, Cesena",
+   "notes": "",
+   "component": "",
+   "subject": "BD",
+   "key": "10906|2027-02-02|14:30|altro",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/annalisa.franco/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "10906",
+   "name": "BASI DI DATI",
+   "teacher": "FRANCO ANNALISA",
+   "date": "2027-02-03",
+   "time": "10:00",
+   "type": "Scritto",
+   "from": "2026-10-29",
+   "to": "2027-02-01",
+   "room": "Aula 2.12 Piano terra (livello 2) Ex-Zuccherificio – Edificio 1, Ingresso Via Machiavelli Via dell’Università, 50, Cesena",
+   "notes": "",
+   "component": "",
+   "subject": "BD",
+   "key": "10906|2027-02-03|10:00|scritto",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/annalisa.franco/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "77776",
+   "name": "MATEMATICA DISCRETA E PROBABILITÀ",
+   "teacher": "CASELLI FABRIZIO",
+   "date": "2027-02-08",
+   "time": "09:00",
+   "type": "Scritto",
+   "from": "2027-01-01",
+   "to": "2027-02-06",
+   "room": "Aula 2.12",
+   "notes": "Per la prova è consentito utilizzare una calcolatrice con al più 30 tasti o una calcolatrice scientifica (non grafica) tra quelle ammesse per l'esame di maturità la cui lista può essere trovata ad esempio qui https://www.studenti.it/maturita-2025-calcolatrici-ammesse-alle-prove.html",
+   "component": "",
+   "subject": "MDP",
+   "key": "77776|2027-02-08|09:00|scritto",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/fabrizio.caselli/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "77776",
+   "name": "MATEMATICA DISCRETA E PROBABILITÀ",
+   "teacher": "CASELLI FABRIZIO",
+   "date": "2027-02-10",
+   "time": "09:00",
+   "type": "Orale",
+   "from": "2027-01-26",
+   "to": "2027-02-09",
+   "room": "Aula 2.1",
+   "notes": "",
+   "component": "",
+   "subject": "MDP",
+   "key": "77776|2027-02-10|09:00|orale",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/fabrizio.caselli/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "B2561",
+   "name": "METODI NUMERICI PER L'INTELLIGENZA ARTIFICIALE",
+   "teacher": "LAZZARO DAMIANA",
+   "date": "2027-02-15",
+   "time": "14:00",
+   "type": "Scritto",
+   "from": "2027-01-31",
+   "to": "2027-02-13",
+   "room": "Laboratorio informatico 4.2 (CAD) Piano secondo (livello 4) Ex-Zuccherificio – Edificio 1, Ingresso Via dell’Università 50 Via dell’Università, 50, Cesena",
+   "notes": "",
+   "component": "",
+   "subject": "MN",
+   "key": "B2561|2027-02-15|14:00|scritto",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/damiana.lazzaro/didattica?tab=appelli"
+   ]
+  }
+ ],
+ "eventi": [
+  {
+   "id": "aperta:10906|2027-01-07|10:00|altro",
+   "kind": "iscrizioni_aperte",
+   "subject": "BD",
+   "code": "10906",
+   "date": "2027-01-07",
+   "time": "10:00",
+   "type": "Altro",
+   "from": "2026-10-29",
+   "to": "2027-01-05",
+   "at": "2026-11-15T22:56:20.951Z",
+   "msg": "BD: iscrizioni aperte per il 07/01/2027 (fino al 05/01/2027)",
+   "silent": true
+  },
+  {
+   "id": "aperta:10906|2027-01-19|10:00|scritto",
+   "kind": "iscrizioni_aperte",
+   "subject": "BD",
+   "code": "10906",
+   "date": "2027-01-19",
+   "time": "10:00",
+   "type": "Scritto",
+   "from": "2026-10-29",
+   "to": "2027-01-17",
+   "at": "2026-11-15T22:56:20.951Z",
+   "msg": "BD: iscrizioni aperte per il 19/01/2027 (fino al 17/01/2027)",
+   "silent": true
+  },
+  {
+   "id": "aperta:10906|2027-02-02|14:30|altro",
+   "kind": "iscrizioni_aperte",
+   "subject": "BD",
+   "code": "10906",
+   "date": "2027-02-02",
+   "time": "14:30",
+   "type": "Altro",
+   "from": "2026-10-29",
+   "to": "2027-01-31",
+   "at": "2026-11-15T22:56:20.951Z",
+   "msg": "BD: iscrizioni aperte per il 02/02/2027 (fino al 31/01/2027)",
+   "silent": true
+  },
+  {
+   "id": "aperta:10906|2027-02-03|10:00|scritto",
+   "kind": "iscrizioni_aperte",
+   "subject": "BD",
+   "code": "10906",
+   "date": "2027-02-03",
+   "time": "10:00",
+   "type": "Scritto",
+   "from": "2026-10-29",
+   "to": "2027-02-01",
+   "at": "2026-11-15T22:56:20.951Z",
+   "msg": "BD: iscrizioni aperte per il 03/02/2027 (fino al 01/02/2027)",
+   "silent": true
+  }
+ ]
+}
