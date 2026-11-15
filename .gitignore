@@ -1,0 +1,8 @@
+# Solo file statici pubblicabili. Mai dati, configurazioni o chiavi.
+private/
+*.env
+.env*
+*.zip
+*.json.bak
+mockP.json
+dati_privati/
