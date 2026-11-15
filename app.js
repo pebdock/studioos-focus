@@ -3,7 +3,7 @@ let CAL_ID=(window.STUDIOOS_CFG||{}).cal||"";
 const SHEET_ID=(window.STUDIOOS_CFG||{}).sheet||"";
 const ARCH_ID=(window.STUDIOOS_CFG||{}).arch||"";
 const SUBJ=["MDP","BD","MN","FIS","OOP","RETI"];
-const EXAMS=[["2027-01-11","MDP","Scritto"],["2027-01-13","MDP","Orale"],["2027-01-19","BD","Scritto"],["2027-02-15","MN","Scritto"],[null,"OOP","Data non pubblicata"],[null,"FIS","Data non pubblicata"],[null,"RETI","Data non pubblicata"]];
+let EXAMS=[["2027-01-11","MDP","Scritto"],["2027-01-13","MDP","Orale"],["2027-01-19","BD","Scritto"],["2027-02-15","MN","Scritto"],[null,"OOP","Data non pubblicata"],[null,"FIS","Data non pubblicata"],[null,"RETI","Data non pubblicata"]];
 const VIEWS=["focus","giorno","piano","registro","settimana","impostazioni"];
 const MIN=60000;
 /*ENGINE*/
@@ -59,12 +59,13 @@ function actExtend(x,t){if(x.phase!=="work"||x.ext||!x.phaseEnd)return x;x.phase
 /*END ENGINE*/
 const $=id=>document.getElementById(id);
 const SYNC=window.STUDIOOS_SYNC;
+const PROGRESS=window.STUDIOOS_PROGRESS;
 const DATA_PREFIX=window.STUDIOOS_DATA_PREFIX||"sfocus.";
 const storageKey=k=>(k==="device"||k==="settings"?"sfocus.":DATA_PREFIX)+k;
 let localSaveFailed=false;
 const LS={get(k,d){try{const v=localStorage.getItem(storageKey(k));return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(storageKey(k),JSON.stringify(v));return true}catch(e){localSaveFailed=true;return false}},remove(k){try{localStorage.removeItem(storageKey(k))}catch(e){localSaveFailed=true}}};
 const deviceId=LS.get("device",null)||(()=>{const d="dev-"+Math.random().toString(36).slice(2,10);LS.set("device",d);return d})();
-const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,rm:false,theme:"auto",look:"auto",breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
+const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,rm:false,theme:"auto",look:"auto",atmosphere:"cozy",breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
 let mcp=null,db=null,index={},dayEvents=[],calDay={},curDay=todayIso(),wkRef=todayIso(),runs={},errors={},syncState={},cur=null,run=null,wake=null,actx=null,stars=0,liveOK=false,lastKey="",lastSec=-1,STEPS=[];
 const UA=navigator.userAgent||"";
 const isApple=/iPhone|iPad|iPod|Macintosh|Mac OS X/.test(UA)&&!/Windows|Android/.test(UA);
@@ -91,7 +92,7 @@ function dayLabel(iso,opt={weekday:"long",day:"numeric",month:"long"}){return ne
 function buzz(p){if(!settings.haptic)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
 function setTint(mat){document.documentElement.style.setProperty("--tint",mat&&SUBJ.includes(mat)?`var(--${mat})`:"var(--acc)")}
 function toast(t,ms=3200){const d=document.createElement("div");d.className="toast";d.textContent=t;$("toasts").appendChild(d);setTimeout(()=>{d.classList.add("out");setTimeout(()=>d.remove(),320)},ms)}
-function applyLook(){const g=settings.look==="glass"||(settings.look==="auto"&&isApple);document.documentElement.classList.toggle("glass",g);document.documentElement.classList.toggle("std",!g);requestAnimationFrame(moveInd)}
+function applyLook(){const g=settings.look!=="std";document.documentElement.classList.toggle("glass",g);document.documentElement.classList.toggle("std",!g);requestAnimationFrame(moveInd)}
 /* ---------- connectors ---------- */
 function payload(r){let p=r&&("payload" in r)?r.payload:r;if(typeof p==="string"){try{p=JSON.parse(p)}catch(e){}}if(p&&p.content&&!p.values&&!p.events)p=p.content;return p}
 async function call(server,tool,input){if(!mcp)throw new Error("connettori non disponibili");return payload(await mcp.callTool(server,tool,input))}
@@ -152,10 +153,10 @@ async function refreshData(force=false){
         $("fTitle").textContent=b.arg||b.id;$("fTime").textContent=b.from+"–"+b.to+" · "+b.id;
         if(b.cons!==LS.get("cons."+b.id,"")){applyCons(b.cons,b);LS.set("cons."+b.id,b.cons);}
       }else{cur.rinv=true;$("fFlag").textContent="Blocco rimosso dal piano · la sessione in corso è conservata";}}
-      renderNext();renderToday();renderWeek();renderAnalysis();renderStats();render();
+      renderNext();renderToday();renderWeek();renderAnalysis();renderPlanRules();renderStats();render();
       if(curView==="registro"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement&&document.activeElement.tagName||""))renderMats();
     }
-    await loadPlan();
+    await loadPlan();await loadPlanMeta();
     window.dispatchEvent(new CustomEvent("studioos:data-refreshed",{detail:{at:Date.now(),changed}}));
   }catch(error){chip("cSh",Object.keys(index).length?"warn":"bad",Object.keys(index).length?"Sheets: copia locale":"Sheets: errore");if($("cSh"))$("cSh").title="Aggiornamento non riuscito: "+String(error.message||error).slice(0,160);}})();
   try{return await dataRefreshing}finally{dataRefreshing=null}
@@ -267,7 +268,7 @@ function subscribeLive(){if(!db)return;let t=setTimeout(()=>syncUI(false,"Connes
     e=>{clearTimeout(t);syncUI(false,"Salvato qui · collegamento da ripristinare")})}catch(e){syncUI(false,"Salvato su questo dispositivo")}}
 async function refreshSync(){
   if(syncPulling)return syncPulling;
-  syncPulling=(async()=>{if(!db)return;try{await loadArchive();const s=await db.doc("state/live").get();if(s.exists)adopt(s.data(),"refresh");await flush();renderRuns();renderStats();renderToday();renderAllErr();renderReviews();renderSims();paintSteps()}catch(e){reportSave()}})();
+  syncPulling=(async()=>{if(!db)return;try{await loadArchive();const s=await db.doc("state/live").get();if(s.exists)adopt(s.data(),"refresh");await flush();renderRuns();renderStats();renderToday();renderAllErr();renderReviews();renderSims();paintSteps();renderProgress()}catch(e){reportSave()}})();
   try{await syncPulling}finally{syncPulling=null}
 }
 bc&&(bc.onmessage=e=>{if(e.data&&e.data.t==="live")adopt(e.data.live,"bc")});
@@ -280,7 +281,7 @@ function schedFor(c,startAt){const b=index[c.id];if(!b||!STEPS.length)return[];c
   return STEPS.filter(s=>s.pause).map(s=>[at(b.date,s.a)+shift,at(b.date,s.b)+shift])}
 async function startRun(){if(!cur||cur.rinv)return;if(run&&run.status==="active"){toast("C'è già una sessione in corso");return}unlockAudio();const now=Date.now();
   let x={runId:uid(),blockId:cur.id,date:todayIso(),materia:cur.mat,plannedMin:planned(cur),startedAt:now,segments:[],phase:"await",status:"active",device:deviceId,
-    cfg:{work:settings.work,brk:settings.brk,auto:settings.auto,resume:settings.resume,smart:settings.smart},interruptions:[],pauses:0,cycle:0,breaksDone:0,skipped:0,extCount:0,declaredExtraSec:0,
+    cfg:{work:settings.work,brk:settings.brk,auto:settings.auto,resume:settings.resume,smart:settings.smart},planKey:index[cur.id]?PROGRESS.planKey(index[cur.id]):null,interruptions:[],pauses:0,cycle:0,breaksDone:0,skipped:0,extCount:0,declaredExtraSec:0,
     notes:$("notes").value||"",steps:LS.get("steps."+cur.id,[]),dayBase:dayConfirmedMin(todayIso()),hardEnd:cur.end&&cur.end>now?cur.end:null,sched:schedFor(cur,now),rev:0};
   startCycle(x,now);lastKey=keyOf(x);await commit(x,"start");acquireWakeIf();buzz(18);say("Sessione avviata");if(x.lastPlan)toast(`Ciclo di ${x.lastPlan.W}′ · ${x.lastPlan.why}`)}
 function act(fn,label){if(!run||run.status!=="active")return;const now=Date.now();const x=clone(advance(run,now));fn(x,now);lastKey=keyOf(x);commit(x,label);buzz(12);render()}
@@ -405,28 +406,25 @@ function applyCons(cons,b){$("dCons").textContent=cons;renderDetailMats(b.mats||
   const crit=cons.split("\n").filter(l=>/^(Verifica|VERIFICA|SIMULAZIONE|REGOLA)/.test(l.trim())).join("\n");$("dCrit").textContent=crit||"Vedi la consegna completa.";cur.crit=$("dCrit").textContent;buildSteps(cons)}
 /* ---------- scaletta ---------- */
 const CK=["Da iniziare","In corso","Completato","Parziale","Da recuperare"];
-function stepKind(t){t=t.toLowerCase();return /simulaz|prova (a tempo|mista)|eol completa/.test(t)?"Simulazione":/correz|errori|confronta/.test(t)?"Correzione":/ripass|richiamo|riprova/.test(t)?"Ripasso":/eserciz|problem|tentativ|laborat|notebook|query|schema|implementa|test/.test(t)?"Esercizi":/teoria|leggi|studia|slide|pp\.|definiz|ricostruisci/.test(t)?"Teoria":/verifica/.test(t)?"Verifica":""}
+let stepsPaintKey="";
+function stepKind(t){return PROGRESS.kind(t)}
 function ckGet(id){const s=syncState["chk_"+id],l=LS.get("chk."+id,null);let o=s&&l?((s.updatedAt||0)>=(l.updatedAt||0)?s:l):(s||l);
   if(!o){const old=LS.get("steps."+id,[]);o={key:"chk_"+id,id,items:old.map(v=>v?2:0),updatedAt:0}}return o}
-async function ckSet(id,items){const o={key:"chk_"+id,id,items,by:deviceId};o.updatedAt=Date.now();LS.set("chk."+id,o);try{await put("state","chk_"+id,o)}catch(e){syncState["chk_"+id]=o}
+function currentChecklist(){return PROGRESS.resolve(ckGet(cur.id),STEPS)}
+async function ckSet(id,items,types){const list=cur&&cur.id===id?STEPS:PROGRESS.steps((index[id]||{}).cons),previous=ckGet(id),old=PROGRESS.resolve(previous,list),o={key:"chk_"+id,id,items,types:types||old.types,taskKeys:PROGRESS.keys(list),by:deviceId};if(old.legacy)o.previousChecklist={items:previous.items,updatedAt:previous.updatedAt};else if(previous.previousChecklist)o.previousChecklist=previous.previousChecklist;o.updatedAt=Date.now();LS.set("chk."+id,o);try{await put("state","chk_"+id,o)}catch(e){syncState["chk_"+id]=o}
   if(run&&run.blockId===id&&run.status==="active"){const x=clone(run);x.steps=items.map(v=>v===2);commit(x,"steps")}}
-function buildSteps(cons){STEPS=[];const m=/SCALETTA:\s*([^\n]+)/.exec(cons);
-  if(m){for(const part of m[1].split(/;\s*/)){const p=/^pausa\s+(\d\d:\d\d)[–-](\d\d:\d\d)/i.exec(part),w=/^(\d\d:\d\d)[–-](\d\d:\d\d)\s*(.*)$/.exec(part);
-    if(p)STEPS.push({a:p[1],b:p[2],t:"Pausa",pause:true});else if(w){const t=w[3].replace(/\s*quota \[[^\]]+\)/,"");STEPS.push({a:w[1],b:w[2],t,k:stepKind(t)})}}}
-  if(!STEPS.filter(s=>!s.pause).length){STEPS=[];const ord=cons.split(/ORDINE OPERATIVO:/)[1]||"";
-    for(const l of ord.split("\n")){const w=/^\s*\d+\.\s*(\d+)\s*min(?:\s*netti)?\s*[—–-]\s*(.+)$/.exec(l);if(w)STEPS.push({a:"",b:"",t:w[2].replace(/,?\s*quota \[[^\]]+\) di \d+ min\.?/,"").slice(0,160),min:+w[1],k:stepKind(w[2])})}}
-  if(!STEPS.length)for(const l of cons.split("\n")){const w=/^-\s*(?:Pausa\s+)?(\d\d:\d\d)[–-](\d\d:\d\d)[.,:]?\s*(.*)$/.exec(l.trim());if(w)STEPS.push({a:w[1],b:w[2],t:w[3]||"Pausa",pause:/^-\s*Pausa/i.test(l.trim()),k:stepKind(w[3]||"")})}
-  if(STEPS.length)STEPS.push({a:"",b:"",t:"Verifica finale: criterio di completamento (vedi sotto)",k:"Verifica",verify:true});
+function buildSteps(cons){STEPS=PROGRESS.steps(cons);
   $("scalettaCard").hidden=!STEPS.length;paintSteps()}
-function paintSteps(){if(!cur)return;const it=ckGet(cur.id).items||[];
-  $("steps").innerHTML=STEPS.map((s,i)=>{const st=it[i]||0;return `<li class="${s.pause?"pause":""}${st===2?" ck2":""}" data-i="${i}">${s.pause?"<span></span>":`<button class="ckb s${st}" data-ck="${i}" aria-label="Stato del passaggio: ${CK[st]}">${CK[st]}</button>`}<label><span class="tm">${s.a?s.a+"–"+s.b:(s.min?s.min+"′":"")}</span>${s.k?`<span class="kind">${s.k}</span>`:""}${esc(s.t)}</label></li>`}).join("");markStep()}
-function markStep(){if(!STEPS.length||!cur)return;const n=romeMin(Date.now()),today=cur.start&&todayIso(new Date(cur.start))===todayIso();const it=ckGet(cur.id).items||[];let done=0,rec=0;
+function paintSteps(){if(!cur)return;const record=currentChecklist(),it=record.items,signature=SYNC.fingerprint({id:cur.id,steps:STEPS,record});if(signature===stepsPaintKey){markStep();return}stepsPaintKey=signature;const active=document.activeElement,focusSelector=active&&$("steps").contains(active)?active.hasAttribute("data-ck")?`[data-ck="${active.dataset.ck}"]`:active.hasAttribute("data-type")?`[data-type="${active.dataset.type}"]`:null:null;
+  $("steps").innerHTML=STEPS.map((s,i)=>{const st=it[i]||0,c=PROGRESS.category(s),select=s.pause||s.verify?"":`<label class="step-type">Tipo <select data-type="${i}" aria-label="Tipo del passaggio ${i+1}">${[["",`Automatico [Stima] · ${{theory:"teoria",practice:"pratica",exam:"esame"}[c]||"da classificare"}`],["theory","Teoria"],["practice","Pratica"],["exam","Esame · prova"]].map(([v,t])=>`<option value="${v}" ${record.types[i]===v?"selected":""}>${t}</option>`).join("")}</select></label>`;return `<li class="${s.pause?"pause":""}${st===2?" ck2":""}" data-i="${i}">${s.pause?"<span></span>":`<button class="ckb s${st}" data-ck="${i}" aria-label="Stato del passaggio: ${CK[st]}">${CK[st]}</button>`}<div><span class="tm">${s.a?s.a+"–"+s.b:(s.min?s.min+"′":"")}</span>${s.k?`<span class="kind">${s.k}</span>`:""}${esc(s.t)}${select}</div></li>`}).join("")+(record.legacy?'<li class="checklist-legacy"><p>Questa checklist precedente non identifica i contenuti. Controlla che corrisponda alla scaletta attuale prima di usarla nelle percentuali.</p><button class="btn" id="ckBind">Confermo la corrispondenza</button></li>':"");markStep();if(focusSelector)$("steps").querySelector(focusSelector)?.focus({preventScroll:true})}
+function markStep(){if(!STEPS.length||!cur)return;const n=romeMin(Date.now()),today=cur.start&&todayIso(new Date(cur.start))===todayIso();const it=currentChecklist().items;let done=0,rec=0;
   const shift=run&&run.blockId===cur.id&&run.status==="active"?Math.max(0,Math.round((run.startedAt-cur.start)/MIN)):0;
-  document.querySelectorAll("#steps li").forEach(li=>{const i=+li.dataset.i,s=STEPS[i];li.classList.toggle("cur",!!(today&&s.a&&n>=mins(s.a)+shift&&n<mins(s.b)+shift));if(it[i]===2)done++;if(it[i]===4)rec++});
+  document.querySelectorAll("#steps li[data-i]").forEach(li=>{const i=+li.dataset.i,s=STEPS[i];li.classList.toggle("cur",!!(today&&s.a&&n>=mins(s.a)+shift&&n<mins(s.b)+shift));if(it[i]===2&&!s.pause)done++;if(it[i]===4&&!s.pause)rec++});
   $("stepCount").textContent=`${done}/${STEPS.filter(s=>!s.pause).length} completati${rec?` · ${rec} da recuperare`:""}${shift?` · scaletta spostata di ${shift}′`:""}`}
-function curStepIdx(){if(!STEPS.length||!cur)return -1;const it=ckGet(cur.id).items||[],li=document.querySelector("#steps li.cur");if(li&&!STEPS[+li.dataset.i].pause)return +li.dataset.i;return STEPS.findIndex((s,i)=>!s.pause&&(it[i]||0)!==2)}
-async function cycleStep(i,to){if(!cur)return;const o=ckGet(cur.id),it=(o.items||[]).slice();while(it.length<STEPS.length)it.push(0);it[i]=to==null?((it[i]||0)+1)%5:to;await ckSet(cur.id,it);buzz(8);paintSteps();renderToday()}
-$("steps").addEventListener("click",e=>{const b=e.target.closest("[data-ck]");if(b)cycleStep(+b.dataset.ck)});
+function curStepIdx(){if(!STEPS.length||!cur)return -1;const it=currentChecklist().items,li=document.querySelector("#steps li.cur");if(li&&!STEPS[+li.dataset.i].pause)return +li.dataset.i;return STEPS.findIndex((s,i)=>!s.pause&&(it[i]||0)!==2)}
+async function cycleStep(i,to){if(!cur)return;const o=currentChecklist(),it=o.items.slice();while(it.length<STEPS.length)it.push(0);it[i]=to==null?((it[i]||0)+1)%5:to;await ckSet(cur.id,it,o.types);buzz(8);paintSteps();renderToday();renderProgress()}
+$("steps").addEventListener("click",async e=>{const b=e.target.closest("[data-ck]");if(b)cycleStep(+b.dataset.ck);if(e.target.id==="ckBind"&&cur){const old=ckGet(cur.id);await ckSet(cur.id,STEPS.map((s,i)=>old.items?.[i]||0));paintSteps();renderProgress()}});
+$("steps").addEventListener("change",async e=>{if(!e.target.matches("[data-type]")||!cur)return;const r=currentChecklist();r.types[+e.target.dataset.type]=e.target.value;await ckSet(cur.id,r.items,r.types);renderProgress()});
 /* ---------- completion & register ---------- */
 function openDone(){if(!run||run.status!=="active")return;const now=Date.now();let x=clone(advance(run,now));if(x.phase==="work"){actPause(x,now);commit(x,"pause")}const net=workSec(x,now);
   $("mdInfo").textContent=`Tempo netto misurato: ${Math.floor(net/60)} min su ${x.plannedMin} pianificati, ${x.cycle||0} cicli, ${x.breaksDone||0} pause. Il tempo da solo non completa il blocco: scegli l'esito in base alla prova.`;
@@ -441,7 +439,7 @@ async function confirmRun(){const out=$("mdOut").value,ev=$("mdEv").value.trim()
   await commit(x,"confirm");closeSheet("mDone");releaseWake();const id=x.blockId;run=null;saveLocal();LS.set("notes."+id,"");
   $("mdEv").value="";$("mdSelf").checked=false;$("mdDiff").value="";$("mdRedo").value="";$("mdRev").value="";
   for(const [k,lab] of [["redo","Da rifare"],["review","Da ripassare"]])if(study[k]){const e={id:uid(),blockId:id,runId:x.runId,materia:x.materia,text:lab+": "+study[k],fix:study.diff||"",at:Date.now()};await put("errors",e.id,e)}
-  buzz([20,40,20]);renderDay();renderStats();renderRuns();renderWeek();render();renderToday();toast("Sessione confermata");logNow();askRegister(id,out)}
+  buzz([20,40,20]);renderDay();renderStats();renderRuns();renderWeek();render();renderToday();renderProgress();toast("Sessione confermata");logNow();askRegister(id,out)}
 async function dropRun(){if(!run||run.status!=="active")return;clearTimeout(window.__nt);const x=clone(run);if(cur&&cur.id===x.blockId)x.notes=$("notes").value;x.status="discarded";x.phase="done";await commit(x,"discard");closeSheet("mDone");releaseWake();run=null;saveLocal();render();renderDay();logNow()}
 let regCtx=null;
 async function askRegister(id,out){const b=index[id];if(!b)return;const focusMin=Math.round(netForBlock(id)/60);let sh;
@@ -506,7 +504,8 @@ function renderWeek(){const m=monday(wkRef),days=[...Array(7)].map((_,i)=>addDay
     return `<div class="exam"><span><b style="color:var(--${s})">${s}</b> · ${esc(k)}</span><b>${d?(n>0?n+" giorni · "+dayLabel(d,{day:"numeric",month:"short"}):n===0?"oggi":"svolto"):"—"}</b></div>`}).join("")+'<p class="mute small">Date dagli appelli già pubblicati in SCADENZE. Ricontrollale sulle pagine UniBo prima dell\'iscrizione.</p>'}
 function hash(s){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return (h>>>0)/4294967295}
 /* ---------- navigation, sheets, gestures ---------- */
-function moveInd(){const t=document.querySelector('.tab[aria-selected="true"]'),i=$("tabInd");if(!t)return;i.style.transform=`translate3d(${t.offsetLeft}px,${t.offsetTop}px,0)`;i.style.width=t.offsetWidth+"px";i.style.height=t.offsetHeight+"px"}
+let navController=null;
+function moveInd(){if(navController)return navController.sync();const t=document.querySelector('.tab[aria-selected="true"]'),i=$("tabInd");if(!t)return;i.style.transform=`translate3d(${t.offsetLeft}px,${t.offsetTop}px,0)`;i.style.width=t.offsetWidth+"px";i.style.height=t.offsetHeight+"px"}
 window.addEventListener("resize",moveInd);
 if(window.ResizeObserver)new ResizeObserver(moveInd).observe($("tabbar"));
 let curView="focus";const viewScroll={};
@@ -514,6 +513,7 @@ function show(v,dir){if(window.__nt&&run&&run.status==="active")persistSession()
   try{if(location.hash!=="#"+v)history.replaceState(null,"","#"+v)}catch(e){}if(v==="settimana"){renderWeek();renderAnalysis()}if(v==="registro"){renderAllErr();renderRuns();renderMats();renderReviews();renderSims()}if(v==="piano"){renderPlan();loadPlan()}render()};
   doIt()}
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{show(t.dataset.v);buzz(6)});
+navController=window.STUDIOOS_NAV.mount($("tabbar"),{select:v=>{show(v);buzz(6)},reducedMotion:()=>settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches});
 window.addEventListener("hashchange",()=>{const h=location.hash.match(/b=(R20-\d{4})/);if(h&&index[h[1]]){openSession(h[1],index[h[1]].date);return}show(location.hash.slice(1))});
 // Page changes use explicit tabs; horizontal swipes keep their native behavior.
 $('tabbar').addEventListener('keydown',e=>{
@@ -530,9 +530,9 @@ document.querySelectorAll(".sheet").forEach(s=>{s.addEventListener("click",e=>{i
   window.addEventListener("pointerup",()=>{if(y0===null)return;c.style.transition="";if(dy>110)closeSheet(s.id);else c.style.transform="";y0=null});window.addEventListener("pointercancel",()=>{c.style.transition="";c.style.transform="";y0=null})});
 window.addEventListener("scroll",()=>{document.querySelector(".top").classList.toggle("compact",window.scrollY>36)},{passive:true});
 /* ---------- settings ---------- */
-function applySettings(){LS.set("settings",settings);document.body.classList.toggle("rm",settings.rm);
+function applySettings(){LS.set("settings",settings);document.body.classList.toggle("rm",settings.rm);document.documentElement.dataset.atmosphere=settings.atmosphere==="essential"?"essential":"cozy";
   document.documentElement.classList.toggle("light",settings.theme==="light");document.documentElement.classList.toggle("dark",settings.theme==="dark");applyLook()}
-function bindSettings(){const m={sWork:"work",sBreak:"brk",sSound:"sound",sVol:"vol",sTheme:"theme",sLook:"look",sNight:"night",sAmb:"amb",sAmbVol:"ambVol"},c={sAuto:"auto",sResume:"resume",sRm:"rm",sBreathe:"breathe",sHaptic:"haptic",sSmart:"smart",sWake:"wake"};
+function bindSettings(){const m={sWork:"work",sBreak:"brk",sSound:"sound",sVol:"vol",sTheme:"theme",sLook:"look",sAtmosphere:"atmosphere",sNight:"night",sAmb:"amb",sAmbVol:"ambVol"},c={sAuto:"auto",sResume:"resume",sRm:"rm",sBreathe:"breathe",sHaptic:"haptic",sSmart:"smart",sWake:"wake"};
   for(const [id,k] of Object.entries(m)){$(id).value=settings[k];$(id).onchange=()=>{settings[k]=$(id).type==="number"||$(id).type==="range"?Number($(id).value):$(id).value;applySettings()}}
   for(const [id,k] of Object.entries(c)){$(id).checked=!!settings[k];$(id).onchange=()=>{settings[k]=$(id).checked;applySettings();if(k==="wake")settings.wake?acquireWakeIf():releaseWake()}}}
 function installHelp(){const ios=`<b>iPhone e iPad (Safari)</b><ol><li>Apri questa pagina in Safari ${window.STUDIOOS_PWA?"dal suo indirizzo":"dal suo link claude.ai"}.</li><li>Tocca Condividi, poi «Aggiungi alla schermata Home» e attiva «Apri come app web» se compare.</li><li>Per lo StandBy: metti il telefono in orizzontale sul supporto, apri Focus e tocca StandBy.</li></ol>`,
@@ -559,7 +559,7 @@ $("notes").addEventListener("change",()=>{if(window.__nt&&run&&run.status==="act
 $("notes").oninput=()=>{const notes=$("notes").value;if(cur)LS.set("notes."+cur.id,notes);if(run&&run.status==="active"&&cur&&cur.id===run.blockId){const id=run.runId;clearTimeout(window.__nt);window.__nt=setTimeout(()=>{if(!run||run.status!=="active"||run.runId!==id)return;const x=clone(run);x.notes=notes;commit(x,"notes")},2000)}};
 $("bErr").onclick=addError;$("eFilter").onchange=renderAllErr;$("eSearch").oninput=renderAllErr;$("bTest").onclick=()=>{unlockAudio();tone(settings.sound);buzz(30)};
 $("bNotif").onclick=async()=>{try{const p=await Notification.requestPermission();$("bNotif").textContent=p==="granted"?"Notifiche attive":"Notifiche non consentite"}catch(e){$("bNotif").textContent="Notifiche non disponibili in questa vista"}};
-$("bExport").onclick=async()=>{const txt=JSON.stringify({app:"STUDIOOS Focus R13h.3 PWA",exportedAt:new Date().toISOString(),device:deviceId,runs:Object.values(runs),errors:Object.values(errors),state:Object.values(syncState).filter(s=>s&&s.key!=="live")});$("expTxt").value=txt;
+$("bExport").onclick=async()=>{const txt=JSON.stringify({app:"STUDIOOS Focus R13h.4 PWA",exportedAt:new Date().toISOString(),device:deviceId,runs:Object.values(runs),errors:Object.values(errors),state:Object.values(syncState).filter(s=>s&&s.key!=="live")});$("expTxt").value=txt;
   let dl=null;try{dl=await (window.claude&&window.claude.use?window.claude.use("downloads"):null)}catch(err){dl=null}
   if(dl){try{await dl.save({filename:"STUDIOOS_Focus_archivio_"+todayIso()+".json",data:txt});toast("Archivio salvato ("+Object.keys(runs).length+" sessioni, "+Object.keys(errors).length+" errori)")}catch(err){toast("Salvataggio non riuscito: copia il testo dal riquadro",5000)}}};
 $("bCopy").onclick=async()=>{try{await navigator.clipboard.writeText($("expTxt").value);$("bCopy").textContent="Copiato"}catch(e){$("expTxt").select();$("bCopy").textContent="Seleziona e copia"}};
@@ -567,7 +567,7 @@ $("impFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const
   for(const x of d.errors||[])if(x.id&&(!errors[x.id]||(x.updatedAt||0)>(errors[x.id].updatedAt||0))){await put("errors",x.id,x);n++}
   for(const s of d.state||[])if(s&&s.key&&s.key!=="live"&&(!syncState[s.key]||(s.updatedAt||0)>(syncState[s.key].updatedAt||0))){await put("state",s.key,s);n++}
   toast(n+" record ripristinati");renderToday();renderReviews();renderSims();renderDay();renderStats();renderRuns();renderAllErr()}catch(err){toast("File di backup non valido")}};
-document.addEventListener("keydown",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;const k=e.key.toLowerCase();
+document.addEventListener("keydown",e=>{if(e.defaultPrevented||e.target.closest("input,textarea,select,button,a,[contenteditable=true],[role=tab]"))return;const k=e.key.toLowerCase();
   if(e.key===" "){e.preventDefault();run&&run.status==="active"?pauseRun():(cur&&startRun())}else if(k==="c")openDone();else if(k==="o")toggleOled();else if(k==="s")$("standby").classList.contains("on")?closeStandby():openStandby();else if(k==="e")extendRun();
   else if(k==="h")document.body.classList.toggle("showctl");else if(k==="f")$("bFull").click();else if(/^[1-6]$/.test(k))show(VIEWS[+k-1]);
   else if(e.key==="Escape"){document.querySelectorAll(".sheet.on").forEach(m=>closeSheet(m.id));document.body.classList.remove("oled");closeStandby()}});
@@ -665,6 +665,7 @@ function pickStudyBlock(){const now=Date.now(),today=todayIso();const L=Object.v
 function renderToday(){if(!$("todayCard"))return;const now=Date.now(),today=todayIso();const L=Object.values(index).filter(b=>b.date===today&&b.stato!=="Rinviato").sort((x,y)=>x.from.localeCompare(y.from));
   const plannedDay=L.reduce((s,b)=>s+b.min,0),conf=Object.values(runs).filter(r=>r.date===today&&r.status==="confirmed").reduce((s,r)=>s+Math.round(workSec(r,now)/60),0),reg=L.reduce((s,b)=>s+(b.fatti||0),0);
   $("tdDate").textContent=dayLabel(today);$("tdHead").textContent=L.length?`${L.length} blocchi · ${Math.floor(plannedDay/60)} h ${plannedDay%60} min`:"Nessun blocco oggi";
+  const hour=Math.floor(romeMin(now)/60);$("dailyGreeting").textContent=hour<12?"Buongiorno. Un passo alla volta.":hour<18?"Un po’ di spazio per concentrarti.":"Una cosa alla volta, anche stasera.";
   $("tdKpi").innerHTML=`<div><b>${plannedDay}′</b><span>previsti</span></div><div><b>${Math.max(conf,reg)}′</b><span>confermati</span></div><div><b>${Math.max(0,plannedDay-Math.max(conf,reg))}′</b><span>rimanenti</span></div>`;
   const pk=pickStudyBlock(),act=run&&run.status==="active";const bs=$("bStudy");
   bs.textContent=act?`Torna alla sessione · ${(index[run.blockId]||{}).mat||""}`:pk?`Inizia a studiare · ${pk.b.mat} ${pk.b.from}${pk.why==="da recuperare"?" (da recuperare)":""}`:"Nessun blocco da iniziare: apri il Calendario";bs.disabled=!act&&!pk;
@@ -711,6 +712,33 @@ $("bSim").onclick=async()=>{const score=Number($("smScore").value),max=Number($(
   ["smName","smScore","smMin","smErr"].forEach(k=>$(k).value="");renderSims();renderAnalysis();toast("Simulazione registrata")};
 /* ---------- R13h · analisi ---------- */
 const EXAMDAYS=new Set(["2027-01-11","2027-01-13","2027-01-19","2027-02-15"]);
+let planMeta=LS.get("planMeta",{rules:{},exams:null,at:0}),metaBusy=null,lastMetaAttempt=0;
+function planLimit(key,fallback){const n=Number((planMeta.rules||{})[key]);return Number.isFinite(n)&&n>0&&n<=(key.includes("week")?10080:1440)?n:fallback}
+function applyPlanMeta(){if(Array.isArray(planMeta.exams)){EXAMS=planMeta.exams;EXAMDAYS.clear();for(const [d]of EXAMS)if(d)EXAMDAYS.add(d)}renderPlanRules()}
+async function loadPlanMeta(force=false){
+  if(!mcp||navigator.onLine===false)return;if(metaBusy)return metaBusy;if(!force&&Date.now()-lastMetaAttempt<180000)return;lastMetaAttempt=Date.now();
+  metaBusy=(async()=>{const results=await Promise.allSettled([sheetGet("SISTEMA!A1:D70"),sheetGet("SCADENZE!A1:Q30")]);let changed=false;
+    if(results[0].status==="fulfilled"){const rows=results[0].value,head=rows.findIndex(r=>r[0]==="CHIAVE"&&r[1]==="VALORE");if(head>=0){const keys=["max_net_day_minutes","max_net_week_minutes","start_iso","cutoff_iso","end_iso","versione_piano","planning_frozen_from","baseline_weight_tab","auto_sync_d035","auto_sync_last"],rules={};for(const r of rows.slice(head+1))if(keys.includes(r[0]))rules[r[0]]=String(r[1]||"");planMeta.rules=rules;planMeta.rulesAt=Date.now();changed=true}}
+    if(results[1].status==="fulfilled"){const rows=results[1].value;if(rows[0]?.[0]==="Materia"&&rows[0]?.[1]==="Prova"){const exams=[];for(const r of rows.slice(1)){if(!SUBJ.includes(r[0]))continue;const date=r[7]==="UFFICIALE"?okDate(r[8]):"";exams.push([date||null,r[0],date?String(r[1]||"Appello"):"Data non pubblicata"])}for(const s of SUBJ)if(!exams.some(e=>e[1]===s))exams.push([null,s,"Data non pubblicata"]);planMeta.exams=exams.sort((a,b)=>(a[0]||"9999").localeCompare(b[0]||"9999"));planMeta.examsAt=Date.now();changed=true}}
+    if(changed){planMeta.at=Date.now();LS.set("planMeta",planMeta);applyPlanMeta();renderToday();renderStats();renderWeek();renderAnalysis()}
+    renderPlanRules();
+  })();try{await metaBusy}finally{metaBusy=null}
+}
+function renderPlanRules(){const el=$("planRules");if(!el)return;const rules=planMeta.rules||{},A=analysisData(),total=Math.max(1,A.total);
+  el.innerHTML=`<div class="rule-chips"><span class="pill">${planLimit("max_net_day_minutes",660)}′ / giorno</span><span class="pill">${planLimit("max_net_week_minutes",4410)}′ / settimana</span>${rules.start_iso?`<span class="pill">Avvio ${esc(rules.start_iso)}</span>`:""}</div><p>${rules.planning_frozen_from?"Ripianificazione automatica sospesa dal "+esc(rules.planning_frozen_from)+". ":""}${rules.auto_sync_d035?"Allineamento Calendar: "+esc(rules.auto_sync_d035)+".":""}</p>${rules.auto_sync_last?`<p class="mute">Ultimo esito riportato dal foglio: ${esc(rules.auto_sync_last)}</p>`:""}<p class="mute">${planMeta.rulesAt?"SISTEMA letto "+new Date(planMeta.rulesAt).toLocaleString("it-IT",{dateStyle:"short",timeStyle:"short"})+(Date.now()-planMeta.rulesAt>240000?" · copia precedente, aggiornamento da verificare":" · controllo automatico ogni 3 minuti a pagina visibile"):"SISTEMA non ancora letto: limiti predefiniti, da verificare."}</p><p><b>Quote del piano attuale</b> ${SUBJ.map(s=>`${s} ${(100*A.per[s].plan/total).toFixed(1)}%`).join(" · ")}</p><p class="mute">Quote = minuti pianificati per materia / minuti del piano. Non sostituiscono i pesi didattici ${rules.baseline_weight_tab?"di "+esc(rules.baseline_weight_tab):"approvati"}.</p>`;
+}
+function draftRecovery(){const B=Object.values(index).filter(b=>b.stato!=="Rinviato"&&b.stato!=="Verificato autonomamente"&&at(b.date,b.to)<Date.now()&&b.min>doneMin(b)).sort((a,b)=>(a.date+a.from).localeCompare(b.date+b.from));
+  if(!B.length){toast("Non risultano minuti arretrati nei blocchi attivi passati");return}const per={};for(const b of B)per[b.mat]=(per[b.mat]||0)+Math.max(0,b.min-doneMin(b));
+  const total=Object.values(per).reduce((n,v)=>n+v,0),text=`Richiesta di recupero preparata il ${todayIso()}.\nResiduo misurato dei blocchi attivi passati: ${total} min (${Object.entries(per).map(([s,v])=>`${s} ${v} min`).join("; ")}). Per ciascun blocco: massimo(0, netto PROGRAMMA − massimo(minuti registro, minuti Focus confermati senza sovrapposizioni)).\nBlocchi: ${B.map(b=>`${b.id} ${b.mat} ${Math.max(0,b.min-doneMin(b))} min`).join("; ")}.\nPrepara una proposta con confronto prima/dopo. Conserva verifiche, prerequisiti, pasti, riposo, appelli e pesi M-R13; rispetta ${planLimit("max_net_day_minutes",660)} min/giorno e ${planLimit("max_net_week_minutes",4410)} min/settimana. Non applicare cambiamenti prima della mia approvazione.`;
+  const field=$("pReq");field.value=(field.value.trim()?field.value.trim()+"\n\n":"")+text;field.focus({preventScroll:true});field.scrollIntoView({behavior:settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});toast("Bozza pronta: controllala e inviala quando vuoi");
+}
+$("pDraft").onclick=draftRecovery;
+function renderProgress(){if(!$("prMetrics"))return;const calc=PROGRESS.calculate(Object.values(index),ckGet,Object.values(runs)),s=$("prSubject").value,a=s?(calc.subjects[s]||PROGRESS.calculate([]).all):calc.all;
+  const names={preparation:"Preparazione",theory:"Teoria",practice:"Pratica",exam:"Esame · prove"},num=n=>Number(n.toFixed(1)).toLocaleString("it-IT");
+  $("prMetrics").innerHTML=Object.entries(names).map(([k,label])=>{const m=a[k],pct=m.pct==null?"N/D":num(m.pct)+"%";return `<div class="coverage-metric"><span>${label}</span><strong>${pct}</strong><progress max="100" value="${m.pct||0}" aria-label="${label}${s?" "+s:""}: ${pct}"></progress><small>${m.total?num(m.done)+" / "+num(m.total)+" min ponderati":"Nessuna attività classificata"}</small></div>`}).join("");
+  $("prQuality").textContent=`${a.blocks} blocchi attivi. ${a.unclassified?num(a.unclassified)+" min con tipo misto o da classificare. ":""}${a.unparsed?num(a.unparsed)+" min senza scaletta interpretabile. ":""}${a.legacy?a.legacy+" checklist precedenti da riconfermare. ":""}100% indica copertura del piano, non superamento dell’esame. Appelli: ${planMeta.examsAt?"SCADENZE letto "+hm(planMeta.examsAt):"date predefinite da verificare"}.`;
+}
+$("prSubject").onchange=renderProgress;
 function bar(lbl,col,full,part,max,txt){return `<div class="hbar"><b>${esc(lbl)}</b><div class="tr"><i class="b" style="width:${max?100*full/max:0}%;background:${col}"></i><i style="width:${max?100*part/max:0}%;background:${col}"></i></div><span class="mute">${txt}</span></div>`}
 function analysisData(){const now=Date.now(),today=todayIso(),B=Object.values(index).filter(b=>b.stato!=="Rinviato"&&b.min>0);
   const per={};for(const s of SUBJ)per[s]={plan:0,done:0,backlog:0,future:0,ver:0,blocks:0,sims:0};
@@ -720,21 +748,21 @@ function analysisData(){const now=Date.now(),today=todayIso(),B=Object.values(in
     if(en<=now){const miss=Math.max(0,b.min-d);p.backlog+=miss;backlog+=miss}else{const rem=st>=now?b.min:Math.max(0,b.min-d);p.future+=rem;future+=rem;dayPlan[b.date]=(dayPlan[b.date]||0)+b.min}
     const w=monday(b.date);wk[w]=(wk[w]||0)+b.min}
   const last=B.map(b=>b.date).sort().pop()||today;let slack=0,days=0;const wkFree={};
-  for(let d=today;d<=last;d=addDays(d,1)){if(EXAMDAYS.has(d))continue;days++;const free=Math.max(0,660-(dayPlan[d]||0)-(d===today?Math.max(0,romeMin(now)-420):0));const w=monday(d);wkFree[w]=(wkFree[w]||0)+free}
-  for(const [w,f] of Object.entries(wkFree))slack+=Math.max(0,Math.min(f,4410-(wk[w]||0)));
+  for(let d=today;d<=last;d=addDays(d,1)){if(EXAMDAYS.has(d))continue;days++;const free=Math.max(0,planLimit("max_net_day_minutes",660)-(dayPlan[d]||0)-(d===today?Math.max(0,romeMin(now)-420):0));const w=monday(d);wkFree[w]=(wkFree[w]||0)+free}
+  for(const [w,f] of Object.entries(wkFree))slack+=Math.max(0,Math.min(f,planLimit("max_net_week_minutes",4410)-(wk[w]||0)));
   return {per,backlog,future,total,slack,days,wk,last,today}}
-function renderAnalysis(){if(!$("anHours"))return;const A=analysisData(),now=Date.now();
+function renderAnalysis(){renderProgress();if(!$("anHours"))return;const A=analysisData(),now=Date.now(),weekLimit=planLimit("max_net_week_minutes",4410),dayLimit=planLimit("max_net_day_minutes",660);
   $("anInfo").textContent=`Dati: PROGRAMMA (${Object.keys(index).length} righe, ultimo caricamento ${(LS.get("index",{}).at?new Date(LS.get("index",{}).at).toLocaleString("it-IT",{dateStyle:"short",timeStyle:"short"}):"—")}), registro K e sessioni confermate in Focus. Aggiornato ${new Date(now).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})}.`;
   const mx=Math.max(...SUBJ.map(s=>A.per[s].plan),1);
   $("anHours").innerHTML=SUBJ.map(s=>{const p=A.per[s];return bar(s,`var(--${s})`,p.plan,p.done,mx,`${Math.round(p.done/60)}/${Math.round(p.plan/60)} h · ${p.plan?Math.round(100*p.done/p.plan):0}%`)}).join("")+
     bar("Tot.","var(--acc)",A.total,SUBJ.reduce((t,s)=>t+A.per[s].done,0),A.total,`${Math.round(SUBJ.reduce((t,s)=>t+A.per[s].done,0)/60)}/${Math.round(A.total/60)} h`);
-  const W=Object.entries(A.wk).sort(),wmx=Math.max(4410,...W.map(([,v])=>v));
-  $("anWeeks").innerHTML=W.map(([w,v])=>`<div class="c" title="Settimana dal ${w}: ${v} min"><i style="height:${100*v/wmx}%;background:${v>4410?"var(--bad,#e5484d)":"var(--acc)"};opacity:${w<monday(A.today)?.45:1}"></i></div>`).join("")+`<div class="cap" style="bottom:${100*4410/wmx}%"></div>`;
+  const W=Object.entries(A.wk).sort(),wmx=Math.max(weekLimit,...W.map(([,v])=>v));
+  $("anWeeks").innerHTML=W.map(([w,v])=>`<div class="c" title="Settimana dal ${w}: ${v} min"><i style="height:${100*v/wmx}%;background:${v>weekLimit?"var(--bad,#e5484d)":"var(--acc)"};opacity:${w<monday(A.today)?.45:1}"></i></div>`).join("")+`<div class="cap" style="bottom:${100*weekLimit/wmx}%"></div>`;$("anLimit").textContent=`Linea tratteggiata: ${weekLimit.toLocaleString("it-IT")} min/settimana. Colonne: piano da lunedì a domenica. ${planMeta.rulesAt?"Limite da SISTEMA.":"Limite predefinito, da verificare."}`;
   const pct=x=>Math.max(0,Math.min(100,Math.round(100*x)));const sc=[["Attuale",A.backlog,"il recupero non viene ripianificato"],["Ottimizzato",A.backlog,"recupero negli spazi liberi"],["Prudente",A.backlog+Math.round(.15*A.future),"+15% di imprevisti sul futuro"]];
   const rows=sc.map(([n,need,why],i)=>{const lost=i===0?need:Math.max(0,need-A.slack),cov=pct((A.total-lost)/Math.max(1,A.total)),marg=i===0?A.slack:A.slack-need;
     return `<tr><td><b>${n}</b><div class="mute">${why}</div></td><td>${Math.round((A.future+(i?need:0))/60)} h</td><td>${Math.round(A.slack/60)} h</td><td>${marg<0?`<b style="color:var(--bad)">${Math.round(marg/60)} h</b>`:Math.round(marg/60)+" h"}</td><td>${cov}%</td></tr>`}).join("");
   const risk=SUBJ.filter(s=>A.per[s].backlog>60).map(s=>`${s} (${A.per[s].backlog}′ arretrati)`);
-  $("anFeas").innerHTML=`<p>${A.days} giorni di studio fino al ${A.last.slice(8)}/${A.last.slice(5,7)} (esami esclusi) · residuo pianificato <b>${Math.round(A.future/60)} h</b> · arretrato <b>${Math.round(A.backlog/60)} h</b> · spazio libero entro 660/giorno e 4.410/settimana <b>${Math.round(A.slack/60)} h</b>.</p>
+  $("anFeas").innerHTML=`<p>[Stima] ${A.days} giorni di studio fino al ${A.last.slice(8)}/${A.last.slice(5,7)} (esami esclusi) · residuo pianificato <b>${Math.round(A.future/60)} h</b> · arretrato <b>${Math.round(A.backlog/60)} h</b> · capacità teorica entro ${dayLimit}/giorno e ${weekLimit}/settimana <b>${Math.round(A.slack/60)} h</b>. La capacità va verificata con i vincoli personali prima di una ridistribuzione.</p>
     <table class="scen"><tr><th>Scenario</th><th>Ore necessarie</th><th>Spazio</th><th>Margine</th><th>Copertura</th></tr>${rows}</table>
     <p class="mute">Copertura = quota del piano svolta o recuperabile; non misura la preparazione. ${risk.length?"A rischio: "+risk.join(", ")+".":"Nessuna materia con più di 60′ di arretrato."}</p>`;
   const conf=Object.values(runs).filter(r=>r.status==="confirmed"),by=k=>conf.filter(r=>r.outcome===k).length,errs=Object.values(errors);
@@ -746,7 +774,7 @@ function renderAnalysis(){if(!$("anHours"))return;const A=analysisData(),now=Dat
     return `<p><b>${s}</b>: ${t}<br><span class="mute">Scenario con programma completato: ${A.per[s].sims} prove a tempo previste; la stima si basa solo sui punteggi che registri, non sulle ore.</span></p>`}).join("")}
 /* ---------- boot ---------- */
 const BOOT_HASH=location.hash;
-(async function boot(){applySettings();bindSettings();installHelp();curView="";show(location.hash.slice(1)||"focus");
+(async function boot(){applySettings();bindSettings();installHelp();applyPlanMeta();curView="";show(location.hash.slice(1)||"focus");
   runs=LS.get("cacheRuns",{});errors=LS.get("cacheErr",{});syncState=Object.assign(LS.get("cacheState",{}),syncState);for(const [col,id,obj] of queue()){const target=col==="runs"?runs:col==="errors"?errors:syncState;if(!target[id]||SYNC.compare(col+"/"+id,obj,target[id])>=0)target[id]=obj}const ci=LS.get("index",null);if(ci)index=ci.idx;
   $("todayLbl").textContent=dayLabel(todayIso())+" · D-035";const loc=LS.get("active",null);if(loc&&loc.run&&loc.run.status==="active"&&!SYNC.terminal(runs[loc.run.runId])){const cached=runs[loc.run.runId];run=cached&&SYNC.compare("runs/"+cached.runId,cached,loc.run)>0?cached:loc.run;lastKey=keyOf(advance(run,Date.now()))}
   requestAnimationFrame(frame);if(Object.keys(index).length)await loadDay(curDay);
@@ -758,7 +786,7 @@ const BOOT_HASH=location.hash;
     try{const s=await db.doc("state/live").get();if(s.exists)adopt(s.data(),"init")}catch(e){}subscribeLive()}
   else{chip("cDb","bad","Archivio ✗ (solo locale)");syncUI(false,bc?"Sync tra schede":"Sync assente")}
   if(mcp){try{await loadIndex()}catch(e){const k=Object.keys(index).length;chip("cSh",k?"warn":"bad",k?"Sheets: copia locale":"Sheets ✗")}}
-  await loadDay(curDay);renderStats();renderWeek();renderRuns();renderAllErr();renderPlan();renderToday();dataReady=true;lastDataRefresh=Date.now();if(mcp)loadPlan();
+  await loadDay(curDay);renderStats();renderWeek();renderRuns();renderAllErr();renderPlan();renderToday();renderProgress();renderPlanRules();dataReady=true;lastDataRefresh=Date.now();if(mcp){loadPlan();loadPlanMeta()}
   try{const h=BOOT_HASH.match(/b=(R20-\d{4})/);if(h&&index[h[1]]){openSession(h[1],index[h[1]].date)}}catch(e){}
   if(run&&run.status==="active"){const b=index[run.blockId];openSession(run.blockId,b&&b.date,true);acquireWakeIf();checkGap()}
   setTimeout(()=>logNow(addDays(todayIso(),-1)),8000)})();

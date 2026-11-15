@@ -305,6 +305,7 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 <section class="view" id="v-focus" role="tabpanel" aria-labelledby="t-focus">
   <div class="stack">
     <article class="card today" id="todayCard" aria-labelledby="tdHead">
+      <div class="daily-greeting"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M9 18h19v9a9 9 0 0 1-18 0v-9Zm19 2h3a4 4 0 0 1 0 8h-3M9 34h21M15 6c-4 4 4 4 0 8M23 4c-4 4 4 4 0 8"/></svg><span id="dailyGreeting">Il tuo spazio per studiare</span></div>
       <div class="row"><div class="sp"><div class="mute small" id="tdDate"></div><h2 id="tdHead">Oggi</h2></div><button class="pill" id="tdPend" hidden></button></div>
       <div class="tdkpi" id="tdKpi"></div>
       <button class="btn primary big" id="bStudy">Inizia a studiare</button>
@@ -384,6 +385,18 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 
 <!-- ================= SETTIMANA ================= -->
 <section class="view" id="v-settimana" role="tabpanel" aria-labelledby="t-settimana">
+  <article class="card progress-card" aria-labelledby="prTitle">
+    <div class="row"><div class="sp"><span class="eyebrow">Un passo alla volta</span><h2 id="prTitle">La tua preparazione</h2></div><select id="prSubject" aria-label="Materia per le percentuali"><option value="">Tutte le materie</option><option>MDP</option><option>BD</option><option>MN</option><option>FIS</option><option>OOP</option><option>RETI</option></select></div>
+    <p class="small mute">Copertura del piano attivo basata sui completamenti dichiarati. Il timer, da solo, non completa le attività.</p>
+    <div id="prMetrics" class="progress-grid"></div><p id="prQuality" class="small mute"></p>
+    <details class="formula-details"><summary>Come vengono calcolate le percentuali</summary><div class="small">
+      <p>Per ogni blocco attivo: G = minuti netti di PROGRAMMA; d = durata di ciascun passaggio, pause escluse. Il peso del passaggio è <b>w = G × d / somma(d)</b>. Un passaggio conta solo nello stato «Completato». «In corso», «Parziale» e «Da recuperare» contano 0.</p>
+      <p><b>Preparazione = 100 × somma(w completati) / somma(G attivi).</b> I blocchi senza scaletta leggibile restano nel denominatore: contano come completati solo se risultano «Verificato autonomamente» nel registro.</p>
+      <p><b>Teoria, pratica, esame = 100 × somma(w completati del tipo) / somma(w previsti del tipo).</b> Per «Esame · prove» servono anche il completamento della verifica finale del blocco o un esito autonomo con prova registrata. Denominatore assente: N/D. Arrotondamento per difetto a un decimale.</p>
+      <p>La classificazione automatica dal testo è una <b>[Stima]</b>: teoria e ripasso → teoria; esercizi e correzioni → pratica; simulazioni e prove a tempo → esame. Passaggi misti o non riconoscibili restano da classificare: puoi assegnare il tipo nella scaletta. Il riepilogo segnala quanti minuti non sono ancora attribuiti.</p>
+      <p>Gli esiti Focus valgono per la versione dei contenuti verificata, senza sommare duplicati o minuti del registro. Le checklist precedenti senza riferimento ai contenuti vanno riconfermate dalla scaletta. Queste percentuali descrivono il piano: non sono un voto, una probabilità di superamento o l'esito ufficiale dell'esame.</p>
+    </div></details>
+  </article>
   <article class="card"><div class="row"><h2 class="sp" id="wkLbl">Settimana</h2><button class="btn" id="wPrev" aria-label="Settimana precedente">‹</button><button class="btn" id="wNext" aria-label="Settimana successiva">›</button></div>
     <div id="wkKpi" class="kpis"></div>
     <div class="days7" id="days7"></div>
@@ -392,7 +405,7 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
   </article>
   <article class="card"><h2>Analisi del piano</h2><p class="small mute" id="anInfo"></p>
     <h3>Ore per materia</h3><div class="bars" id="anHours"></div><p class="small mute">Barra chiara: pianificato nel piano attivo · barra piena: svolto (massimo tra registro e Focus confermato, mai sommati).</p>
-    <h3>Carico settimanale</h3><div class="wkbars" id="anWeeks"></div><p class="small mute">Linea tratteggiata: limite di 4.410 min/settimana. Colonna: minuti pianificati per settimana (lunedì–domenica).</p>
+    <h3>Carico settimanale</h3><div class="wkbars" id="anWeeks"></div><p class="small mute" id="anLimit">Colonna: minuti pianificati per settimana (lunedì-domenica). Limite letto da SISTEMA.</p>
     <h3>Fattibilità e scenari</h3><div id="anFeas" class="small"></div>
     <h3>Esercizi, verifiche e simulazioni</h3><div id="anEx" class="small"></div>
     <h3>Stima del voto</h3><div id="anGrade" class="small"></div></article>
@@ -423,8 +436,9 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 
 <!-- ================= PIANO (tutor e ridistribuzione) ================= -->
 <section class="view" id="v-piano" role="tabpanel" aria-labelledby="t-piano">
+  <article class="card"><span class="eyebrow">Il piano resta il riferimento</span><h2>Il tuo piano, aggiornato</h2><div id="planRules" class="small"></div><p class="small mute">Focus legge gli aggiornamenti dei fogli e di Calendar. Le modifiche a orari e pesi passano dalle proposte esistenti e dalla tua approvazione.</p><button class="btn" id="pDraft">Prepara richiesta di recupero</button><p class="small mute">Calcola i residui dei blocchi passati e prepara il testo qui sotto. Puoi modificarlo prima di inviarlo.</p></article>
   <article class="card"><div class="row"><h2 class="sp">Tutor e ridistribuzione</h2><button class="btn" id="pReload">Aggiorna</button></div>
-    <p class="small mute" id="pInfo">Canale con le attività pianificate: il check-in delle 22:30 e la ridistribuzione (06:12 · 13:12 · 19:12) scrivono qui proposte, domande e messaggi. Le modifiche al piano si applicano solo dopo il tuo «Approva».</p>
+    <p class="small mute" id="pInfo">Proposte, domande e messaggi letti da PIANO_PROPOSTE. Il pulsante «Approva» registra la tua decisione; l'applicazione al piano dipende dal processo che gestisce la proposta.</p>
     <div id="pNotes"></div></article>
   <article class="card"><h3>Domande del tutor</h3><div id="pQ"></div></article>
   <article class="card"><h3>Proposte da approvare</h3><div id="pProp"></div></article>
@@ -432,7 +446,7 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
     <div class="chips" id="pChips"><button class="chipbtn">Oggi ho iniziato in ritardo</button><button class="chipbtn">Sono indietro su una materia</button><button class="chipbtn">Domani ho meno tempo</button><button class="chipbtn">Blocco troppo lungo o stanchezza</button><button class="chipbtn">Argomento più difficile del previsto</button><button class="chipbtn">Vorrei un giorno più leggero</button></div>
     <label for="pReq">Cosa è successo e cosa ti serve (orari, materia, blocchi)</label><textarea id="pReq" rows="3"></textarea>
     <div class="row"><button class="btn primary" id="pSend">Invia al tutor</button></div>
-    <p class="small mute">La richiesta va nel foglio PIANO_PROPOSTE. La prossima esecuzione della ridistribuzione risponde con una proposta da approvare qui; Calendar si riallinea da solo entro un'ora dall'applicazione.</p></article>
+    <p class="small mute">«Invia al tutor» salva la richiesta in PIANO_PROPOSTE. Non cambia orari o pesi. Lo stato dell'allineamento Calendar riportato da SISTEMA è visibile in alto.</p></article>
   <article class="card"><h3>Storico</h3><div id="pHist" class="small"></div></article>
 </section>
 
@@ -454,7 +468,8 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
     <p class="small mute">Gli avvisi suonano solo con la pagina aperta. Se il telefono sospende la pagina, al ritorno il timer si ricalcola dagli orari reali, ma l'avviso perso non suona.</p>
   </article>
   <article class="card"><h2>Aspetto</h2>
-    <div class="row"><div class="sp"><label for="sLook">Stile</label><select id="sLook"><option value="auto">Automatico (vetro su Apple, standard altrove)</option><option value="glass">Vetro (Liquid Glass)</option><option value="std">Standard</option></select></div>
+    <label for="sAtmosphere">Atmosfera</label><select id="sAtmosphere"><option value="cozy">Studio accogliente</option><option value="essential">Essenziale</option></select>
+    <div class="row"><div class="sp"><label for="sLook">Stile</label><select id="sLook"><option value="auto">Automatico (vetro adattivo)</option><option value="glass">Vetro (ispirato a Liquid Glass)</option><option value="std">Standard</option></select></div>
       <div class="sp"><label for="sTheme">Tema</label><select id="sTheme"><option value="auto">Come il sistema</option><option value="light">Chiaro</option><option value="dark">Scuro</option></select></div></div>
     <div class="row"><div class="sp"><label for="sNight">StandBy notturno (rosso)</label><select id="sNight"><option value="auto">Automatico 22:00–07:00</option><option value="on">Sempre</option><option value="off">Mai</option></select></div></div>
     <label><input id="sRm" type="checkbox"> Riduci le animazioni</label>
@@ -505,6 +520,8 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 <script src="sync.js"></script>
 <script src="picker-config.js"></script>
 <script src="adapter.js"></script>
+<script src="progress.js"></script>
+<script src="navigation.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
