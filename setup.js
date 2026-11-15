@@ -10,7 +10,17 @@
   var cfg = get("cfg2") || {}, tok = get("tok");
   var ready = tok && tok.exp > Date.now() && (tok.scope || []).indexOf("https://www.googleapis.com/auth/drive.file") >= 0;
   if (!ready) { msg("Prima collega Google dalla pagina principale (Impostazioni › Account Google), poi torna qui.", true); $("pick").disabled = true; return; }
-  if (!cfg.pickerKey || !cfg.project) { msg("Il selettore non è configurato su questo dispositivo: inserisci chiave e numero di progetto in Impostazioni › Configurazione avanzata.", true); $("pick").disabled = true; return; }
+  if (!cfg.pickerKey || !cfg.project) {
+    $("pick").disabled = true; msg("Recupero la configurazione del selettore dal tuo account Google…");
+    var shared = window.STUDIOOS_PICKER_CONFIG;
+    if (shared) shared.load(tok, cfg).then(function (found) {
+      cfg = found; set("cfg2", cfg); $("pick").disabled = false;
+      msg("Selettore pronto. Tocca «Scegli i fogli».");
+    }).catch(function () {
+      msg("Configurazione non trovata: torna a Focus, collega lo stesso account Google e premi «Cerca i fogli». La configurazione avanzata serve solo per il primo collegamento dell'account.", true);
+    });
+    else msg("Aggiornamento dell'app incompleto: ricarica questa pagina con una connessione attiva.", true);
+  }
   async function classify(id) {
     var r = await fetch("https://sheets.googleapis.com/v4/spreadsheets/" + encodeURIComponent(id) + "?fields=properties.title,sheets.properties.title", { headers: { Authorization: "Bearer " + tok.t }, cache: "no-store", referrerPolicy: "no-referrer" });
     if (!r.ok) throw new Error("Google " + r.status);

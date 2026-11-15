@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.1.4 · R13h.3";
+  var VERSION = "pwa-1.1.5 · R13h.3";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -382,7 +382,7 @@
       '<label><input type="checkbox" id="pwaCal"' + (CFG.calOn ? " checked" : "") + '> Controllo con Google Calendar (facoltativo, sola lettura: chiede l\'accesso in lettura a tutti i calendari)</label>' +
       '<p class="small mute">' + esc(platformHelp()) + '</p>' +
       '<details><summary class="small">Configurazione avanzata</summary>' +
-      '<p class="small mute">Servono solo per «Scegli i fogli» su un dispositivo nuovo: chiave del selettore Google (limitata a questo sito) e numero del progetto Google Cloud. Restano su questo dispositivo.</p>' +
+      '<p class="small mute">La configurazione del selettore si recupera con lo stesso account Google. Questi campi servono per il primo collegamento: il salvataggio la rende disponibile anche agli altri dispositivi tramite i metadati privati dell\'archivio autorizzato.</p>' +
       '<label for="pwaKey">Chiave API del selettore</label><input id="pwaKey" autocomplete="off" spellcheck="false" value="' + esc(CFG.pickerKey || "") + '">' +
       '<label for="pwaProj">Numero del progetto</label><input id="pwaProj" inputmode="numeric" autocomplete="off" value="' + esc(CFG.project || "") + '">' +
       '<div class="row"><button class="btn" data-pwa="saveadv">Salva</button><button class="btn" data-pwa="reset">Scollega i fogli da questo dispositivo</button></div></details>' +
@@ -416,7 +416,14 @@
       else if (a === "wr-off") { CFG.readOnly = true; saveCfg(); toast("Sola lettura"); setTimeout(function () { location.reload(); }, 600); }
       else if (a === "diag") { var d = el("pwaDiag"); d.hidden = false; d.textContent = "Verifico…"; try { d.textContent = (await diagnose()).join("\n"); } catch (x) { d.textContent = "Verifica non riuscita: " + x.message; } }
       else if (a === "choose") { CFG.sheet = el("pwaSelSheet").value; CFG.arch = el("pwaSelArch").value; CFG.names = { sheet: el("pwaSelSheet").selectedOptions[0].text, arch: el("pwaSelArch").selectedOptions[0].text }; delete CFG.choices; saveCfg(); location.reload(); }
-      else if (a === "saveadv") { var k = el("pwaKey").value.trim(), p = el("pwaProj").value.trim(); CFG.pickerKey = /^[\w-]{20,60}$/.test(k) ? k : ""; CFG.project = /^\d{6,15}$/.test(p) ? p : ""; saveCfg(); toast(CFG.pickerKey && CFG.project ? "Salvato" : "Valori non validi o vuoti"); renderPanel(); }
+      else if (a === "saveadv") {
+        var k = el("pwaKey").value.trim(), p = el("pwaProj").value.trim(); CFG.pickerKey = /^[\w-]{20,60}$/.test(k) ? k : ""; CFG.project = /^\d{6,15}$/.test(p) ? p : ""; saveCfg();
+        if (window.STUDIOOS_PICKER_CONFIG && window.STUDIOOS_PICKER_CONFIG.valid(CFG) && token() && CFG.arch) {
+          try { await window.STUDIOOS_PICKER_CONFIG.save(tokObj(), CFG); toast("Configurazione salvata e verificata anche per gli altri dispositivi"); }
+          catch (x) { toast("Salvata su questo dispositivo. Condivisione non riuscita: " + x.message); }
+        } else toast(CFG.pickerKey && CFG.project ? "Salvato su questo dispositivo: collega Google e l'archivio per condividerla" : "Valori non validi o vuoti");
+        renderPanel();
+      }
       else if (a === "reset") { delete CFG.sheet; delete CFG.arch; delete CFG.names; delete CFG.choices; CFG.readOnly = true; saveCfg(); location.reload(); }
     });
     document.addEventListener("change", async function (e) {
@@ -429,6 +436,10 @@
       }
     });
     setInterval(renderPanel, 60000);
+    /* La configurazione del Picker segue l'account, anche se i fogli sono già collegati. */
+    if (token() && (!CFG.pickerKey || !CFG.project) && window.STUDIOOS_PICKER_CONFIG) {
+      window.STUDIOOS_PICKER_CONFIG.load(tokObj(), CFG).then(function () { saveCfg(); renderPanel(); }).catch(function () {});
+    }
     /* dopo l'accesso: collega i fogli e, se richiesto, il calendario */
     if (token() && !configured()) runFind();
     if (token() && CFG.calOn && !CFG.cal && hasScope(S_CAL)) findCalendar().then(function (l) { if (l.length) { CFG.cal = l[0].id; saveCfg(); location.reload(); } }).catch(function () {});
