@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.5.1 · R13h.5";
+  var VERSION = "pwa-1.6.0 · R13h.6";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -134,6 +134,7 @@
     { file: "sheet", re: /^PROGRAMMA!J(\d+):K\1$/, ok: function (m, v) { var n = +m[1]; return n >= 6 && n <= 427 && v.length === 1 && v[0].length === 2 && STATES.indexOf(v[0][0]) >= 0 && int(v[0][1]) >= 0 && int(v[0][1]) <= 900; } },
     { file: "arch", re: /^FOCUS_LOG!A(\d+):X\1$/, ok: function (m, v) { return +m[1] >= 3 && +m[1] <= 400 && v.length === 1 && v[0].length <= 24 && /^\d{4}-\d{2}-\d{2}$/.test(v[0][0]); } },
     { file: "arch", re: /^PIANO_PROPOSTE!A(\d+):I\1$/, ok: function (m, v) { return +m[1] >= 3 && +m[1] <= 400 && v.length === 1 && v[0].length === 9 && v[0][3] === "RICHIESTA" && v[0][8] === "IN_ATTESA"; } },
+    { file: "arch", re: /^UNIBO_STATO!B1$/, ok: function (m, v) { return v.length === 1 && v[0].length === 1 && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(String(v[0][0])); } },
     { file: "arch", re: /^PIANO_PROPOSTE!I(\d+):L\1$/, ok: function (m, v) { return +m[1] >= 3 && +m[1] <= 400 && v.length === 1 && v[0].length === 4 && DECISIONS.indexOf(v[0][0]) >= 0; } }
   ];
   function fileKey(id) { return id && id === CFG.sheet ? "sheet" : id && id === CFG.arch ? "arch" : ""; }

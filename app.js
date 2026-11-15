@@ -65,7 +65,7 @@ const storageKey=k=>(k==="device"||k==="settings"?"sfocus.":DATA_PREFIX)+k;
 let localSaveFailed=false;
 const LS={get(k,d){try{const v=localStorage.getItem(storageKey(k));return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(storageKey(k),JSON.stringify(v));return true}catch(e){localSaveFailed=true;return false}},remove(k){try{localStorage.removeItem(storageKey(k))}catch(e){localSaveFailed=true}}};
 const deviceId=LS.get("device",null)||(()=>{const d="dev-"+Math.random().toString(36).slice(2,10);LS.set("device",d);return d})();
-const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,rm:false,theme:"auto",look:"auto",atmosphere:"cozy",motion:"elastic",breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
+const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,rm:false,theme:"auto",look:"auto",atmosphere:"cozy",motion:"elastic",glass:50,breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
 let mcp=null,db=null,index={},dayEvents=[],calDay={},curDay=todayIso(),wkRef=todayIso(),runs={},errors={},syncState={},cur=null,run=null,wake=null,actx=null,stars=0,liveOK=false,lastKey="",lastSec=-1,STEPS=[];
 const UA=navigator.userAgent||"";
 const isApple=/iPhone|iPad|iPod|Macintosh|Mac OS X/.test(UA)&&!/Windows|Android/.test(UA);
@@ -156,7 +156,7 @@ async function refreshData(force=false){
       renderNext();renderToday();renderWeek();renderAnalysis();renderPlanRules();renderStats();render();
       if(curView==="registro"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement&&document.activeElement.tagName||""))renderMats();
     }
-    await loadPlan();await loadPlanMeta();
+    await loadPlan();await loadPlanMeta();if(typeof loadCareer==="function")loadCareer();
     window.dispatchEvent(new CustomEvent("studioos:data-refreshed",{detail:{at:Date.now(),changed}}));
   }catch(error){chip("cSh",Object.keys(index).length?"warn":"bad",Object.keys(index).length?"Sheets: copia locale":"Sheets: errore");if($("cSh"))$("cSh").title="Aggiornamento non riuscito: "+String(error.message||error).slice(0,160);}})();
   try{return await dataRefreshing}finally{dataRefreshing=null}
@@ -504,7 +504,7 @@ function renderWeek(){const m=monday(wkRef),days=[...Array(7)].map((_,i)=>addDay
   $("wkSubj").innerHTML=SUBJ.map(s=>{const bs=blocks.filter(b=>b.mat===s),p=bs.reduce((t,b)=>t+b.min,0),d=bs.reduce((t,b)=>t+done(b),0);if(!p)return"";
     return `<div class="wk"><b style="color:var(--${s})">${s}</b><div class="meter" style="background:color-mix(in srgb,var(--${s}) 16%,transparent)"><i style="width:${Math.min(100,d/p*100)}%;background:var(--${s})"></i></div><span class="v">${d}/${p} min</span></div>`}).join("")||'<p class="mute">Nessun blocco in questa settimana.</p>';
   const t=todayIso();$("exams").innerHTML=EXAMS.map(([d,s,k])=>{const n=d?Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(t+"T12:00:00Z"))/864e5):null;
-    return `<div class="exam"><span><b style="color:var(--${s})">${s}</b> · ${esc(k)}</span><b>${d?(n>0?n+" giorni · "+dayLabel(d,{day:"numeric",month:"short"}):n===0?"oggi":"svolto"):"—"}</b></div>`}).join("")+'<p class="mute small">Date dagli appelli già pubblicati in SCADENZE. Ricontrollale sulle pagine UniBo prima dell\'iscrizione.</p>'}
+    const bk=bookingFor(s,d);return `<div class="exam"><span><b style="color:var(--${s})">${s}</b> · ${esc(k)}${bk?` <span class="pill ok booked" title="Prenotazione letta da AlmaEsami">✓ prenotato ${esc(bk.at.slice(11,16))}</span>`:""}</span><b>${d?(n>0?n+" giorni · "+dayLabel(d,{day:"numeric",month:"short"}):n===0?"oggi":"svolto"):"—"}</b></div>`}).join("")+'<p class="mute small">Date dagli appelli già pubblicati in SCADENZE. Ricontrollale sulle pagine UniBo prima dell\'iscrizione.</p>'}
 function hash(s){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return (h>>>0)/4294967295}
 /* ---------- navigation, sheets, gestures ---------- */
 let navController=null;
@@ -533,9 +533,9 @@ document.querySelectorAll(".sheet").forEach(s=>{s.addEventListener("click",e=>{i
   window.addEventListener("pointerup",()=>{if(y0===null)return;c.style.transition="";if(dy>110)closeSheet(s.id);else c.style.transform="";y0=null});window.addEventListener("pointercancel",()=>{c.style.transition="";c.style.transform="";y0=null})});
 window.addEventListener("scroll",()=>{document.querySelector(".top").classList.toggle("compact",window.scrollY>36)},{passive:true});
 /* ---------- settings ---------- */
-function applySettings(){LS.set("settings",settings);document.body.classList.toggle("rm",settings.rm);document.documentElement.dataset.atmosphere=settings.atmosphere==="essential"?"essential":"cozy";document.documentElement.dataset.motion=settings.motion==="soft"?"soft":"elastic";
+function applySettings(){LS.set("settings",settings);document.body.classList.toggle("rm",settings.rm);document.documentElement.dataset.atmosphere=settings.atmosphere==="essential"?"essential":"cozy";document.documentElement.dataset.motion=settings.motion==="soft"?"soft":"elastic";document.documentElement.style.setProperty("--glass-tint",String(Math.max(0,Math.min(100,Number(settings.glass)||0))/100));
   document.documentElement.classList.toggle("light",settings.theme==="light");document.documentElement.classList.toggle("dark",settings.theme==="dark");applyLook()}
-function bindSettings(){const m={sWork:"work",sBreak:"brk",sSound:"sound",sVol:"vol",sTheme:"theme",sLook:"look",sAtmosphere:"atmosphere",sMotion:"motion",sNight:"night",sAmb:"amb",sAmbVol:"ambVol"},c={sAuto:"auto",sResume:"resume",sRm:"rm",sBreathe:"breathe",sHaptic:"haptic",sSmart:"smart",sWake:"wake"};
+function bindSettings(){const m={sWork:"work",sBreak:"brk",sSound:"sound",sVol:"vol",sTheme:"theme",sLook:"look",sAtmosphere:"atmosphere",sMotion:"motion",sGlass:"glass",sNight:"night",sAmb:"amb",sAmbVol:"ambVol"},c={sAuto:"auto",sResume:"resume",sRm:"rm",sBreathe:"breathe",sHaptic:"haptic",sSmart:"smart",sWake:"wake"};
   for(const [id,k] of Object.entries(m)){$(id).value=settings[k];$(id).onchange=()=>{settings[k]=$(id).type==="number"||$(id).type==="range"?Number($(id).value):$(id).value;applySettings()}}
   for(const [id,k] of Object.entries(c)){$(id).checked=!!settings[k];$(id).onchange=()=>{settings[k]=$(id).checked;applySettings();if(k==="wake")settings.wake?acquireWakeIf():releaseWake()}}}
 function installHelp(){const ios=`<b>iPhone e iPad (Safari)</b><ol><li>Apri questa pagina in Safari ${window.STUDIOOS_PWA?"dal suo indirizzo":"dal suo link claude.ai"}.</li><li>Tocca Condividi, poi «Aggiungi alla schermata Home» e attiva «Apri come app web» se compare.</li><li>Per lo StandBy: metti il telefono in orizzontale sul supporto, apri Focus e tocca StandBy.</li></ol>`,
@@ -678,7 +678,7 @@ function renderToday(){if(!$("todayCard"))return;const now=Date.now(),today=toda
   const recB=[...new Set(rec.map(b=>b.id))].map(id=>index[id]),dueN=dueErrors().length,nPend=(plan.rows||[]).filter(pend).length;
   $("tdTodo").innerHTML=(recB.length?`<p><b>Da recuperare:</b> ${recB.slice(0,5).map(b=>`<a href="#" data-go="${b.id}" data-day="${b.date}">${esc(b.mat)} ${b.date.slice(8)}/${b.date.slice(5,7)}</a>`).join(" · ")} <span class="mute">(chiedi una ridistribuzione in Piano)</span></p>`:"")+(dueN?`<p><b>Ripassi di oggi:</b> ${dueN} ${dueN===1?"errore":"errori"} da rifare · <a href="#" id="goRv">apri Studio</a></p>`:"");
   const tp=$("tdPend");tp.hidden=!nPend;tp.textContent=nPend+" dal tutor";
-  $("tdExams").innerHTML=EXAMS.filter(x=>x[0]&&x[0]>=today).slice(0,4).map(([d,m,t])=>`<span class="pill" style="border-color:var(--${m})">${m} ${t} · ${Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(today+"T12:00:00Z"))/864e5)} g</span>`).join("")}
+  $("tdExams").innerHTML=EXAMS.filter(x=>x[0]&&x[0]>=today).slice(0,4).map(([d,m,t])=>`<span class="pill${bookingFor(m,d)?" booked":""}" style="border-color:var(--${m})">${bookingFor(m,d)?"✓ ":""}${m} ${t} · ${Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(today+"T12:00:00Z"))/864e5)} g</span>`).join("")}
 async function startStudy(){unlockAudio();if(run&&run.status==="active"){const b=index[run.blockId];await openSession(run.blockId,b&&b.date,true);show("focus");$("focusCard").scrollIntoView({behavior:settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});return}
   const pk=pickStudyBlock();if(!pk)return show("giorno");await openSession(pk.b.id,pk.b.date);if(cur&&!cur.rinv){await startRun();$("focusCard").scrollIntoView({behavior:settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})}}
 $("bStudy").onclick=startStudy;$("tdPend").onclick=()=>show("piano");
@@ -754,6 +754,33 @@ function analysisData(){const now=Date.now(),today=todayIso(),B=Object.values(in
   for(let d=today;d<=last;d=addDays(d,1)){if(EXAMDAYS.has(d))continue;days++;const free=Math.max(0,planLimit("max_net_day_minutes",660)-(dayPlan[d]||0)-(d===today?Math.max(0,romeMin(now)-420):0));const w=monday(d);wkFree[w]=(wkFree[w]||0)+free}
   for(const [w,f] of Object.entries(wkFree))slack+=Math.max(0,Math.min(f,planLimit("max_net_week_minutes",4410)-(wk[w]||0)));
   return {per,backlog,future,total,slack,days,wk,last,today}}
+/* ---------- carriera UniBo: scheda UNIBO_STATO scritta dal ponte sul PC, letta anche da iPhone ---------- */
+const CAREER=window.STUDIOOS_CAREER;let career=LS.get("career",null),careerBusy=null,lastCareerAttempt=0,careerErr="";
+function localIso(){const d=new Date(),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`}
+function fmtWhen(v){const d=/Z$/.test(v)?new Date(v):new Date(String(v).slice(0,16)+":00");return Number.isFinite(d.getTime())?d.toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).replace(","," "):"—"}
+function bookingFor(subject,date){return career&&CAREER&&date?CAREER.bookedOn(career.summary,subject,date):null}
+async function loadCareer(force=false){if(!mcp||!CAREER||navigator.onLine===false){renderCareer();return}if(careerBusy)return careerBusy;if(!force&&Date.now()-lastCareerAttempt<180000)return;lastCareerAttempt=Date.now();
+  careerBusy=(async()=>{try{const st=CAREER.parse(await archGet("UNIBO_STATO!A1:J2"));careerErr="";if(st){career=Object.assign(st,{readAt:Date.now()});LS.set("career",career)}else if(!career)careerErr="Il ponte non ha ancora scritto dati"}
+    catch(e){careerErr=/range|400|not found/i.test(String(e&&e.message||e))?"Scheda UNIBO_STATO non trovata nell'archivio":"Lettura non riuscita: resta l'ultima copia"}
+    renderCareer();renderExamsOnly()})();try{await careerBusy}finally{careerBusy=null}}
+function renderExamsOnly(){try{renderWeek()}catch(e){}try{renderToday()}catch(e){}}
+function renderCareer(){const el=$("crBody");if(!el||!CAREER)return;const f=CAREER.freshness(career,Date.now()),fr=$("crFresh");
+  fr.className="small career-fresh lvl-"+f.level;fr.textContent=[careerErr,f.label,career&&career.readAt?"letto qui alle "+new Date(career.readAt).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}):""].filter(Boolean).join(" · ");
+  if(!career){el.innerHTML='<p class="small mute">Ancora nessun riepilogo. Sul PC il ponte UniBoh scrive la scheda nascosta UNIBO_STATO dell\'archivio: da lì i dati arrivano qui e sull\'iPhone.</p>';$("crAll").innerHTML="";return}
+  const S=career.summary,plan=(S.plan&&S.plan.data)||[],st=CAREER.stats(plan),pct=st.cfuTotali?Math.round(st.cfuAcquisiti/st.cfuTotali*1000)/10:0,subj=CAREER.bySubject(S,localIso()),num=v=>v==null?"n.d.":String(v).replace(".",",");
+  $("crProg").textContent=(S.programme&&S.programme.data&&S.programme.data.name)||"Università di Bologna";
+  const names={plan:"piano esami",history:"cronologia",bookable:"prenotabilità",programme:"corso di studio"},bad=Object.keys(names).filter(k=>S[k]&&S[k].status!=="ok");
+  el.innerHTML=`<div class="career-head"><div class="career-ring" style="--p:${pct}" role="img" aria-label="${st.cfuAcquisiti} CFU su ${st.cfuTotali}"><b>${st.cfuAcquisiti}</b><span>/${st.cfuTotali} CFU</span></div>
+    <div class="kpis career-kpis"><div class="kpi"><b>${num(st.mediaPonderata)}</b><span>media ponderata</span></div><div class="kpi"><b>${num(st.mediaAritmetica)}</b><span>media aritmetica</span></div><div class="kpi"><b>${st.verbalizzati}/${st.esamiTotali}</b><span>verbalizzati</span></div>${st.lodi?`<div class="kpi"><b>${st.lodi}</b><span>${st.lodi===1?"lode":"lodi"}</span></div>`:""}</div></div>
+    <h3>Le materie della sessione</h3><ul class="career-subj">${SUBJ.map(s=>{const x=subj[s]||{},it=x.item,b=x.booking;
+      const tag=b?`<span class="pill ok">Prenotato · ${fmtWhen(b.at)} · ${esc(b.mode)}</span>`:it&&it.state==="verbalizzato"?`<span class="pill ok">${esc(it.grade||"verbalizzato")}</span>`:it&&it.bookable?'<span class="pill warn">Prenotabile ora</span>':`<span class="small mute">${esc(it?it.state:"non nel piano esami")}</span>`;
+      return `<li><span class="dot" style="background:var(--${s})"></span><span class="sp"><b>${s}</b> <span class="small mute">${esc(it?it.name.toLowerCase():"")}</span></span>${tag}</li>`}).join("")}</ul>
+    ${bad.length?`<p class="small warn-text">Non aggiornati all'ultimo controllo: ${bad.map(k=>names[k]+(S[k].at?" (ultima lettura riuscita "+fmtWhen(S[k].at)+")":" (mai letto)")).join(", ")}.</p>`:""}`;
+  $("crAll").innerHTML=`<table class="career-table"><thead><tr><th>Insegnamento</th><th>CFU</th><th>Esito</th></tr></thead><tbody>${plan.map(x=>`<tr><td>${esc(x.name.toLowerCase())}<span class="small mute"> · ${x.year||"?"}° anno</span></td><td>${x.cfu}</td><td>${x.state==="verbalizzato"?esc(x.grade||"✓"):x.state==="prenotato"?"prenotato":x.bookable?"prenotabile":"—"}</td></tr>`).join("")}</tbody></table>`}
+$("crAsk").onclick=async()=>{if(!mcp){toast("Collega Google per chiedere un aggiornamento");return}
+  try{await archSet("UNIBO_STATO!B1",[[new Date().toISOString()]]);buzz(8);toast("Richiesta inviata: con il PC acceso il ponte aggiorna entro pochi minuti",4500);setTimeout(()=>loadCareer(true),180000)}
+  catch(e){toast(/Sola lettura/.test(String(e.message||e))?"Registrazione nei fogli spenta qui: rileggo l'ultima copia":"Richiesta non inviata: "+String(e.message||e).slice(0,70),4500)}loadCareer(true)};
+setTimeout(renderCareer,0);
 function renderAnalysis(){renderProgress();if(!$("anHours"))return;const A=analysisData(),now=Date.now(),weekLimit=planLimit("max_net_week_minutes",4410),dayLimit=planLimit("max_net_day_minutes",660);
   $("anInfo").textContent=`Dati: PROGRAMMA (${Object.keys(index).length} righe, ultimo caricamento ${(LS.get("index",{}).at?new Date(LS.get("index",{}).at).toLocaleString("it-IT",{dateStyle:"short",timeStyle:"short"}):"—")}), registro K e sessioni confermate in Focus. Aggiornato ${new Date(now).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})}.`;
   const mx=Math.max(...SUBJ.map(s=>A.per[s].plan),1);
@@ -789,7 +816,7 @@ const BOOT_HASH=location.hash;
     try{const s=await db.doc("state/live").get();if(s.exists)adopt(s.data(),"init")}catch(e){}subscribeLive()}
   else{chip("cDb","bad","Archivio ✗ (solo locale)");syncUI(false,bc?"Sync tra schede":"Sync assente")}
   if(mcp){try{await loadIndex()}catch(e){const k=Object.keys(index).length;chip("cSh",k?"warn":"bad",k?"Sheets: copia locale":"Sheets ✗")}}
-  await loadDay(curDay);renderStats();renderWeek();renderRuns();renderAllErr();renderPlan();renderToday();renderProgress();renderPlanRules();dataReady=true;lastDataRefresh=Date.now();if(mcp){loadPlan();loadPlanMeta()}
+  await loadDay(curDay);renderStats();renderWeek();renderRuns();renderAllErr();renderPlan();renderToday();renderProgress();renderPlanRules();dataReady=true;lastDataRefresh=Date.now();if(mcp){loadPlan();loadPlanMeta();loadCareer()}
   try{const h=BOOT_HASH.match(/b=(R20-\d{4})/);if(h&&index[h[1]]){openSession(h[1],index[h[1]].date)}}catch(e){}
   if(run&&run.status==="active"){const b=index[run.blockId];openSession(run.blockId,b&&b.date,true);acquireWakeIf();checkGap()}
   setTimeout(()=>logNow(addDays(todayIso(),-1)),8000)})();

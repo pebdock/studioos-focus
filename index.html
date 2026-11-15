@@ -275,6 +275,7 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 </style>
 <link rel="stylesheet" href="refinement.css">
 <link rel="stylesheet" href="interaction.css">
+<link rel="stylesheet" href="ios.css">
 </head>
 <body>
 <div id="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -287,12 +288,12 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 </header>
 <nav id="tabbar" class="bar" role="tablist" aria-label="Sezioni">
   <span id="tabInd" aria-hidden="true"></span>
-  <button class="tab" role="tab" data-v="focus" id="t-focus" aria-controls="v-focus"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Oggi</button>
-  <button class="tab" role="tab" data-v="giorno" id="t-giorno" aria-controls="v-giorno"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/></svg>Calendario</button>
-  <button class="tab" role="tab" data-v="piano" id="t-piano" aria-controls="v-piano"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg>Piano<span class="badge" id="pBadge" hidden>0</span></button>
-  <button class="tab" role="tab" data-v="registro" id="t-registro" aria-controls="v-registro"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg>Studio</button>
-  <button class="tab" role="tab" data-v="settimana" id="t-settimana" aria-controls="v-settimana"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Analisi</button>
-  <button class="tab" role="tab" data-v="impostazioni" id="t-impostazioni" aria-controls="v-impostazioni"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Impostazioni</button>
+  <button class="tab" role="tab" data-v="focus" id="t-focus" aria-controls="v-focus"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg><span class="tlbl" data-short="Oggi">Oggi</span></button>
+  <button class="tab" role="tab" data-v="giorno" id="t-giorno" aria-controls="v-giorno"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/></svg><span class="tlbl" data-short="Agenda">Calendario</span></button>
+  <button class="tab" role="tab" data-v="piano" id="t-piano" aria-controls="v-piano"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span class="tlbl" data-short="Piano">Piano</span><span class="badge" id="pBadge" hidden>0</span></button>
+  <button class="tab" role="tab" data-v="registro" id="t-registro" aria-controls="v-registro"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><span class="tlbl" data-short="Studio">Studio</span></button>
+  <button class="tab" role="tab" data-v="settimana" id="t-settimana" aria-controls="v-settimana"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="tlbl" data-short="Analisi">Analisi</span></button>
+  <button class="tab" role="tab" data-v="impostazioni" id="t-impostazioni" aria-controls="v-impostazioni"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tlbl" data-short="Opzioni">Impostazioni</span></button>
   
   
   
@@ -397,6 +398,13 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
       <p>Gli esiti Focus valgono per la versione dei contenuti verificata, senza sommare duplicati o minuti del registro. Le checklist precedenti senza riferimento ai contenuti vanno riconfermate dalla scaletta. Queste percentuali descrivono il piano: non sono un voto, una probabilità di superamento o l'esito ufficiale dell'esame.</p>
     </div></details>
   </article>
+  <article class="card career-card" id="careerCard" aria-labelledby="crTitle">
+    <div class="row"><div class="sp"><span class="eyebrow" id="crProg">Università di Bologna</span><h2 id="crTitle">La tua carriera</h2></div><button class="btn ghost" id="crAsk" type="button">Aggiorna</button></div>
+    <p class="small career-fresh" id="crFresh" role="status"></p>
+    <div id="crBody"></div>
+    <details class="formula-details" id="crAllBox"><summary>Tutti gli insegnamenti</summary><div id="crAll" class="career-all"></div></details>
+    <p class="small mute">Letti in sola lettura da AlmaEsami e Studenti Online tramite UniBoh sul tuo PC; nessuna iscrizione è automatica. Medie solo sui voti verbalizzati (30 e lode vale 30, idoneità escluse). Un dato non letto resta «non disponibile», mai zero.</p>
+  </article>
   <article class="card"><div class="row"><h2 class="sp" id="wkLbl">Settimana</h2><button class="btn" id="wPrev" aria-label="Settimana precedente">‹</button><button class="btn" id="wNext" aria-label="Settimana successiva">›</button></div>
     <div id="wkKpi" class="kpis"></div>
     <div class="days7" id="days7"></div>
@@ -470,6 +478,8 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
   <article class="card"><h2>Aspetto</h2>
     <label for="sAtmosphere">Atmosfera</label><select id="sAtmosphere"><option value="cozy">Studio accogliente</option><option value="essential">Essenziale</option></select>
     <label for="sMotion">Movimento</label><select id="sMotion"><option value="elastic">Elastico</option><option value="soft">Morbido</option></select>
+    <label for="sGlass">Vetro</label><div class="glass-slider"><span aria-hidden="true">Trasparente</span><input id="sGlass" type="range" min="0" max="100" step="5" aria-describedby="sGlassHelp"><span aria-hidden="true">Colorato</span></div>
+    <p class="small mute" id="sGlassHelp">Come il cursore Liquid Glass di iOS 27: più a destra il vetro diventa più coprente e leggibile. Con «Riduci trasparenza» del sistema il vetro è sempre pieno.</p>
     <div class="row"><div class="sp"><label for="sLook">Stile</label><select id="sLook"><option value="auto">Automatico (vetro adattivo)</option><option value="glass">Vetro (ispirato a Liquid Glass)</option><option value="std">Standard</option></select></div>
       <div class="sp"><label for="sTheme">Tema</label><select id="sTheme"><option value="auto">Come il sistema</option><option value="light">Chiaro</option><option value="dark">Scuro</option></select></div></div>
     <div class="row"><div class="sp"><label for="sNight">StandBy notturno (rosso)</label><select id="sNight"><option value="auto">Automatico 22:00–07:00</option><option value="on">Sempre</option><option value="off">Mai</option></select></div></div>
@@ -522,6 +532,8 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 <script src="picker-config.js"></script>
 <script src="adapter.js"></script>
 <script src="progress.js"></script>
+<script src="career.js"></script>
+<script src="motion.js"></script>
 <script src="navigation.js"></script>
 <script src="app.js"></script>
 </body>

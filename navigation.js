@@ -1,7 +1,13 @@
 /* Finite damped spring. Pointer motion is confined to the navigation bar.
-   Only transforms animate; geometry is measured at gesture/layout boundaries. */
+   Only transforms animate; geometry is measured at gesture/layout boundaries.
+   Springs follow Apple's duration/bounce model (motion.js): a tight critically damped spring
+   while the finger drags the lens, a lightly bouncy one when it is released. While pressed the
+   lens lifts (scale ≈1.12, as the iOS tab bar lens) and stretches along the direction of travel. */
 (function(root){
   "use strict";
+  const M=root.STUDIOOS_MOTION||(typeof require==="function"?require("./motion.js"):null);
+  const DRAG=M?M.params(.24,0):{stiffness:685,damping:52},LIFT=1.12;
+  const release=a=>M?M.params(.4,.22*a):{stiffness:247,damping:29};
   const bound=(v,a,b)=>Math.max(a,Math.min(b,v));
   function mount(bar,{select,reducedMotion=()=>false,strength=()=>1,raf=requestAnimationFrame,caf=cancelAnimationFrame,now=()=>performance.now()}={}){
     const tabs=Array.from(bar.querySelectorAll(".tab")),indicator=bar.querySelector("#tabInd");
@@ -15,10 +21,11 @@
     function stop(snap=true){if(pending)caf(pending);pending=0;lastAt=0;bar.classList.remove("nav-moving");if(snap){for(const k of ["x","y","sx","sy"])state[k]=target[k];state.vx=state.vy=state.vsx=state.vsy=0;paint()}}
     function frame(stamp){pending=0;if(destroyed)return;if(reducedMotion()){stop();return}const t=Number.isFinite(stamp)?stamp:now(),dt=bound((t-(lastAt||t-16))/1000,.001,.032);lastAt=t;
       // Semi-implicit integration with a bounded step remains stable after a dropped frame.
-      const amount=bound(strength(),.2,1),stiffness=400,damping=gesture?29:22+5*(1-amount);
+      const amount=bound(strength(),.2,1),P=gesture?DRAG:release(amount),stiffness=P.stiffness,damping=P.damping;
+      if(gesture){const st=Math.min(.07,Math.hypot(state.vx,state.vy)/5200)*amount,dir=Math.abs(state.vx)>=Math.abs(state.vy),base=1+(LIFT-1)*amount;target.sx=base*(1+(dir?st:-st*.55));target.sy=base*(1+(dir?-st*.55:st))}
       for(const [p,v]of [["x","vx"],["y","vy"],["sx","vsx"],["sy","vsy"]]){state[v]+=(stiffness*(target[p]-state[p])-damping*state[v])*dt;state[p]+=state[v]*dt}
       const minX=Math.min(...geometry.map(g=>g.x)),maxX=Math.max(...geometry.map(g=>g.x)),minY=Math.min(...geometry.map(g=>g.y)),maxY=Math.max(...geometry.map(g=>g.y));
-      state.x=bound(state.x,minX-2,maxX+2);state.y=bound(state.y,minY-2,maxY+2);state.sx=bound(state.sx,.94,1.10);state.sy=bound(state.sy,.94,1.10);paint();
+      state.x=bound(state.x,minX-2,maxX+2);state.y=bound(state.y,minY-2,maxY+2);state.sx=bound(state.sx,.9,1.28);state.sy=bound(state.sy,.9,1.28);paint();
       const rest=Math.abs(target.x-state.x)+Math.abs(target.y-state.y)<.08&&Math.abs(state.vx)+Math.abs(state.vy)<.7&&Math.abs(target.sx-state.sx)+Math.abs(target.sy-state.sy)<.001&&Math.abs(state.vsx)+Math.abs(state.vsy)<.008;
       if(rest||t>=deadline)stop();else pending=raf(frame);
     }
@@ -31,7 +38,7 @@
       g.vx=bound((e.clientX-g.lastX)/elapsed*1000,-900,900);g.vy=bound((e.clientY-g.lastY)/elapsed*1000,-900,900);g.lastX=e.clientX;g.lastY=e.clientY;g.lastAt=stamp;
       target.x=bound(g.origin.x+dx,Math.min(...geometry.map(x=>x.x)),Math.max(...geometry.map(x=>x.x)));
       target.y=bound(g.origin.y+dy,Math.min(...geometry.map(x=>x.y)),Math.max(...geometry.map(x=>x.y)));
-      target.sx=1+(.025+Math.min(.05,Math.abs(g.vx)/15000))*amount;target.sy=1+(.025+Math.min(.04,Math.abs(g.vy)/16000))*amount;
+      target.sx=target.sy=1+(LIFT-1)*amount;
       if(reducedMotion()){target.x=(h||selected()||g.origin).x;target.y=(h||selected()||g.origin).y;target.sx=target.sy=1}animate();
     }
     function end(e,cancel=false){if(!gesture||e.pointerId!==gesture.id)return;const g=gesture,h=cancel?null:hit(e.clientX,e.clientY);gesture=null;

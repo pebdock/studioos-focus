@@ -1,0 +1,152 @@
+/* Focus 1.6 · strato iOS: raggi Apple concentrici, tab bar flottante a capsula con lente Liquid Glass,
+   molle di motion.js (modello duration/bounce di Apple tradotto in linear()), resa PWA su iPhone.
+   Solo presentazione: nessuna logica dell'app dipende da questo file.
+   Approssimazione web: non è il renderer nativo Liquid Glass; niente rifrazione reale su Safari. */
+
+/* ---------- token ---------- */
+:root{
+ --r-device:55px;--r-sheet:34px;--r-card:26px;--r-inner:16px;--r-field:13px;--r-cap:999px;--pad-card:20px;
+ /* Ripieghi se linear() non è supportata: motion.js li sostituisce con le curve a molla calcolate. */
+ --spring-smooth:cubic-bezier(.25,.1,.25,1);--dur-smooth:420ms;
+ --spring-snappy:cubic-bezier(.2,.9,.25,1);--dur-snappy:340ms;
+ --spring-bouncy:cubic-bezier(.3,1.2,.5,1);--dur-bouncy:520ms;
+ --spring-sheet:cubic-bezier(.32,.72,0,1);--dur-sheet:520ms;
+ --spring-press:cubic-bezier(.2,.8,.2,1);--dur-press:240ms;
+ --glass-tint:.5;
+ --glass-fill:color-mix(in srgb,var(--surface) 80%,transparent);
+ --glass-fill:color-mix(in srgb,var(--surface) calc(52% + var(--glass-tint) * 44%),transparent);
+ --glass-blur:calc(26px - var(--glass-tint) * 10px);
+}
+
+/* ---------- raggi concentrici (Apple HIG: angoli interni = esterni − margine) ---------- */
+.card,.std .card,.glass .card{border-radius:var(--r-card)}
+.coverage-metric,.kpi,.tdkpi>div,.exam,.sess,.matl,.prop,.scen,.career-ring{border-radius:var(--r-inner)}
+input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{border-radius:var(--r-field)}
+.btn,.chipbtn,.pill,.ckb,#island,.toast{border-radius:var(--r-cap)}
+.sheet>div{border-radius:var(--r-sheet)}
+@supports (corner-shape:superellipse(1.5)){
+ /* Angoli continui («squircle») dove il browser li supporta; altrove resta il raggio circolare. */
+ .card,.sheet>div,.coverage-metric,.kpi,.tdkpi>div,.exam,.sess,.matl,.prop,input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{corner-shape:superellipse(1.5)}
+}
+
+/* ---------- pressione e transizioni con le molle ---------- */
+.btn,.chipbtn,.ckb,.pill[role=button]{transition:transform var(--dur-bouncy) var(--spring-bouncy),background-color 160ms ease,color 160ms ease,box-shadow 200ms ease}
+.btn:not(:disabled):active,.chipbtn:active,.ckb:active{transform:scale(.955);filter:none;transition-duration:var(--dur-press);transition-timing-function:var(--spring-press)}
+.tab{transition:color 180ms ease,transform var(--dur-bouncy) var(--spring-bouncy)}
+.tab svg{transition:transform var(--dur-bouncy) var(--spring-bouncy)}
+.tab:active{transform:none}
+/* Cambio di sezione come nelle tab bar iOS: dissolvenza breve, senza scivolamento. */
+.view.on{animation:iosTabIn 200ms ease-out}
+@keyframes iosTabIn{from{opacity:0}to{opacity:1}}
+.sheet.on>div{animation:iosSheetUp var(--dur-sheet) var(--spring-sheet) backwards}
+@keyframes iosSheetUp{from{transform:translate3d(0,105%,0)}to{transform:none}}
+.toast{animation:iosToastIn var(--dur-bouncy) var(--spring-bouncy) backwards}
+@keyframes iosToastIn{from{transform:translate3d(0,14px,0) scale(.94);opacity:0}to{transform:none;opacity:1}}
+#island{transition:opacity 220ms ease,transform var(--dur-bouncy) var(--spring-bouncy)}
+details>summary{transition:color 160ms ease}
+.meter i,#ring .net{transition-timing-function:var(--spring-smooth)}
+
+/* ---------- tab bar: capsula flottante in una sola riga, lente di vetro ---------- */
+.glass #tabbar,.std #tabbar{background:var(--glass-fill)}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ .glass #tabbar{backdrop-filter:blur(var(--glass-blur)) saturate(170%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(170%)}
+}
+.glass #tabbar{box-shadow:0 10px 34px #1a1f3a1f,0 1px 2px #1a1f3a14,inset 0 1px 0 #ffffff70,inset 0 -1px 0 #ffffff1a}
+#tabInd,.std #tabInd,.glass #tabInd{border-radius:var(--r-cap);transition:none;will-change:auto;
+ background:color-mix(in srgb,var(--acc) calc(10% + var(--glass-tint) * 8%),color-mix(in srgb,var(--surface) 70%,transparent));
+ border:1px solid color-mix(in srgb,var(--acc) 18%,#ffffff40);box-shadow:inset 0 1px 0 #ffffff66,inset 0 -1px 1px #00000008}
+/* Lente sollevata durante il trascinamento: più chiara, bordo speculare, ombra morbida. */
+#tabbar.nav-scrub #tabInd{background:color-mix(in srgb,var(--surface) 38%,transparent);border-color:#ffffffa0;
+ box-shadow:0 10px 28px #10142a2a,0 2px 6px #10142a14,inset 0 1px 0 #ffffffd0,inset 0 0 0 .5px #ffffff80,inset 0 -6px 14px color-mix(in srgb,var(--acc) 10%,transparent)}
+#tabbar.nav-moving #tabInd{will-change:transform}
+#tabbar.nav-scrub .tab.nav-preview svg{transform:scale(1.16)}
+#tabbar.nav-scrub .tab.nav-preview{color:var(--acc)}
+.tab[aria-selected=true] svg{stroke-width:2.1}
+@media(max-width:979px){
+ body{--nav-height:64px}
+ .std #tabbar,.glass #tabbar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:fixed;height:64px;max-width:560px;padding:4px;gap:0;border-radius:var(--r-cap);
+  left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));bottom:max(12px,calc(env(safe-area-inset-bottom) - 6px));margin-inline:auto}
+ .tab{flex-direction:column;justify-content:center;align-items:center;min-height:56px;height:56px;padding:5px 0 4px;gap:2px;border-radius:var(--r-cap);font-size:10.5px;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+ .tab svg{width:23px;height:23px}
+ #tabInd,.std #tabInd,.glass #tabInd{border-radius:var(--r-cap)}
+ .tlbl{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+}
+@media(max-width:599px){
+ body{--nav-height:64px}
+ .std #tabbar,.glass #tabbar{grid-template-columns:repeat(6,minmax(0,1fr));max-width:none;padding:4px;gap:0;border-radius:var(--r-cap)}
+ .tab{flex-direction:column;min-height:56px;gap:2px;padding:5px 0 4px;font-size:10.5px}
+ .tab svg{width:23px;height:23px}
+}
+@media(max-width:430px){
+ /* Etichette brevi sui telefoni: il nome completo resta per i lettori di schermo. */
+ .tlbl[data-short]{font-size:0}.tlbl[data-short]::after{content:attr(data-short);font-size:10px}
+}
+@media(max-width:359px){
+ .std #tabbar,.glass #tabbar{left:8px;right:8px}.tab svg{width:21px;height:21px}.tlbl[data-short]::after{font-size:9.5px}
+}
+@media(max-height:520px) and (orientation:landscape) and (max-width:979px){
+ body{--nav-height:52px}.std #tabbar,.glass #tabbar{height:52px;max-width:620px}.tab{flex-direction:row;height:44px;min-height:44px;gap:5px;font-size:11px}.tab svg{width:18px;height:18px}
+}
+
+/* ---------- iPhone e PWA: meno elementi da scrivania ---------- */
+@media(hover:none) and (pointer:coarse){
+ .hideable,.kbd{display:none!important} /* scorciatoie da tastiera: inutili con il dito */
+ .top .chips{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+ .top .chips::-webkit-scrollbar{display:none}
+ .top .pill{white-space:nowrap;flex:none}
+}
+@media(display-mode:standalone){
+ /* Già installata: la guida all'installazione non serve. */
+ .card:has(#installTxt){display:none}
+}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media(max-width:599px){
+ input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px} /* niente zoom automatico di Safari */
+ .card,.std .card,.glass .card{--pad-card:18px;padding:var(--pad-card)}
+}
+
+/* ---------- prestazioni: le card fuori schermo non vengono disegnate ---------- */
+@supports (content-visibility:auto){
+ #v-registro>.card:nth-child(n+2),#v-settimana>.card:nth-child(n+3),#v-piano>.card:nth-child(n+2),#v-impostazioni>.card:nth-child(n+3){content-visibility:auto;contain-intrinsic-size:auto 520px}
+}
+
+/* ---------- carriera UniBo ---------- */
+.career-card .row{align-items:flex-start}
+.career-fresh{display:flex;align-items:center;gap:7px;margin:4px 0 14px;color:var(--mute)}
+.career-fresh::before{content:"";width:8px;height:8px;border-radius:50%;flex:none;background:var(--mute)}
+.career-fresh.lvl-ok::before{background:var(--ok)}.career-fresh.lvl-partial::before,.career-fresh.lvl-stale::before{background:#c98a10}
+.career-head{display:grid;grid-template-columns:auto minmax(0,1fr);min-width:0;gap:18px;align-items:center;margin-bottom:12px}
+.career-ring{--p:0;width:104px;height:104px;border-radius:50%;display:grid;place-content:center;text-align:center;
+ background:radial-gradient(closest-side,var(--surface) 78%,transparent 79% 100%),conic-gradient(var(--acc) calc(var(--p) * 1%),color-mix(in srgb,var(--acc) 14%,var(--surface)) 0)}
+.career-ring b{font-size:1.7rem;letter-spacing:-.04em;line-height:1}.career-ring span{font-size:.72rem;color:var(--mute)}
+.career-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.career-kpis .kpi span{overflow-wrap:normal;word-break:normal;font-size:.74rem;line-height:1.25}
+.career-subj{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:2px}
+.career-subj li{display:flex;flex-wrap:wrap;align-items:center;column-gap:10px;row-gap:4px;min-height:44px;padding:6px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);min-width:0}
+.career-subj li:last-child{border-bottom:0}
+.career-subj .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.career-subj .sp{flex:1 1 10rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.career-subj .pill{flex:0 1 auto;max-width:100%;white-space:normal;font-size:.74rem;margin-left:auto}
+.career-table{width:100%;border-collapse:collapse;font-size:.85rem}.career-table th{text-align:left;font-weight:600;color:var(--mute);padding:6px 4px}.career-table td{padding:7px 4px;border-top:1px solid var(--line);text-transform:none}
+.career-table td:first-child{text-transform:capitalize}
+.career-all{overflow-x:auto}
+.warn-text{color:#a46a00}
+.pill.booked{border-color:var(--ok)!important;color:var(--ok)}
+@media(max-width:380px){.career-head{grid-template-columns:1fr;justify-items:center}.career-kpis{width:100%}}
+
+/* ---------- cursore del vetro ---------- */
+.glass-slider{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;font-size:.8rem;color:var(--mute)}
+.glass-slider input{width:100%;min-height:44px;accent-color:var(--acc)}
+
+/* ---------- accessibilità ---------- */
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+ :root{--glass-fill:var(--surface)}
+ .glass #tabbar{backdrop-filter:none;-webkit-backdrop-filter:none}
+ #tabbar.nav-scrub #tabInd{background:color-mix(in srgb,var(--acc) 16%,var(--surface))}
+}
+@media(prefers-reduced-motion:reduce){
+ .view.on,.sheet.on>div,.toast{animation:none}
+ .btn,.chipbtn,.ckb,.tab,.tab svg,#island{transition:none}
+ #tabbar.nav-scrub .tab.nav-preview svg{transform:none}
+}
+body.rm .view.on,body.rm .sheet.on>div,body.rm .toast{animation:none}
+body.rm .btn,body.rm .tab,body.rm .tab svg{transition:none}
