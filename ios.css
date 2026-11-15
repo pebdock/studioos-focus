@@ -165,3 +165,24 @@ body.rm .btn,body.rm .tab,body.rm .tab svg{transition:none}
 .td-new .chipbtn{flex:none}
 a.pill{text-decoration:none}
 
+/* 1.8.1 · sezioni interne di Analisi e Studio: un gruppo alla volta */
+[data-sec][hidden]{display:none!important}
+.sec-nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:30;margin:0 0 12px;grid-column:1/-1}
+.sec-nav .lg-seg{margin:0;box-shadow:0 6px 24px -12px rgb(0 0 0 / .35)}
+.sec-nav .lg-seg button[aria-selected=true]{color:var(--ink)}
+@media (min-width:980px){.sec-nav{max-width:560px}}
+/* segmentati con 4 opzioni: niente parole spezzate («Campan|a») */
+.lg-seg button{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;hyphens:none;word-break:normal}
+.lg-seg[style*="--n:4"] button,.lg-seg[style*="--n: 4"] button{font-size:.76rem;padding-inline:4px}
+/* scelte rapide della ridistribuzione: vanno a capo invece di uscire dallo schermo */
+#v-piano .chips,#v-piano .quick{flex-wrap:wrap;overflow:visible}
+/* 1.8.1 · materiali compatti: nome e prossimo uso a sinistra, «Sono a» a destra */
+.matl{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.matl:last-of-type{border-bottom:0}
+.matl-main{flex:1;min-width:0;overflow-wrap:anywhere}
+.matl-main .mute.small{margin-top:2px}
+.matl-pos{flex:none;display:flex;flex-direction:column;gap:2px;margin:0;font-size:.68rem;color:var(--mute);width:78px}
+.matl-pos input{width:100%;min-height:34px;padding:4px 8px;font-size:16px;border-radius:var(--r-field,13px)}
+#mMore,#topicMore{margin-top:10px;width:100%}
+.sec-nav .lg-seg button{font-size:.8rem;padding-inline:4px}
+#v-piano .chips .chipbtn{font-size:.8rem;padding:7px 11px;min-height:36px}

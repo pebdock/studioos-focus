@@ -56,4 +56,3 @@
   }
   const api={mount};root.STUDIOOS_NAV=api;if(typeof module!=="undefined"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
-

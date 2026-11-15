@@ -83,7 +83,7 @@
     if(root.STUDIOOS_PWA&&!pwa)return false; /* l'adattatore crea la sua card poco dopo */
     const box=doc.createElement("details");box.id="lgSys";box.className="lg-group";
     box.innerHTML='<summary><span><b>Collegamenti e sistema</b><span class="small mute" id="lgSysSum">Account Google, fogli, Calendar, installazione</span></span></summary><div class="lg-group-body"></div>';
-    const body=box.querySelector(".lg-group-body");for(const c of [pwa,install])if(c)body.appendChild(c);view.appendChild(box);
+    const body=box.querySelector(".lg-group-body"),health=doc.getElementById("systemHealth")&&doc.getElementById("systemHealth").closest(".card");for(const c of [health,pwa,install])if(c)body.appendChild(c);view.appendChild(box);
     const sum=()=>{const t=(doc.getElementById("syncTxt")||{}).textContent||"",ro=pwa&&/Sola lettura|spenta/i.test(pwa.textContent);doc.getElementById("lgSysSum").textContent=[t,ro?"registrazione spenta":""].filter(Boolean).join(" · ")||"Account Google, fogli, Calendar, installazione"};
     sum();setInterval(sum,15000);return true;
   }
@@ -112,4 +112,3 @@
   const api={update,start,lensMap,GLASS};root.STUDIOOS_LIQUID=api;
   if(doc.readyState==="loading")doc.addEventListener("DOMContentLoaded",start);else start();
 })(typeof window!=="undefined"?window:globalThis);
-

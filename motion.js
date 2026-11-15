@@ -37,4 +37,3 @@
   root.STUDIOOS_MOTION=api;if(typeof module!=="undefined"&&module.exports)module.exports=api;
   if(typeof document!=="undefined")install(document);
 })(typeof window!=="undefined"?window:globalThis);
-
