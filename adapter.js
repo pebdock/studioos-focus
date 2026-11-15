@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.5.0 · R13h.5";
+  var VERSION = "pwa-1.5.1 · R13h.5";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {

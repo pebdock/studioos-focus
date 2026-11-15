@@ -778,7 +778,7 @@ function renderAnalysis(){renderProgress();if(!$("anHours"))return;const A=analy
 /* ---------- boot ---------- */
 const BOOT_HASH=location.hash;
 (async function boot(){applySettings();bindSettings();installHelp();applyPlanMeta();curView="";show(location.hash.slice(1)||"focus");
-  runs=LS.get("cacheRuns",{});errors=LS.get("cacheErr",{});syncState=Object.assign(LS.get("cacheState",{}),syncState);for(const [col,id,obj] of queue()){const target=col==="runs"?runs:col==="errors"?errors:syncState;if(!target[id]||SYNC.compare(col+"/"+id,obj,target[id])>=0)target[id]=obj}const ci=LS.get("index",null);if(ci)index=ci.idx;
+  runs=LS.get("cacheRuns",{});errors=LS.get("cacheErr",{});syncState=Object.assign(LS.get("cacheState",{}),syncState);for(const [col,id,obj] of queue()){const target=col==="runs"?runs:col==="errors"?errors:syncState;if(!target[id]||SYNC.compare(col+"/"+id,obj,target[id])>=0)target[id]=obj}const ci=LS.get("index",null);if(ci){index=ci.idx;if(curView==="settimana"){renderWeek();renderAnalysis()}else renderProgress()}
   $("todayLbl").textContent=dayLabel(todayIso())+" · D-035";const loc=LS.get("active",null);if(loc&&loc.run&&loc.run.status==="active"&&!SYNC.terminal(runs[loc.run.runId])){const cached=runs[loc.run.runId];run=cached&&SYNC.compare("runs/"+cached.runId,cached,loc.run)>0?cached:loc.run;lastKey=keyOf(advance(run,Date.now()))}
   requestAnimationFrame(frame);if(Object.keys(index).length)await loadDay(curDay);
   const to=ms=>new Promise(r=>setTimeout(()=>r(null),ms));
