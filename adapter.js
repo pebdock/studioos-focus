@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-1.2.1 · R13h.3";
+  var VERSION = "pwa-1.3.0 · R13h.3";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -36,8 +36,9 @@
   if (CFG.readOnly == null) CFG.readOnly = true;
   ls.del("cfg"); /* eventuale configurazione della 1.0 con link #cfg: non più usata */
   function saveCfg() {
+    var previous = window.STUDIOOS_CFG && window.STUDIOOS_CFG.cal;
     ls.set("cfg2", CFG); window.STUDIOOS_CFG = { sheet: CFG.sheet || "", arch: CFG.arch || "", cal: CFG.calOn ? (CFG.cal || "") : "" };
-    window.dispatchEvent(new CustomEvent("studioos:calendar-config",{detail:{id:window.STUDIOOS_CFG.cal}}));
+    if(previous!==window.STUDIOOS_CFG.cal)window.dispatchEvent(new CustomEvent("studioos:calendar-config",{detail:{id:window.STUDIOOS_CFG.cal}}));
   }
   function configured() { return !!(CFG.sheet && CFG.arch); }
   window.STUDIOOS_PWA = true;
@@ -101,7 +102,7 @@
       var headers = { "Authorization": "Bearer " + t };
       if (opt.body) headers["Content-Type"] = "application/json";
       var r;
-      try { r = await fetch(url, { method: opt.method || "GET", headers: headers, body: opt.body, cache: "no-store", referrerPolicy: "no-referrer" }); }
+      try { r = await fetch(url, { signal: typeof AbortSignal!=="undefined"&&AbortSignal.timeout?AbortSignal.timeout(20000):undefined, method: opt.method || "GET", headers: headers, body: opt.body, cache: "no-store", referrerPolicy: "no-referrer" }); }
       catch (e) { if (attempt < 1) { await sleep(800); continue; } throw new Error("Rete non raggiungibile"); }
       if (r.status === 401) { ls.del("tok"); setErr("Accesso scaduto: tocca «Collega Google»."); throw new Error("Accesso a Google scaduto"); }
       if ((r.status === 429 || r.status >= 500) && attempt < 2) { await sleep(700 * Math.pow(2, attempt)); continue; }
@@ -452,7 +453,7 @@
       '<div class="row" style="margin-top:6px">' + (ok ? '<button class="btn" data-pwa="diag">Verifica connessione</button><button class="btn" data-pwa="out">Disconnetti</button>' : '<button class="btn primary" data-pwa="in">Collega Google</button>') +
       (ok ? '<button class="btn" data-pwa="find">Cerca i fogli</button><a class="btn" href="setup.html">Scegli i fogli</a>' : "") + "</div>" +
       '<pre class="cons small" id="pwaDiag" hidden></pre>' +
-      '<div class="pwa-save"><span class="pwa-save-label">Le tue sessioni</span><p id="pwaSaveState" role="status" aria-live="polite">Controllo dei salvataggi…</p><button class="btn" data-pwa="sync-now">Sincronizza ora</button><p class="small mute">Puoi passare a un altro dispositivo dopo «Salvato su Google». Alla riapertura recupero la sessione; senza rete conservo le modifiche qui e le invio quando torni online.</p></div>' +
+      '<div class="pwa-save"><span class="pwa-save-label">Le tue sessioni</span><p id="pwaSaveState" role="status" aria-live="polite">Controllo dei salvataggi…</p><button class="btn" data-pwa="sync-now">Sincronizza ora</button><p class="small mute">Puoi passare a un altro dispositivo dopo «Salvato su Google». Piano e Calendar si aggiornano automaticamente ogni 30 secondi e alla riapertura. Recupero anche la sessione; senza rete conservo le modifiche qui e le invio quando torni online.</p></div>' +
       (configured() ? '<p class="small"><b>Registrazione nei fogli:</b> ' + (CFG.readOnly ? 'spenta su questo dispositivo. <button class="btn" data-pwa="wr-on">Attiva</button><span id="pwaWr" hidden> Le sessioni si salvano nel tuo archivio Google e l\'attivazione segue lo stesso archivio sugli altri dispositivi. Il registro PROGRAMMA richiede sempre la tua conferma. Usa la PWA come timer operativo. <button class="btn primary" data-pwa="wr-on-ok">Conferma attivazione</button></span>' : 'attiva. <button class="btn" data-pwa="wr-off">Solo salvataggio locale qui</button>') + '</p>' : '') +
       '<div class="pwa-calendar"><label><input type="checkbox" id="pwaCal"' + (CFG.calOn ? " checked" : "") + '> Confronta il piano con Google Calendar</label><p class="small mute">Solo lettura. Google richiede accesso in lettura ai calendari; Focus usa quello che scegli e non modifica gli eventi.</p>' +
       (CFG.calOn&&CFG.cal?'<p class="small">Collegato a <b>'+esc(CFG.calendarName||"calendario selezionato")+'</b>.</p>':"")+
@@ -522,7 +523,7 @@
       }
     });
     window.addEventListener("studioos:sync-status",function(e){appSaveStatus=e.detail;updateSavePanel();});
-    setInterval(renderPanel, 60000);
+    setInterval(function(){if(!el("pwaCard")||!el("pwaCard").contains(document.activeElement))updateSavePanel();},60000);
     /* La configurazione del Picker segue l'account, anche se i fogli sono già collegati. */
     if (token() && window.STUDIOOS_PICKER_CONFIG) {
       window.STUDIOOS_PICKER_CONFIG.load(tokObj(), CFG,{refresh:true,preferences:true}).then(function () { saveCfg(); renderPanel();window.dispatchEvent(new CustomEvent("studioos:sync-now"));if(CFG.calOn&&hasScope(S_CAL))connectCalendar(true); }).catch(function () {});
@@ -556,3 +557,4 @@
     canWrite: function () { return !CFG.readOnly && !!token(); }, refresh: function () { return loadAll(0); },
     storagePrefix: window.STUDIOOS_DATA_PREFIX, cloudStatus: function () { return {ready:tabOK===true,readAt:lastCloudRead,writtenAt:lastCloudWrite||ls.get("cloudWriteAt",0),readOnly:CFG.readOnly}; }, _cfg: function () { return CFG; } };
 })();
+

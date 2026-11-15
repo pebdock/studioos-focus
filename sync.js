@@ -44,6 +44,10 @@
       saved = saved.obj || saved;
       return { key: "live", run: null, ended: saved.runId, endedStatus: saved.status, endedRun: copy(saved), at: stamp(saved), updatedAt: stamp(saved), by: saved.by };
     }
+    if (saved && compare("runs/" + live.run.runId, saved.obj || saved, live.run) > 0) {
+      saved = saved.obj || saved;
+      return Object.assign({}, live, { run: copy(saved), at: stamp(saved), updatedAt: stamp(saved), by: saved.by || live.by });
+    }
     return live;
   }
   function prefix(cfg) { return cfg && cfg.sheet && cfg.arch ? "sfocus.data." + cfg.sheet + "." + cfg.arch + "." : "sfocus.unlinked."; }
@@ -65,3 +69,4 @@
     operation: operation, enqueue: enqueue, acknowledge: acknowledge, normalizeLive: normalizeLive, prefix: prefix, migrate: migrate };
   if (typeof module === "object" && module.exports) module.exports = root.STUDIOOS_SYNC;
 })(typeof window === "object" ? window : globalThis);
+
