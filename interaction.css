@@ -45,6 +45,7 @@ input[type=range]{touch-action:pan-y}textarea{min-height:110px}
 #toasts{bottom:calc(var(--nav-height) + env(safe-area-inset-bottom) + 22px);max-width:min(90vw,460px);pointer-events:none}
 #ring .ph,#ring .net{transition:none}
 .past-sessions{margin-top:14px;border-top:1px solid var(--line)}.past-sessions>summary{color:var(--mute);font-size:.85rem}.past-sessions[open]>summary{color:var(--ink)}
+#tdExams{flex-wrap:wrap;overflow:visible;white-space:normal;gap:6px}#tdExams>*{flex:0 1 auto;max-width:100%}
 @media(min-width:980px){
  body{padding:28px 30px 36px;--nav-height:0px}
  .std #tabbar,.glass #tabbar{display:flex;position:sticky;top:12px;left:auto;right:auto;bottom:auto;width:100%;max-width:100%;transform:none;gap:4px;padding:6px;margin:0 0 24px;border-radius:20px;z-index:40}
