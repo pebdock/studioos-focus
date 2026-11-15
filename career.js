@@ -41,6 +41,20 @@
     const hist=(summary&&summary.history&&summary.history.data)||[];
     return hist.find(h=>h.code===code&&h.status==="prenotato"&&String(h.at).slice(0,10)===date)||null;
   }
-  const api={CODES,parse,stats,freshness,bySubject,bookedOn,ago,STALE_MS};
+  /* Appelli pubblici letti dal ponte (pagine docente e del corso di studio): date anche se non prenotate. */
+  const SOURCES={MDP:"https://www.unibo.it/sitoweb/fabrizio.caselli/didattica?tab=appelli",BD:"https://www.unibo.it/sitoweb/annalisa.franco/didattica?tab=appelli",
+    MN:"https://www.unibo.it/sitoweb/damiana.lazzaro/didattica?tab=appelli",FIS:"https://www.unibo.it/sitoweb/luigi.guiducci3/didattica?tab=appelli",
+    OOP:"https://www.unibo.it/sitoweb/mirko.viroli/didattica?tab=appelli",RETI:"https://www.unibo.it/sitoweb/franco.callegati/didattica?tab=appelli"};
+  const ALMAESAMI="https://almaesami.unibo.it/";
+  function windowState(it,today){if(!it||!it.from||!it.to)return "sconosciuta";if(today<it.from)return "non_aperta";if(today>it.to)return "chiusa";return "aperta"}
+  function appelli(summary,subject,today){
+    const list=((summary&&summary.appelli&&summary.appelli.data)||[]).filter(x=>(!subject||x.subject===subject)&&(!today||x.date>=today));
+    return list.map(x=>Object.assign({},x,{state:windowState(x,today||""),booked:!!bookedOn(summary,x.subject,x.date)}));
+  }
+  function appelliStatus(summary){const a=summary&&summary.appelli;if(!a)return {level:"none",label:"Appelli pubblici non ancora letti dal PC"};
+    return {level:a.status==="ok"?"ok":"partial",label:(a.status==="ok"?"Appelli pubblici letti ":"Ultima lettura riuscita ")+(a.at?new Date(a.at).toLocaleString("it-IT",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"mai")+(a.status!=="ok"&&a.error?" · "+a.error:"")}}
+  function news(summary,nowMs,days){const lim=(nowMs||Date.now())-(days||14)*864e5;
+    return ((summary&&summary.eventi)||[]).filter(e=>!e.silent&&Date.parse(e.at)>=lim)}
+  const api={CODES,parse,stats,freshness,bySubject,bookedOn,ago,STALE_MS,SOURCES,ALMAESAMI,windowState,appelli,appelliStatus,news};
   root.STUDIOOS_CAREER=api;if(typeof module!=="undefined"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);

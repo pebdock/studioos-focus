@@ -150,3 +150,17 @@ html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;text-
 }
 body.rm .view.on,body.rm .sheet.on>div,body.rm .toast{animation:none}
 body.rm .btn,body.rm .tab,body.rm .tab svg{transition:none}
+
+/* R13h.8 · appelli sempre visibili (date pubblicate, finestre d'iscrizione, link AlmaEsami) */
+.exam-subj{padding:6px 0 10px;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.exam-subj:first-child{border-top:0}.exam-subj .exam{border-top:0;padding-bottom:4px}
+.appelli{list-style:none;margin:2px 0 6px;padding:0;display:grid;gap:4px}
+.appelli li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 8px;font-size:.84rem;padding:4px 10px;border-radius:var(--r-field,13px);background:color-mix(in srgb,var(--line) 22%,transparent);font-variant-numeric:tabular-nums}
+.appelli li.inplan{box-shadow:inset 3px 0 0 var(--sc,currentColor)}
+.appelli .pill{white-space:normal;max-width:100%}
+.exam-links{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem}
+.exam-links a{color:var(--accent,inherit);text-decoration:none;font-weight:600;padding:6px 0;min-height:32px;display:inline-flex;align-items:center}
+.td-news{display:grid;gap:6px;margin-top:8px}
+.td-new{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:var(--r-inner,16px);background:color-mix(in srgb,var(--warn) 12%,transparent);font-size:.85rem}
+.td-new .chipbtn{flex:none}
+a.pill{text-decoration:none}

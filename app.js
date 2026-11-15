@@ -504,8 +504,19 @@ function renderWeek(){const m=monday(wkRef),days=[...Array(7)].map((_,i)=>addDay
   $("days7").innerHTML=days.map((d,i)=>`<div title="${per[i]} min"><span>${per[i]?Math.round(per[i]/6)/10+" h":""}</span><i style="height:${per[i]/mx*84}px;${d===todayIso()?"opacity:1;outline:2px solid var(--ink)":""}"></i><span>${dayLabel(d,{weekday:"short"}).slice(0,3)}</span></div>`).join("");
   $("wkSubj").innerHTML=SUBJ.map(s=>{const bs=blocks.filter(b=>b.mat===s),p=bs.reduce((t,b)=>t+b.min,0),d=bs.reduce((t,b)=>t+done(b),0);if(!p)return"";
     return `<div class="wk"><b style="color:var(--${s})">${s}</b><div class="meter" style="background:color-mix(in srgb,var(--${s}) 16%,transparent)"><i style="width:${Math.min(100,d/p*100)}%;background:var(--${s})"></i></div><span class="v">${d}/${p} min</span></div>`}).join("")||'<p class="mute">Nessun blocco in questa settimana.</p>';
-  const t=todayIso();$("exams").innerHTML=EXAMS.map(([d,s,k])=>{const n=d?Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(t+"T12:00:00Z"))/864e5):null;
-    const bk=bookingFor(s,d);return `<div class="exam"><span><b style="color:var(--${s})">${s}</b> · ${esc(k)}${bk?` <span class="pill ok booked" title="Prenotazione letta da AlmaEsami">✓ prenotato ${esc(bk.at.slice(11,16))}</span>`:""}</span><b>${d?(n>0?n+" giorni · "+dayLabel(d,{day:"numeric",month:"short"}):n===0?"oggi":"svolto"):"—"}</b></div>`}).join("")+'<p class="mute small">Date dagli appelli già pubblicati in SCADENZE. Ricontrollale sulle pagine UniBo prima dell\'iscrizione.</p>'}
+  renderExams()}
+/* Date d'esame sempre visibili: appelli del piano (SCADENZE) e appelli pubblici letti dal ponte, anche se non prenotati. */
+function renderExams(){const el=$("exams");if(!el)return;const t=todayIso(),S=career&&career.summary,has=!!(S&&S.appelli&&CAREER&&CAREER.appelli);
+  const fmt=d=>dayLabel(d,{day:"numeric",month:"short"}),dd=d=>d?d.slice(8,10)+"/"+d.slice(5,7):"",AE=(CAREER&&CAREER.ALMAESAMI)||"https://almaesami.unibo.it/";
+  const chip=a=>a.booked?'<span class="pill ok booked">✓ prenotato</span>':a.state==="aperta"?`<span class="pill warn">iscrizioni fino al ${dd(a.to)}</span>`:a.state==="non_aperta"?`<span class="pill">iscrizioni dal ${dd(a.from)}</span>`:a.state==="chiusa"?'<span class="pill">iscrizioni chiuse</span>':"";
+  el.innerHTML=SUBJ.map(s=>{const plan=EXAMS.filter(x=>x[1]===s),list=has?CAREER.appelli(S,s,t):[];
+    const planned=plan.filter(x=>x[0]).map(([d,,k])=>{const n=Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(t+"T12:00:00Z"))/864e5),bk=bookingFor(s,d);
+      return `<div class="exam"><span><b style="color:var(--${s})">${s}</b> · ${esc(k)} <span class="mute small">nel piano</span>${bk?` <span class="pill ok booked" title="Prenotazione letta da AlmaEsami">✓ prenotato ${esc(bk.at.slice(11,16))}</span>`:""}</span><b>${n>0?n+" giorni · "+fmt(d):n===0?"oggi":"svolto"}</b></div>`}).join("")
+      ||`<div class="exam"><span><b style="color:var(--${s})">${s}</b> · ${esc((plan[0]||[])[2]||"Data non pubblicata")}</span><b>—</b></div>`;
+    const rows=list.slice(0,5).map(a=>`<li class="${plan.some(x=>x[0]===a.date)?"inplan":""}"><span>${fmt(a.date)}${a.time?" "+a.time:""} · ${esc(a.type||"prova")}</span>${chip(a)}</li>`).join("");
+    const more=list.length>5?`<li class="mute small">+${list.length-5} altre date sulla pagina del docente</li>`:"",empty=has&&!list.length?'<li class="mute small">Nessun appello futuro pubblicato finora</li>':"";
+    return `<section class="exam-subj" style="--sc:var(--${s})">${planned}${rows||more||empty?`<ul class="appelli">${rows}${more}${empty}</ul>`:""}<div class="exam-links"><a href="${AE}" target="_blank" rel="noopener">AlmaEsami ↗</a>${CAREER&&CAREER.SOURCES&&CAREER.SOURCES[s]?`<a href="${CAREER.SOURCES[s]}" target="_blank" rel="noopener">Appelli del docente ↗</a>`:""}</div></section>`}).join("")
+    +`<p class="mute small">${has?esc(CAREER.appelliStatus(S).label)+". ":"Appelli pubblici non ancora letti dal PC. "}Le date pubblicate non sono iscrizioni: ci si iscrive solo in AlmaEsami.</p>`}
 function hash(s){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return (h>>>0)/4294967295}
 /* ---------- navigation, sheets, gestures ---------- */
 let navController=null;
@@ -679,7 +690,15 @@ function renderToday(){if(!$("todayCard"))return;const now=Date.now(),today=toda
   const recB=[...new Set(rec.map(b=>b.id))].map(id=>index[id]),dueN=dueErrors().length,nPend=(plan.rows||[]).filter(pend).length;
   $("tdTodo").innerHTML=(recB.length?`<p><b>Da recuperare:</b> ${recB.slice(0,5).map(b=>`<a href="#" data-go="${b.id}" data-day="${b.date}">${esc(b.mat)} ${b.date.slice(8)}/${b.date.slice(5,7)}</a>`).join(" · ")} <span class="mute">(chiedi una ridistribuzione in Piano)</span></p>`:"")+(dueN?`<p><b>Ripassi di oggi:</b> ${dueN} ${dueN===1?"errore":"errori"} da rifare · <a href="#" id="goRv">apri Studio</a></p>`:"");
   const tp=$("tdPend");tp.hidden=!nPend;tp.textContent=nPend+" dal tutor";
-  $("tdExams").innerHTML=EXAMS.filter(x=>x[0]&&x[0]>=today).slice(0,4).map(([d,m,t])=>`<span class="pill${bookingFor(m,d)?" booked":""}" style="border-color:var(--${m})">${bookingFor(m,d)?"✓ ":""}${m} ${t} · ${Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(today+"T12:00:00Z"))/864e5)} g</span>`).join("")}
+  const S=career&&career.summary,open=S&&CAREER&&CAREER.appelli?CAREER.appelli(S,null,today).filter(a=>a.state==="aperta"&&!a.booked):[],seen=new Set();
+  $("tdExams").innerHTML=EXAMS.filter(x=>x[0]&&x[0]>=today).slice(0,4).map(([d,m,t])=>`<span class="pill${bookingFor(m,d)?" booked":""}" style="border-color:var(--${m})">${bookingFor(m,d)?"✓ ":""}${m} ${t} · ${Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(today+"T12:00:00Z"))/864e5)} g</span>`).join("")
+    +open.filter(a=>!seen.has(a.subject)&&seen.add(a.subject)).map(a=>`<a class="pill warn" href="${CAREER.ALMAESAMI}" target="_blank" rel="noopener" title="Appello del ${a.date.split("-").reverse().join("/")}: iscrizioni aperte, non risulti prenotato">${a.subject} iscrizioni aperte · fino al ${a.to.slice(8,10)}/${a.to.slice(5,7)}</a>`).join("");
+  renderNews()}
+/* Novità appelli dal ponte (nuove date, iscrizioni aperte o in chiusura): restano visibili 14 giorni o fino a «Visto». */
+function renderNews(){const host=$("tdExams");if(!host||!CAREER||!CAREER.news)return;let box=$("tdNews");if(!box){box=document.createElement("div");box.id="tdNews";box.className="td-news";host.after(box)}
+  const seen=new Set(LS.get("newsSeen",[])),list=career?CAREER.news(career.summary,Date.now(),14).filter(e=>!seen.has(e.id)):[];
+  box.innerHTML=list.slice(0,4).map(e=>`<div class="td-new"><span>🔔 ${esc(e.msg)}</span><button class="chipbtn" data-news="${esc(e.id)}">Visto</button></div>`).join("");
+  box.querySelectorAll("[data-news]").forEach(b=>b.onclick=()=>{const v=LS.get("newsSeen",[]);v.push(b.dataset.news);LS.set("newsSeen",v.slice(-200));renderNews()})}
 async function startStudy(){unlockAudio();if(run&&run.status==="active"){const b=index[run.blockId];await openSession(run.blockId,b&&b.date,true);show("focus");$("focusCard").scrollIntoView({behavior:settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});return}
   const pk=pickStudyBlock();if(!pk)return show("giorno");await openSession(pk.b.id,pk.b.date);if(cur&&!cur.rinv){await startRun();$("focusCard").scrollIntoView({behavior:settings.rm||matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})}}
 $("bStudy").onclick=startStudy;$("tdPend").onclick=()=>show("piano");
