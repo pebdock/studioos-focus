@@ -1,23 +1,15 @@
-/* STUDIOOS Focus · note della versione definitiva (2.3.1: leggibilità e controlli touch).
+/* STUDIOOS Focus · note della versione definitiva (2.4.0: timer e lettura compatta).
    Mostrate una sola volta dopo l'aggiornamento (mai durante una sessione attiva) e sempre
    disponibili in Opzioni › Informazioni. Nessun dato letto o scritto oltre a una chiave locale. */
 (function(root){
   "use strict";
   const doc=root.document;if(!doc)return;
-  const VERSION="2.3.1",KEY="sfocus_release_seen";
+  const VERSION="2.4.0",KEY="sfocus_release_seen";
   const NOTES=[
-    ["Interfaccia (2.3.1)","Oggi più compatto, file e istruzioni più distinti nella scaletta e controlli touch da almeno 44 px. Le note usano due colonne sugli schermi ampi. Il codice del timer e dei salvataggi resta invariato."],
-    ["Scaletta compatta (2.3.0)","Ogni passo occupa meno spazio: stato, orario e titolo in testa, poi «Apri» e «Cosa fare» senza ripetere il file; il titolo ripetuto della stessa unità è attenuato."],
-    ["Basi (2.2.0)","In Studio › Prerequisiti e basi usate trovi, per MN, BD, OOP e Reti, le basi che i materiali usano senza spiegarle, con i blocchi in cui servono. È una ricerca nei materiali [Inferenza]: confermala studiando."],
-    ["Scaletta (2.1.0)","Ogni intervallo di studio della scaletta indica il file da aprire con le pagine e cosa fare. Dove la fonte non dava i minuti dei singoli passi, la ripartizione è una proposta [Stima] e la consegna lo dice."],
-    ["Prerequisiti (2.1.0)","Ogni prerequisito è un passo vero della scaletta, con esercizi e «serve per». In Studio trovi anche l'elenco delle basi usate ma non spiegate nei corsi e dove il piano le allena."],
-    ["Prerequisiti (2.0.1)","Le basi di matematica che servono a Fisica e MDP (trigonometria, derivate, integrali, vettori, serie) sono nel piano subito prima dell'argomento che le usa, senza minuti in più. Le trovi nel check-in del blocco e in Studio › Materiali, con tracce, pagine e criterio."],
-    ["Studio","Timer con pause intelligenti e respirazione guidata, check-in facoltativo (energia, concentrazione, motivazione, punto raggiunto), mini-verifica a fine blocco e registro per argomento. Il timer da solo non completa nulla."],
-    ["Piano","Il piano resta il riferimento. Le proposte del tutor le approvi tu; lo script Google le applica entro un'ora solo se rispettano pasti, pause e limiti. Calendar si allinea da solo ogni ora."],
-    ["Esami","Tutte le date pubblicate, anche non prenotate, con finestre d'iscrizione e link ad AlmaEsami. Si aggiornano ogni 3 ore anche a PC spento; prenotazioni e carriera arrivano dal ponte del PC quando è acceso."],
-    ["Analisi","Ritmo, Argomenti, Piano ed Esami in sezioni separate: una cosa alla volta, senza scorrere chilometri."],
-    ["Design","Liquid Glass sui controlli, sfondo fluido che segue materia e timer, movimenti a molla, tab bar a capsula pensata per iPhone."],
-    ["Affidabilità","Sessioni sincronizzate fra dispositivi con coda offline, backup giornaliero del piano, nessun minuto inventato, nessuna iscrizione automatica agli appelli."]];
+    ["Timer (2.4.0)","Il mini-timer in basso non copre più lo schermo e ha il suo tasto ❚❚ / ▶: metti in pausa o riprendi da qualsiasi sezione. Nel blocco vedi un solo comando principale (Avvia oppure Pausa); StandBy, OLED e gli altri sono in «Altre opzioni»."],
+    ["Scaletta (2.4.0)","Un passo per riga: stato (○ ◐ ✓ ◑ ↺), orario, durata e tipo (Teoria, Esercizi, Esame, Prerequisito…). «Cosa fare» è su due righe: tocca il passo per il testo completo e per cambiare il tipo. Gli esercizi d'esame reali sono evidenziati."],
+    ["Lettura (2.4.0)","Le spiegazioni lunghe sono chiuse dietro «ⓘ Come funziona»; i materiali del blocco non si ripetono più (stesso file, pagine unite)."],
+    ["Versioni precedenti","Interfaccia più leggibile e controlli touch da 44 px (2.3.1), prerequisiti come passi veri della scaletta, basi usate ma non spiegate, file e pagine per ogni intervallo, sincronizzazione tra dispositivi con coda offline, nessun minuto inventato."]];
   const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const body=()=>`<p class="eyebrow">Versione stabile · sessione invernale 2026/27</p><h2 id="relTitle">STUDIOOS Focus ${VERSION} · Definitiva</h2>
     <ul class="rel-list">${NOTES.map(([t,d])=>`<li><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join("")}</ul>

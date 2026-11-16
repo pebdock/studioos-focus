@@ -338,14 +338,14 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
         <button class="btn" id="bExt" disabled hidden>+10 min</button>
         <button class="btn" id="bDone" disabled>Concludi…</button>
       </div>
-      <div class="controls minor hideable">
+      <details class="more-ctl hideable"><summary>Altre opzioni</summary><div class="controls minor">
         <button class="btn ghost" id="bStandby">StandBy</button>
         <button class="btn ghost" id="bOled" aria-pressed="false">OLED</button>
         <button class="btn ghost" id="bFull">Schermo intero</button>
         <button class="btn ghost" id="bHide">Solo timer</button>
         <button class="btn ghost" id="bTired" disabled title="Cicli più brevi e pause più lunghe da adesso">Sono stanco</button>
-      </div>
-      <p class="center mute small hideable"><span class="kbd">Spazio</span> avvia/pausa · <span class="kbd">C</span> concludi · <span class="kbd">S</span> StandBy · <span class="kbd">O</span> OLED · <span class="kbd">E</span> +10 min · <span class="kbd">F</span> schermo intero · <span class="kbd">1–6</span> sezioni</p>
+      </div></details>
+      <p class="center mute small hideable kbd-help"><span class="kbd">Spazio</span> avvia/pausa · <span class="kbd">C</span> concludi · <span class="kbd">S</span> StandBy · <span class="kbd">O</span> OLED · <span class="kbd">E</span> +10 min · <span class="kbd">F</span> schermo intero · <span class="kbd">1–6</span> sezioni</p>
     </article>
     <article class="card study-checkin" id="studyCheckin" hidden>
       <details id="studyCheckinDetails"><summary>Il punto dello studio <span class="small mute" id="studyCheckinHint">Argomento e come ti senti</span></summary>
@@ -361,12 +361,12 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
     <article class="card" id="scalettaCard" hidden>
       <div class="row"><h3 class="sp">Scaletta del blocco</h3><span id="stepCount" class="mute small"></span></div>
       <ol class="steps" id="steps"></ol>
-      <p class="mute small">Tocca lo stato per cambiarlo: Da iniziare → In corso → Completato → Parziale → Da recuperare. Lo stato si salva e si sincronizza tra i dispositivi; non conta come prova di padronanza: l'esito si conferma con «Concludi».</p>
+      <p class="mute small steps-hint">○ da iniziare · ◐ in corso · ✓ fatto · ◑ parziale · ↺ da recuperare. Tocca un passo per il testo completo. L'esito del blocco si conferma con «Concludi».</p>
     </article>
     <article class="card" id="detail" hidden>
-      <details open><summary>Criterio di completamento</summary><pre class="cons" id="dCrit"></pre></details>
+      <details><summary>Criterio di completamento</summary><pre class="cons" id="dCrit"></pre></details>
       <details><summary>Consegna completa</summary><pre class="cons" id="dCons"></pre></details>
-      <details open><summary>Materiali</summary><div id="dMatList" class="small"></div><pre class="cons" id="dMat" hidden></pre><p><a id="dOpen" href="#" target="_blank" rel="noopener">Apri la cartella o il file su Drive</a> <span class="mute small">(il timer continua)</span></p></details>
+      <details><summary>Materiali</summary><div id="dMatList" class="small"></div><pre class="cons" id="dMat" hidden></pre><p><a id="dOpen" href="#" target="_blank" rel="noopener">Apri la cartella o il file su Drive</a> <span class="mute small">(il timer continua)</span></p></details>
       <label for="notes">Note della sessione (punto di arresto, pagina, esercizio)</label>
       <textarea id="notes" rows="3"></textarea>
       <details><summary>Errori di questo blocco</summary>
@@ -546,7 +546,7 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
   <h2 id="mrT">Scrivi nel registro PROGRAMMA</h2><p class="small" id="mrInfo"></p>
   <div class="row"><button class="btn primary" id="mrOk">Scrivi</button><button class="btn" id="mrNo">Annulla</button></div>
 </div></div>
-<button id="island" aria-label="Torna al timer"><span class="dot"></span><span id="isPh">Studio</span><span id="isT">00:00</span></button>
+<div id="island" role="group" aria-label="Timer in corso"><button id="isGo" aria-label="Torna al timer"><span class="dot"></span><span id="isPh">Studio</span><span id="isT">00:00</span></button><button id="isPause" aria-label="Pausa">❚❚</button></div>
 <div id="toasts" aria-live="polite"></div>
 <div id="standby" role="dialog" aria-label="Modalità StandBy">
   <div id="sbGrid">
@@ -573,5 +573,6 @@ input,textarea,pre,.sel,[contenteditable]{-webkit-user-select:text;user-select:t
 <script src="prerequisites.js"></script>
 <script src="sections.js"></script>
 <script src="release.js"></script>
+<script src="compact.js"></script>
 </body>
 </html>

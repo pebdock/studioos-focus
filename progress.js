@@ -1,7 +1,7 @@
 /* Plan coverage, not an estimate of mastery or the probability of passing. */
 (function(root){
   "use strict";
-  function kind(t){t=t.toLowerCase();return /simulaz|prova (a tempo|mista)|eol completa/.test(t)?"Simulazione":/correz|errori|confronta/.test(t)?"Correzione":/ripass|richiamo|riprova/.test(t)?"Ripasso":/eserciz|problem|tentativ|laborat|notebook|query|schema|implementa|test/.test(t)?"Esercizi":/teoria|leggi|studia|slide|pp\.|definiz|ricostruisci/.test(t)?"Teoria":/verifica/.test(t)?"Verifica":""}
+  function kind(t){t=t.toLowerCase();return /esercizio d.esame/.test(t)?"Esame":/prerequisit/.test(t)?"Prerequisito":/simulaz|prova (a tempo|mista)|eol completa/.test(t)?"Simulazione":/correz|errori|confronta/.test(t)?"Correzione":/ripass|richiamo|riprova/.test(t)?"Ripasso":/eserciz|problem|tentativ|laborat|notebook|query|schema|implementa|test/.test(t)?"Esercizi":/teoria|leggi|studia|slide|pp\.|definiz|ricostruisci/.test(t)?"Teoria":/verifica/.test(t)?"Verifica":""}
   function steps(cons,budget=0){cons=String(cons||"");let out=[];const m=/SCALETTA:\s*([^\n]+)/.exec(cons);
     if(m)for(const part of m[1].split(/;\s*/)){const p=/^pausa\s+(\d\d:\d\d)[–-](\d\d:\d\d)/i.exec(part),w=/^(\d\d:\d\d)[–-](\d\d:\d\d)\s*(.*)$/.exec(part);
       if(p)out.push({a:p[1],b:p[2],t:"Pausa",pause:true});else if(w){const t=w[3].replace(/\s*quota \[\d+,\s*\d+\)/,""),d=/^(.*?)\s+—\s+Apri:\s*(.*?)\s+—\s+Fai:\s*(.*)$/.exec(t),st={a:w[1],b:w[2],t,k:kind(t),source:w[3]};
@@ -37,7 +37,7 @@
     return {items:bound.map(x=>x.state),types:bound.map(x=>x.type),taskKeys:ks,legacy:!Array.isArray(r.taskKeys)&&(r.items||[]).some(Boolean)};
   }
   function category(s){if(s.coarse)return "";const t=String(s.source||s.t||"").toLowerCase();
-    if(/simulaz|prova (a tempo|mista|d.esame)|eol completa/.test(t))return "exam";
+    if(/simulaz|prova (a tempo|mista|d.esame)|esercizio d.esame|eol completa/.test(t))return "exam";
     const th=/teoria|leggi|lettura|studia|slide|pp\.|definiz|ricostruisci|ripass|richiamo/.test(t),pr=/correz|errori|confronta|eserciz|problem|tentativ|laborat|notebook|query|schema|implementa|test/.test(t);
     return th&&!pr?"theory":pr&&!th?"practice":"";
   }

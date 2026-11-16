@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-2.3.0 · Definitiva";
+  var VERSION = "pwa-2.4.0 · Definitiva";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -430,7 +430,7 @@
     var step = !ok ? 1 : !configured() ? 2 : 3;
     if (step === 3 && CFG.readOnly && !err) {
       top.hidden = false;
-      top.innerHTML = '<span><b>Sola lettura.</b> Focus mostra il piano ma non salva sessioni e registro nei tuoi fogli. Attiva il salvataggio in Opzioni › Collegamenti e sistema.</span> <button class="btn" data-pwa="settings">Apri Opzioni</button>';
+      top.innerHTML = '<span class="pwa-ro"><span title="Focus mostra il piano ma non salva sessioni e registro nei tuoi fogli. Il salvataggio si attiva in Opzioni › Collegamenti e sistema."><b>Sola lettura</b> · sessioni salvate solo qui</span> <button class="btn" data-pwa="settings">Attiva</button></span>';
     } else if (step < 3 || err) {
       top.hidden = false;
       var txt = step === 1 ? "Passo 1 di 2 · Collega il tuo account Google: Focus vedrà solo i fogli STUDIOOS che autorizzi."

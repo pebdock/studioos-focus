@@ -41,7 +41,7 @@ input[type=range]{touch-action:pan-y}textarea{min-height:110px}
 .kpis,.tdkpi{grid-template-columns:repeat(3,minmax(0,1fr))}.kpi{min-width:0}
 .pwa-save,.pwa-calendar{background:color-mix(in srgb,var(--acc) 3%,var(--surface))}
 #pwaCard p,#pwaDiag{overflow-wrap:anywhere}#pwaDiag{white-space:pre-wrap;max-width:100%}
-#island{min-height:48px;max-width:calc(100% - 32px);bottom:calc(var(--nav-height) + env(safe-area-inset-bottom) + 20px);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 5px 24px #0002}
+#island{top:auto;min-height:48px;max-width:calc(100% - 32px);bottom:calc(var(--nav-height) + env(safe-area-inset-bottom) + 20px);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 5px 24px #0002}
 #toasts{bottom:calc(var(--nav-height) + env(safe-area-inset-bottom) + 22px);max-width:min(90vw,460px);pointer-events:none}
 #ring .ph,#ring .net{transition:none}
 .past-sessions{margin-top:14px;border-top:1px solid var(--line)}.past-sessions>summary{color:var(--mute);font-size:.85rem}.past-sessions[open]>summary{color:var(--ink)}
