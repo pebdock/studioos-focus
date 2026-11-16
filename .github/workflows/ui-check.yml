@@ -1,0 +1,45 @@
+name: Focus UI preflight
+on:
+  pull_request:
+    paths:
+      - '*.css'
+      - 'release.js'
+      - 'sw.js'
+      - 'BUILD.json'
+      - '.github/ui-check/**'
+      - '.github/workflows/ui-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: focus-ui-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install isolated browser test tools
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
+        run: |
+          node --version
+          npm install --prefix "$RUNNER_TEMP/focus-ui" --no-audit --no-fund --no-save --no-package-lock --ignore-scripts playwright@1.65.1
+          "$RUNNER_TEMP/focus-ui/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Verify assets and render synthetic study data
+        env:
+          NODE_PATH: ${{ runner.temp }}/focus-ui/node_modules
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
+          UI_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node .github/ui-check/check.cjs
+      - name: Save review evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: focus-ui-evidence
+          path: artifacts-ui/
+          retention-days: 7

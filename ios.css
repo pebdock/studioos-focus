@@ -200,3 +200,28 @@ a.pill{text-decoration:none}
 .rel-actions .btn{min-width:140px;min-height:44px}
 @media (prefers-reduced-motion:no-preference){.rel-dialog[open] .rel-card{animation:relIn .42s var(--spring-ease,cubic-bezier(.2,.9,.25,1.1)) both}}
 @keyframes relIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+
+/* Presentation pass: shorter overview, full instructions, unchanged DOM. */
+#todayCard{row-gap:12px}
+#todayCard .daily-greeting{gap:8px;margin-bottom:2px;font-size:.82rem}
+#todayCard .daily-greeting svg{width:32px;height:32px;padding:4px;border-radius:11px}
+#todayCard .row>.sp{min-width:0}
+#todayCard h2{font-size:clamp(1.22rem,4vw,1.7rem);line-height:1.2}
+#todayCard .tdkpi{gap:8px}
+#todayCard .tdkpi>div{padding:10px}
+#todayCard .tdkpi b{font-size:clamp(1.12rem,3vw,1.3rem);font-variant-numeric:tabular-nums}
+#tdNext{line-height:1.5;overflow-wrap:anywhere}
+#focusCard #fTitle{font-size:clamp(1.08rem,3vw,1.3rem);line-height:1.35;text-wrap:pretty}
+#detail .cons{max-width:100%;line-height:1.6;overflow-wrap:anywhere}
+
+/* Keep every release note; reduce padding and use the available desktop width. */
+#relDialog .rel-card{padding:20px 18px 16px}
+#relDialog .rel-card h2{font-size:1.25rem;margin-bottom:12px}
+#relDialog .rel-list{gap:6px}
+#relDialog .rel-list li{padding:8px 10px;gap:3px;min-width:0;overflow-wrap:anywhere}
+#relDialog .rel-list span{line-height:1.5}
+#relDialog .rel-actions{bottom:-16px;margin:0 -18px -16px;padding:12px 18px 16px}
+@media(min-width:740px){
+ #relDialog{max-width:min(660px,calc(100vw - 32px))}
+ #relDialog .rel-list{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+}
