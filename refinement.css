@@ -147,3 +147,4 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 .prq-glossary{margin-top:12px}.prq-glossary summary{cursor:pointer;font-weight:600}
 .prq-gl-row{display:grid;grid-template-columns:3.2em 1fr;gap:8px;padding:7px 0;border-top:1px solid var(--line,rgba(127,127,127,.18))}
 .prq-gl-row small{display:block;color:var(--mute,#8e8e93)}
+.prq-gl-subj{margin:14px 0 2px;font-size:.92em;letter-spacing:.03em}

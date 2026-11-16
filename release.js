@@ -1,11 +1,12 @@
-/* STUDIOOS Focus · note della versione definitiva (2.1.0: scaletta con file, pagine e cosa fare).
+/* STUDIOOS Focus · note della versione definitiva (2.2.0: basi usate ma non spiegate in tutte le materie).
    Mostrate una sola volta dopo l'aggiornamento (mai durante una sessione attiva) e sempre
    disponibili in Opzioni › Informazioni. Nessun dato letto o scritto oltre a una chiave locale. */
 (function(root){
   "use strict";
   const doc=root.document;if(!doc)return;
-  const VERSION="2.1.0",KEY="sfocus_release_seen";
+  const VERSION="2.2.0",KEY="sfocus_release_seen";
   const NOTES=[
+    ["Basi (2.2.0)","In Studio › Prerequisiti e basi usate trovi, per MN, BD, OOP e Reti, le basi che i materiali usano senza spiegarle, con i blocchi in cui servono. È una ricerca nei materiali [Inferenza]: confermala studiando."],
     ["Scaletta (2.1.0)","Ogni intervallo di studio della scaletta indica il file da aprire con le pagine e cosa fare. Dove la fonte non dava i minuti dei singoli passi, la ripartizione è una proposta [Stima] e la consegna lo dice."],
     ["Prerequisiti (2.1.0)","Ogni prerequisito è un passo vero della scaletta, con esercizi e «serve per». In Studio trovi anche l'elenco delle basi usate ma non spiegate nei corsi e dove il piano le allena."],
     ["Prerequisiti (2.0.1)","Le basi di matematica che servono a Fisica e MDP (trigonometria, derivate, integrali, vettori, serie) sono nel piano subito prima dell'argomento che le usa, senza minuti in più. Le trovi nel check-in del blocco e in Studio › Materiali, con tracce, pagine e criterio."],
