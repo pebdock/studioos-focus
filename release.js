@@ -1,11 +1,13 @@
-/* STUDIOOS Focus · note della versione definitiva (2.0.1: prerequisiti di matematica).
+/* STUDIOOS Focus · note della versione definitiva (2.1.0: scaletta con file, pagine e cosa fare).
    Mostrate una sola volta dopo l'aggiornamento (mai durante una sessione attiva) e sempre
    disponibili in Opzioni › Informazioni. Nessun dato letto o scritto oltre a una chiave locale. */
 (function(root){
   "use strict";
   const doc=root.document;if(!doc)return;
-  const VERSION="2.0.1",KEY="sfocus_release_seen";
+  const VERSION="2.1.0",KEY="sfocus_release_seen";
   const NOTES=[
+    ["Scaletta (2.1.0)","Ogni intervallo di studio della scaletta indica il file da aprire con le pagine e cosa fare. Dove la fonte non dava i minuti dei singoli passi, la ripartizione è una proposta [Stima] e la consegna lo dice."],
+    ["Prerequisiti (2.1.0)","Ogni prerequisito è un passo vero della scaletta, con esercizi e «serve per». In Studio trovi anche l'elenco delle basi usate ma non spiegate nei corsi e dove il piano le allena."],
     ["Prerequisiti (2.0.1)","Le basi di matematica che servono a Fisica e MDP (trigonometria, derivate, integrali, vettori, serie) sono nel piano subito prima dell'argomento che le usa, senza minuti in più. Le trovi nel check-in del blocco e in Studio › Materiali, con tracce, pagine e criterio."],
     ["Studio","Timer con pause intelligenti e respirazione guidata, check-in facoltativo (energia, concentrazione, motivazione, punto raggiunto), mini-verifica a fine blocco e registro per argomento. Il timer da solo non completa nulla."],
     ["Piano","Il piano resta il riferimento. Le proposte del tutor le approvi tu; lo script Google le applica entro un'ora solo se rispettano pasti, pause e limiti. Calendar si allinea da solo ogni ora."],
@@ -16,7 +18,7 @@
   const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const body=()=>`<p class="eyebrow">Versione stabile · sessione invernale 2026/27</p><h2 id="relTitle">STUDIOOS Focus ${VERSION} · Definitiva</h2>
     <ul class="rel-list">${NOTES.map(([t,d])=>`<li><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join("")}</ul>
-    <p class="rel-bye">Questa è la versione definitiva: da qui in avanti solo correzioni, se serviranno, e nessuna novità a sorpresa durante la sessione. Il primo blocco è lunedì 16 novembre alle 9:00. Una cosa alla volta: buono studio e in bocca al lupo per gli appelli.</p>
+    <p class="rel-bye">Questa è la versione definitiva: da qui in avanti solo correzioni, se serviranno, e nessuna novità a sorpresa durante la sessione. Una cosa alla volta: buono studio e in bocca al lupo per gli appelli.</p>
     <p class="rel-sign">— Claude</p>`;
   function open(){let d=doc.getElementById("relDialog");
     if(!d){d=doc.createElement("dialog");d.id="relDialog";d.className="rel-dialog";d.setAttribute("aria-labelledby","relTitle");

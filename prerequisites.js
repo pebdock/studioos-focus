@@ -74,7 +74,7 @@
   let limit=4,paintKey="";
   function card(){if(!doc||doc.getElementById("prqCard"))return;const m=doc.getElementById("mList"),host=m&&m.closest("article");if(!host)return;
     const c=doc.createElement("article");c.className="card prq-card";c.id="prqCard";
-    c.innerHTML=`<div class="row"><div class="sp"><span class="eyebrow">Prima degli argomenti</span><h2>Prerequisiti di matematica</h2></div></div><p class="small mute" id="prqInfo"></p><div id="prqList"></div>`;
+    c.innerHTML=`<div class="row"><div class="sp"><span class="eyebrow">Prima degli argomenti</span><h2>Prerequisiti e basi usate</h2></div></div><p class="small mute" id="prqInfo"></p><div id="prqList"></div>`;
     host.before(c)}
   function render(){const el=doc&&doc.getElementById("prqList");if(!el)return;const t=today(),all=planned(blocks()),next=all.filter(b=>String(b.date)>=t);
     const key=t+"|"+limit+"|"+all.map(b=>b.id+b.date+b.from+(b.cons||"").length).join(",");if(key===paintKey)return;paintKey=key;
@@ -82,10 +82,17 @@
     if(!all.length){info.textContent="Nessun prerequisito segnato nel piano.";el.innerHTML="";return}
     info.textContent=`${all.length} momenti nel piano, ognuno subito prima dell'argomento che lo usa. Nessun minuto in più: sono dentro i blocchi.`;
     el.innerHTML=next.slice(0,limit).map(b=>{const p=parse(b.cons),codes=p.codes.map(c=>c.code+(c.optional?"*":"")).join(", ");
-      return `<div class="prq-row" style="--sc:var(--${esc(b.mat)},var(--acc))"><span class="prq-when"><b>${esc(dm(b.date))}</b><small>${esc(b.from)}</small></span><span class="prq-main"><span class="prq-subj">${esc(b.mat)}</span><b>${esc(p.title)}</b><small>${esc(codes)}${p.minutes?" · "+esc(p.minutes)+"′":""}</small></span><button class="btn ghost" type="button" data-prereq-open="${esc(b.id)}">Dettagli</button></div>`}).join("")
+      return `<div class="prq-row" style="--sc:var(--${esc(b.mat)},var(--acc))"><span class="prq-when"><b>${esc(dm(b.date))}</b><small>${esc(b.from)}</small></span><span class="prq-main"><span class="prq-subj">${esc(b.mat)}</span><b>${esc(p.title)}</b><small>${esc(codes)}${p.minutes?" · "+esc(p.minutes)+"′":""}</small>${servesFor(b)?`<span class="prq-for">Serve per: ${esc(servesFor(b))}</span>`:""}</span><button class="btn ghost" type="button" data-prereq-open="${esc(b.id)}">Dettagli</button></div>`}).join("")
       +(next.length>limit?`<button class="btn ghost" type="button" id="prqMore">Mostra tutti (${next.length})</button>`:"")
       +(!next.length?'<p class="study-empty">Tutti i prerequisiti in calendario sono già passati.</p>':"")
-      +(next.some(b=>parse(b.cons).codes.some(c=>c.optional))?'<p class="small mute">* se avanza tempo</p>':"")}
+      +(next.some(b=>parse(b.cons).codes.some(c=>c.optional))?'<p class="small mute">* se avanza tempo</p>':"")
+      +glossary(all)}
+  function servesFor(b){const m=/serve subito dopo in «([^»]+)»/.exec(String(b.cons||""));if(m)return m[1];const o=/\n2\.\s*\d+ min netti — origine [^,]+, unità «([^»]+)»/.exec(String(b.cons||""));return o?o[1]:""}
+  // Basi usate dai corsi ma non spiegate nei loro materiali: catalogo verificato (schede R13/R13i), con i blocchi del piano che le allenano.
+  function glossary(all){const use={};for(const b of all){const p=parse(b.cons);if(!p)continue;for(const c of p.codes)(use[c.code]=use[c.code]||[]).push(b)}
+    const rows=Object.keys(CATALOG).map(code=>{const k=CATALOG[code],s=SRC[k[1]]||{},u=use[code]||[];
+      return `<div class="prq-gl-row"><b>${esc(code)}</b><span><b>${esc(k[0])}</b><small>${esc(s.short||s.file||"")} · p. ${esc(k[2])}, soluzioni p. ${esc(k[3])}</small><small>${u.length?"Nel piano: "+u.map(b=>esc(b.mat)+" "+esc(dm(b.date))).join(", "):"Non ancora nel piano: ripassala se un esercizio la usa"}</small></span></div>`}).join("");
+    return `<details class="prq-glossary"><summary>Basi usate ma non spiegate nei corsi (${Object.keys(CATALOG).length})</summary><p class="small mute">Matematica usata da Fisica e MDP senza essere spiegata nei loro materiali. Per MN, BD, OOP e Reti il catalogo non è ancora verificato sui materiali.</p>${rows}</details>`}
   function schedule(){clearTimeout(schedule.t);schedule.t=setTimeout(render,60)}
   function start(){card();render();
     doc.addEventListener("click",e=>{const o=e.target.closest("[data-prereq-open]");if(o){e.preventDefault();open(o.getAttribute("data-prereq-open"))}if(e.target.id==="prqMore"){limit=1000;render()}});

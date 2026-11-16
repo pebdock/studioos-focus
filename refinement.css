@@ -138,3 +138,12 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 #mSearch,.matl input,#pwaKey,#pwaProj{min-height:44px}
 #island::after{content:"";position:absolute;inset:-7px -4px}
 @media(max-width:420px){.daynav{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px}#dToday{order:1;grid-column:1/-1;justify-self:center}}
+
+/* 2.1.0 · scaletta strutturata: file da aprire e cosa fare per ogni intervallo */
+.st-open,.st-do{display:block;margin-top:4px;font-size:.88em;line-height:1.38;overflow-wrap:anywhere}
+.st-open b,.st-do b{display:inline-block;min-width:5.6em;margin-right:6px;font-size:.78em;font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:var(--mute,#8e8e93)}
+.st-open{color:var(--acc,#0a84ff)}
+.prq-for{display:block;font-size:.82em;color:var(--mute,#8e8e93)}
+.prq-glossary{margin-top:12px}.prq-glossary summary{cursor:pointer;font-weight:600}
+.prq-gl-row{display:grid;grid-template-columns:3.2em 1fr;gap:8px;padding:7px 0;border-top:1px solid var(--line,rgba(127,127,127,.18))}
+.prq-gl-row small{display:block;color:var(--mute,#8e8e93)}

@@ -4,7 +4,8 @@
   function kind(t){t=t.toLowerCase();return /simulaz|prova (a tempo|mista)|eol completa/.test(t)?"Simulazione":/correz|errori|confronta/.test(t)?"Correzione":/ripass|richiamo|riprova/.test(t)?"Ripasso":/eserciz|problem|tentativ|laborat|notebook|query|schema|implementa|test/.test(t)?"Esercizi":/teoria|leggi|studia|slide|pp\.|definiz|ricostruisci/.test(t)?"Teoria":/verifica/.test(t)?"Verifica":""}
   function steps(cons,budget=0){cons=String(cons||"");let out=[];const m=/SCALETTA:\s*([^\n]+)/.exec(cons);
     if(m)for(const part of m[1].split(/;\s*/)){const p=/^pausa\s+(\d\d:\d\d)[–-](\d\d:\d\d)/i.exec(part),w=/^(\d\d:\d\d)[–-](\d\d:\d\d)\s*(.*)$/.exec(part);
-      if(p)out.push({a:p[1],b:p[2],t:"Pausa",pause:true});else if(w){const t=w[3].replace(/\s*quota \[[^\]]+\)/,"");out.push({a:w[1],b:w[2],t,k:kind(t),source:w[3]})}}
+      if(p)out.push({a:p[1],b:p[2],t:"Pausa",pause:true});else if(w){const t=w[3].replace(/\s*quota \[\d+,\s*\d+\)/,""),d=/^(.*?)\s+—\s+Apri:\s*(.*?)\s+—\s+Fai:\s*(.*)$/.exec(t),st={a:w[1],b:w[2],t,k:kind(t),source:w[3]};
+        if(d){st.t=d[1].trim();st.open=d[2].trim();st.todo=d[3].trim();st.k=kind(d[3]+" "+d[1])}out.push(st)}}
     if(!out.filter(s=>!s.pause).length){out=[];const ord=cons.split(/ORDINE OPERATIVO:/)[1]||"";
       for(const l of ord.split("\n")){const w=/^\s*\d+\.\s*(\d+)\s*min(?:\s*netti)?\s*[—–-]\s*(.+)$/.exec(l);if(w)out.push({a:"",b:"",t:w[2].replace(/,?\s*quota \[[^\]]+\) di \d+ min\.?/,"").slice(0,160),min:+w[1],k:kind(w[2]),source:w[2]})}}
     if(!out.length)for(const l of cons.split("\n")){const w=/^-\s*(?:Pausa\s+)?(\d\d:\d\d)[–-](\d\d:\d\d)[.,:]?\s*(.*)$/.exec(l.trim());if(w)out.push({a:w[1],b:w[2],t:w[3]||"Pausa",pause:/^-\s*Pausa/i.test(l.trim()),k:kind(w[3]||""),source:w[3]})}
