@@ -18,7 +18,7 @@
 /* ---------- sfondo fluido ---------- */
 #lgBg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;contain:strict;
  --c2:color-mix(in srgb,var(--lg-c1) 55%,var(--acc));--c3:color-mix(in srgb,var(--lg-c1) 40%,#ffb36b)}
-#lgBg i{position:absolute;border-radius:50%;will-change:transform;opacity:.68;
+#lgBg i{position:absolute;border-radius:50%;opacity:.68;
  background:radial-gradient(closest-side,color-mix(in srgb,var(--lg-c1) 70%,transparent),color-mix(in srgb,var(--lg-c1) 22%,transparent) 55%,transparent)}
 #lgBg .lg-b1{width:78vmax;height:78vmax;left:-28vmax;top:-30vmax;animation:lgDrift1 31s ease-in-out infinite alternate}
 #lgBg .lg-b2{width:62vmax;height:62vmax;right:-24vmax;top:18vh;opacity:.38;background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 65%,transparent),transparent);animation:lgDrift2 37s ease-in-out infinite alternate}
@@ -29,7 +29,7 @@
 @keyframes lgDrift3{from{translate:0 0}to{translate:-6vmax -5vmax}}
 /* Marea: sale con l'avanzamento del blocco (0 → 100%). */
 #lgBg .lg-tide{position:absolute;left:0;right:0;bottom:0;height:100vh;transform:translate3d(0,calc((1 - var(--lg-p)) * 86vh + 6vh),0);opacity:0;transition:opacity 1.2s ease}
-#lgBg .lg-tide svg{position:absolute;left:0;top:-60px;width:200%;height:120px;animation:lgWave 14s linear infinite;will-change:transform}
+#lgBg .lg-tide svg{position:absolute;left:0;top:-60px;width:200%;height:120px;animation:lgWave 14s linear infinite}
 #lgBg .lg-tide::after{content:"";position:absolute;inset:58px 0 0;background:linear-gradient(color-mix(in srgb,var(--lg-c1) 16%,transparent),color-mix(in srgb,var(--lg-c1) 7%,transparent))}
 #lgBg .lg-tide path{fill:color-mix(in srgb,var(--lg-c1) 16%,transparent)}#lgBg .lg-tide .lg-tide2{fill:color-mix(in srgb,var(--lg-c1) 10%,transparent)}
 @keyframes lgWave{to{transform:translate3d(-50%,0,0)}}

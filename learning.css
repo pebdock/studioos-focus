@@ -36,3 +36,28 @@ html #topicList .topic-item>summary,html.lg #topicList .topic-item>summary{displ
 .prq-links{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 .prq-links .btn{min-height:40px}
 @media (max-width:430px){.prq-row{gap:10px}.prq-row .btn{padding-inline:10px;font-size:.85rem}}
+
+/* Scan the time, opening material and task without truncating any instruction. */
+#steps>li>div{min-width:0;line-height:1.5;overflow-wrap:anywhere}
+#steps .tm{font-size:.82rem;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+#steps .st-open{margin-top:6px;padding:6px 9px;border-radius:9px;
+ background:color-mix(in srgb,var(--acc) 7%,transparent);color:var(--ink)}
+#steps .st-open b{color:var(--acc)}
+#steps .st-do{margin-top:6px;line-height:1.5;color:var(--ink)}
+#steps .step-type{flex-wrap:wrap;gap:6px}
+#steps .step-type select{min-width:0;max-width:100%;padding-inline:10px 34px}
+#prqList .prq-main{gap:4px}
+#prqList .prq-main small{line-height:1.5}
+.study-ratings label{display:grid;gap:6px;min-width:0}
+
+/* Compact presentation must not require small touch targets or Safari input zoom. */
+@media(pointer:coarse){
+ #steps>li>.ckb{min-width:44px;min-height:44px;padding:8px 12px}
+ #steps .step-type select{min-height:44px;font-size:16px}
+ .prq-row .btn,.prq-links .btn{min-height:44px}
+ .matl-pos input{min-height:44px}
+}
+@media(forced-colors:active){
+ #steps .st-open{border:1px solid CanvasText;background:Canvas;color:CanvasText}
+ #steps .st-open b{color:LinkText}
+}
