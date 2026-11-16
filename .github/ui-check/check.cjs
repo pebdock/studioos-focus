@@ -85,7 +85,11 @@ async function run(){
     await page.locator('#relDialog').getByRole('button',{name:'Inizia',exact:true}).click();
     await page.locator('#t-focus').focus();await page.keyboard.press('ArrowRight');
     check(await page.locator('#t-giorno').getAttribute('aria-selected')==='true','keyboard navigation');
-    item.variants.push({variant,scrollWidth:layout.scroll,touchHeights:layout.targets.map(t=>t.height)});
+    await page.locator('#t-focus').click();
+    const zoom=await page.evaluate(()=>{document.documentElement.style.fontSize='200%';return {width:innerWidth,scroll:document.documentElement.scrollWidth}});
+    if(variant==='after')check(zoom.scroll<=Math.max(zoom.width,item.variants[0].zoomScroll)+1,'200% text enlargement: no added horizontal overflow');
+    await page.evaluate(()=>document.documentElement.style.removeProperty('font-size'));
+    item.variants.push({variant,scrollWidth:layout.scroll,zoomScroll:zoom.scroll,touchHeights:layout.targets.map(t=>t.height)});
    }
    await page.emulateMedia({reducedMotion:'reduce'});await page.locator('#t-focus').click();
    const motion=await page.locator('#lgBg i').evaluateAll(es=>es.map(e=>getComputedStyle(e).animationName));
