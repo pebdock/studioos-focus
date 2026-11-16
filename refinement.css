@@ -148,3 +148,15 @@ body.rm *,body.rm *::before,body.rm *::after{animation:none!important;transition
 .prq-gl-row{display:grid;grid-template-columns:3.2em 1fr;gap:8px;padding:7px 0;border-top:1px solid var(--line,rgba(127,127,127,.18))}
 .prq-gl-row small{display:block;color:var(--mute,#8e8e93)}
 .prq-gl-subj{margin:14px 0 2px;font-size:.92em;letter-spacing:.03em}
+/* 2.3.0 · scaletta compatta: stato a sinistra, contenuto a destra, «Tipo» su una riga piccola */
+#steps>li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 10px;align-items:start;padding:10px 12px}
+#steps>li.pause{display:flex;padding:6px 12px;min-height:0}
+#steps>li>.ckb{min-height:32px;padding:4px 10px;font-size:.76em;white-space:nowrap;align-self:start}
+#steps>li>div{min-width:0;line-height:1.36}
+#steps .tm{font-weight:650;margin-right:6px}
+#steps .st-open,#steps .st-do{margin-top:3px}
+#steps .step-type{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:.76em;color:var(--mute,#8e8e93)}
+#steps .step-type select{min-height:30px;padding:2px 8px;font-size:1em;width:auto;max-width:100%}
+#steps .st-same{font-size:.84em;color:var(--mute,#8e8e93)}
+#steps{gap:6px}
+@media (max-width:520px){#steps>li{grid-template-columns:minmax(0,1fr);gap:4px;padding:8px 10px}#steps>li>.ckb{justify-self:start;min-height:28px;padding:2px 9px}#steps .step-type{margin-top:4px}#steps .step-type select{min-height:28px}}
