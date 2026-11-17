@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
 const cp=require('node:child_process'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const {chromium,webkit}=require('playwright');
 const root=process.cwd(),out=path.join(root,'artifacts-ui');fs.mkdirSync(out,{recursive:true});
-const report={checks:0,cases:[],functional:[],errors:[]};
+const report={checks:0,cases:[],functional:[],materials:[],errors:[]};
 const check=(value,label)=>{report.checks++;assert.ok(value,label)};
 const git=(...args)=>cp.execFileSync('git',args,{cwd:root,maxBuffer:8*1024*1024});
 const base=git('rev-parse',process.env.UI_BASE||'origin/main').toString().trim();
@@ -156,6 +156,49 @@ async function timerSmoke(browser,origin){
  }
  if(summaries.length===2)check(JSON.stringify(summaries[0])===JSON.stringify(summaries[1]),'functional: before/after timer, notes, checklist, interruption, confirmation, discard and routing parity');
 }
+async function glassMaterial(page,engine,width,theme){
+ const slider=page.locator('#sGlass'),original=await slider.inputValue(),look=await page.locator('#sLook').inputValue();
+ const item={engine,width,theme,samples:[]};
+ const snapshot=()=>page.evaluate(()=>{
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=1;const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  const color=value=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=value;ctx.fillRect(0,0,1,1);return [...ctx.getImageData(0,0,1,1).data].map((v,i)=>i===3?v/255:v)};
+  const luminance=rgb=>{const v=rgb.map(c=>c/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);return v[0]*.2126+v[1]*.7152+v[2]*.0722};
+  const contrast=(foreground,background)=>{const [a,b]=[luminance(foreground),luminance(background)].sort((a,b)=>a-b);return (b+.05)/(a+.05)};
+  const inspect=(el,text=el)=>{const style=getComputedStyle(el),rgba=color(style.backgroundColor),fg=color(getComputedStyle(text).color).slice(0,3);
+   return {alpha:rgba[3],blur:style.backdropFilter||style.webkitBackdropFilter,opacity:style.opacity,worstContrast:Math.min(...[0,255].map(base=>contrast(fg,rgba.slice(0,3).map(c=>c*rgba[3]+base*(1-rgba[3])))))};};
+  const dock=document.getElementById('tabbar'),guide=document.getElementById('ui-glass-guide');
+  return {dock:inspect(dock,dock.querySelector('.tab[aria-selected=false]')),button:inspect(document.querySelector('.top .ui-glass-guide-open')),panel:inspect(guide,guide.querySelector('.small.mute')),cardsOpaque:[...document.querySelectorAll('.card')].every(el=>color(getComputedStyle(el).backgroundColor)[3]===1)};
+ });
+ await page.locator('#t-impostazioni').click();
+ await page.locator('#sLook + .lg-seg button[data-v="glass"]').click();
+ for(const value of ['0','50','100']){
+  await slider.fill(value);const sample=await snapshot();item.samples.push({value,...sample});
+  check(sample.dock.blur.includes('blur('),'glass: floating controls blur the backdrop');
+  check(sample.dock.opacity==='1'&&sample.dock.worstContrast>=4.5,'glass: text remains opaque and readable over black or white content');
+  check(Math.abs(sample.button.alpha-sample.dock.alpha)<.01&&sample.button.blur.includes('blur('),'glass: header guide and dock use consistent material');
+  check(sample.cardsOpaque,'glass: content remains opaque at every slider value');
+ }
+ const alphas=item.samples.map(x=>x.dock.alpha);
+ check(alphas[0]<alphas[1]&&alphas[1]<alphas[2]&&alphas[2]-alphas[0]>=.20,'glass: slider produces a meaningful increasing tint range');
+ await slider.fill('0');await page.locator('[popovertarget="ui-glass-guide"]').first().click();const clear=await snapshot();
+ check(clear.panel.alpha>clear.dock.alpha&&clear.panel.alpha<1&&clear.panel.worstContrast>=4.5,'glass: text-heavy panels retain denser readable material');
+ await page.locator('#ui-glass-guide .ui-glass-close').click();
+ await page.locator('#sLook + .lg-seg button[data-v="std"]').click();const standard=await snapshot();
+ check(standard.dock.alpha===1&&standard.dock.blur==='none','glass: Standard mode is genuinely opaque');
+ await page.locator('#sLook + .lg-seg button[data-v="glass"]').click();
+ if(engine==='chromium'){
+  const cdp=await page.context().newCDPSession(page);
+  try{for(const [name,value]of [['prefers-reduced-transparency','reduce'],['prefers-contrast','more']]){
+   await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-color-scheme',value:theme},{name,value}]});const reduced=await snapshot();
+   check(reduced.dock.alpha===1&&reduced.panel.alpha===1&&reduced.button.alpha===1&&reduced.dock.blur==='none'&&reduced.panel.blur==='none'&&reduced.button.blur==='none','glass: '+name+' removes transparency and blur from all materials');
+  }}finally{await cdp.send('Emulation.setEmulatedMedia',{features:[]});await cdp.detach();await page.emulateMedia({colorScheme:theme});}
+ }
+ await slider.fill(original);await page.locator('#sLook + .lg-seg button[data-v="'+look+'"]').click();
+ await page.reload({waitUntil:'load'});
+ check(await slider.inputValue()===original&&await page.locator('#sLook').inputValue()===look,'glass: existing saved slider and style settings survive reload');
+ await page.locator('#t-focus').click();
+ report.materials.push(item);
+}
 async function run(){
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const origin='http://127.0.0.1:'+server.address().port;
  for(const [engine,launcher] of Object.entries({chromium,webkit})){
@@ -204,6 +247,7 @@ async function run(){
     await page.evaluate(()=>document.documentElement.style.removeProperty('font-size'));
     item.variants.push({variant,scrollWidth:layout.scroll,zoomScroll:zoom.scroll,touchHeights:layout.targets.map(t=>t.height)});
    }
+   if([390,1440].includes(width))await glassMaterial(page,engine,width,theme);
    await page.emulateMedia({reducedMotion:'reduce'});await page.locator('#t-focus').click();
    const motion=await page.locator('#lgBg i').evaluateAll(es=>es.map(e=>getComputedStyle(e).animationName));
    check(motion.every(x=>x==='none'),'reduced motion');check(errors.length===0,'no page exceptions: '+errors.join('; '));

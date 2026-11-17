@@ -1,0 +1,853 @@
+{
+  "baseline": "3481111d8ff91fef9e8f7773fd2e6a35b8f1d655",
+  "build": "202611171153",
+  "published_before": [
+    {
+      "theme": "light",
+      "value": "0",
+      "tint": "0",
+      "dock": "color(srgb 1 1 1 / 0.86)",
+      "seg": "color(srgb 1 1 1 / 0.86)",
+      "card": "rgb(255, 255, 255)",
+      "blur": "blur(24px) saturate(1.8)"
+    },
+    {
+      "theme": "light",
+      "value": "50",
+      "tint": "0.5",
+      "dock": "color(srgb 1 1 1 / 0.92)",
+      "seg": "color(srgb 1 1 1 / 0.92)",
+      "card": "rgb(255, 255, 255)",
+      "blur": "blur(24px) saturate(1.8)"
+    },
+    {
+      "theme": "light",
+      "value": "100",
+      "tint": "1",
+      "dock": "color(srgb 1 1 1 / 0.98)",
+      "seg": "color(srgb 1 1 1 / 0.98)",
+      "card": "rgb(255, 255, 255)",
+      "blur": "blur(24px) saturate(1.8)"
+    },
+    {
+      "theme": "dark",
+      "value": "0",
+      "tint": "0",
+      "dock": "color(srgb 0.105882 0.145098 0.207843 / 0.86)",
+      "seg": "color(srgb 0.105882 0.145098 0.207843 / 0.86)",
+      "card": "rgb(27, 37, 53)",
+      "blur": "blur(24px) saturate(1.8)"
+    },
+    {
+      "theme": "dark",
+      "value": "50",
+      "tint": "0.5",
+      "dock": "color(srgb 0.105882 0.145098 0.207843 / 0.92)",
+      "seg": "color(srgb 0.105882 0.145098 0.207843 / 0.92)",
+      "card": "rgb(27, 37, 53)",
+      "blur": "blur(24px) saturate(1.8)"
+    },
+    {
+      "theme": "dark",
+      "value": "100",
+      "tint": "1",
+      "dock": "color(srgb 0.105882 0.145098 0.207843 / 0.98)",
+      "seg": "color(srgb 0.105882 0.145098 0.207843 / 0.98)",
+      "card": "rgb(27, 37, 53)",
+      "blur": "blur(24px) saturate(1.8)"
+    }
+  ],
+  "checks": 1217,
+  "cases": 28,
+  "functional_variants": 2,
+  "materials": [
+    {
+      "engine": "chromium",
+      "width": 390,
+      "theme": "light",
+      "samples": [
+        {
+          "value": "0",
+          "dock": {
+            "alpha": 0.6392156862745098,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 6.436295374921146
+          },
+          "button": {
+            "alpha": 0.6392156862745098,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 6.436295374921146
+          },
+          "panel": {
+            "alpha": 0.8588235294117647,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 4.515880986804674
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "50",
+          "dock": {
+            "alpha": 0.7803921568627451,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 9.604127179992998
+          },
+          "button": {
+            "alpha": 0.7803921568627451,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 9.604127179992998
+          },
+          "panel": {
+            "alpha": 0.9098039215686274,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.102871834278016
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "100",
+          "dock": {
+            "alpha": 0.9215686274509803,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 13.61888224648558
+          },
+          "button": {
+            "alpha": 0.9215686274509803,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 13.61888224648558
+          },
+          "panel": {
+            "alpha": 0.9607843137254902,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.7349390702750105
+          },
+          "cardsOpaque": true
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "theme": "dark",
+      "samples": [
+        {
+          "value": "0",
+          "dock": {
+            "alpha": 0.7215686274509804,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 5.529717199724634
+          },
+          "button": {
+            "alpha": 0.7215686274509804,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 5.529717199724634
+          },
+          "panel": {
+            "alpha": 0.8588235294117647,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.42337606079925
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "50",
+          "dock": {
+            "alpha": 0.8313725490196079,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 8.034652759455703
+          },
+          "button": {
+            "alpha": 0.8313725490196079,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 8.034652759455703
+          },
+          "panel": {
+            "alpha": 0.9098039215686274,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 6.444813785091675
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "100",
+          "dock": {
+            "alpha": 0.9411764705882353,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 11.563108431879549
+          },
+          "button": {
+            "alpha": 0.9411764705882353,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 11.563108431879549
+          },
+          "panel": {
+            "alpha": 0.9607843137254902,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 7.576468012629807
+          },
+          "cardsOpaque": true
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "theme": "light",
+      "samples": [
+        {
+          "value": "0",
+          "dock": {
+            "alpha": 0.6392156862745098,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 6.436295374921146
+          },
+          "button": {
+            "alpha": 0.6392156862745098,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 6.436295374921146
+          },
+          "panel": {
+            "alpha": 0.8588235294117647,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 4.515880986804674
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "50",
+          "dock": {
+            "alpha": 0.7803921568627451,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 9.604127179992998
+          },
+          "button": {
+            "alpha": 0.7803921568627451,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 9.604127179992998
+          },
+          "panel": {
+            "alpha": 0.9098039215686274,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.102871834278016
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "100",
+          "dock": {
+            "alpha": 0.9215686274509803,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 13.61888224648558
+          },
+          "button": {
+            "alpha": 0.9215686274509803,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 13.61888224648558
+          },
+          "panel": {
+            "alpha": 0.9607843137254902,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.7349390702750105
+          },
+          "cardsOpaque": true
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "theme": "dark",
+      "samples": [
+        {
+          "value": "0",
+          "dock": {
+            "alpha": 0.7215686274509804,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 5.529717199724634
+          },
+          "button": {
+            "alpha": 0.7215686274509804,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 5.529717199724634
+          },
+          "panel": {
+            "alpha": 0.8588235294117647,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.42337606079925
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "50",
+          "dock": {
+            "alpha": 0.8313725490196079,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 8.034652759455703
+          },
+          "button": {
+            "alpha": 0.8313725490196079,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 8.034652759455703
+          },
+          "panel": {
+            "alpha": 0.9098039215686274,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 6.444813785091675
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "100",
+          "dock": {
+            "alpha": 0.9411764705882353,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 11.563108431879549
+          },
+          "button": {
+            "alpha": 0.9411764705882353,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 11.563108431879549
+          },
+          "panel": {
+            "alpha": 0.9607843137254902,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 7.576468012629807
+          },
+          "cardsOpaque": true
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "theme": "light",
+      "samples": [
+        {
+          "value": "0",
+          "dock": {
+            "alpha": 0.6392156862745098,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 6.436295374921146
+          },
+          "button": {
+            "alpha": 0.6392156862745098,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 6.436295374921146
+          },
+          "panel": {
+            "alpha": 0.8588235294117647,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 4.515880986804674
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "50",
+          "dock": {
+            "alpha": 0.7803921568627451,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 9.604127179992998
+          },
+          "button": {
+            "alpha": 0.7803921568627451,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 9.604127179992998
+          },
+          "panel": {
+            "alpha": 0.9098039215686274,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.102871834278016
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "100",
+          "dock": {
+            "alpha": 0.9215686274509803,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 13.61888224648558
+          },
+          "button": {
+            "alpha": 0.9215686274509803,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 13.61888224648558
+          },
+          "panel": {
+            "alpha": 0.9607843137254902,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.7349390702750105
+          },
+          "cardsOpaque": true
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "theme": "dark",
+      "samples": [
+        {
+          "value": "0",
+          "dock": {
+            "alpha": 0.7215686274509804,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 5.529717199724634
+          },
+          "button": {
+            "alpha": 0.7215686274509804,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 5.529717199724634
+          },
+          "panel": {
+            "alpha": 0.8588235294117647,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.42337606079925
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "50",
+          "dock": {
+            "alpha": 0.8313725490196079,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 8.034652759455703
+          },
+          "button": {
+            "alpha": 0.8313725490196079,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 8.034652759455703
+          },
+          "panel": {
+            "alpha": 0.9098039215686274,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 6.444813785091675
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "100",
+          "dock": {
+            "alpha": 0.9411764705882353,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 11.563108431879549
+          },
+          "button": {
+            "alpha": 0.9411764705882353,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 11.563108431879549
+          },
+          "panel": {
+            "alpha": 0.9607843137254902,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 7.576468012629807
+          },
+          "cardsOpaque": true
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 1440,
+      "theme": "light",
+      "samples": [
+        {
+          "value": "0",
+          "dock": {
+            "alpha": 0.6392156862745098,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 6.436295374921146
+          },
+          "button": {
+            "alpha": 0.6392156862745098,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 6.436295374921146
+          },
+          "panel": {
+            "alpha": 0.8588235294117647,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 4.515880986804674
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "50",
+          "dock": {
+            "alpha": 0.7803921568627451,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 9.604127179992998
+          },
+          "button": {
+            "alpha": 0.7803921568627451,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 9.604127179992998
+          },
+          "panel": {
+            "alpha": 0.9098039215686274,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.102871834278016
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "100",
+          "dock": {
+            "alpha": 0.9215686274509803,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 13.61888224648558
+          },
+          "button": {
+            "alpha": 0.9215686274509803,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 13.61888224648558
+          },
+          "panel": {
+            "alpha": 0.9607843137254902,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.7349390702750105
+          },
+          "cardsOpaque": true
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 1440,
+      "theme": "dark",
+      "samples": [
+        {
+          "value": "0",
+          "dock": {
+            "alpha": 0.7215686274509804,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 5.529717199724634
+          },
+          "button": {
+            "alpha": 0.7215686274509804,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 5.529717199724634
+          },
+          "panel": {
+            "alpha": 0.8588235294117647,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 5.42337606079925
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "50",
+          "dock": {
+            "alpha": 0.8313725490196079,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 8.034652759455703
+          },
+          "button": {
+            "alpha": 0.8313725490196079,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 8.034652759455703
+          },
+          "panel": {
+            "alpha": 0.9098039215686274,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 6.444813785091675
+          },
+          "cardsOpaque": true
+        },
+        {
+          "value": "100",
+          "dock": {
+            "alpha": 0.9411764705882353,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 11.563108431879549
+          },
+          "button": {
+            "alpha": 0.9411764705882353,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "1",
+            "worstContrast": 11.563108431879549
+          },
+          "panel": {
+            "alpha": 0.9607843137254902,
+            "blur": "blur(24px) saturate(1.8)",
+            "opacity": "0",
+            "worstContrast": 7.576468012629807
+          },
+          "cardsOpaque": true
+        }
+      ]
+    }
+  ],
+  "cache_update": {
+    "base": "3481111d8ff91fef9e8f7773fd2e6a35b8f1d655",
+    "oldVersion": "studioos-focus-202611171128",
+    "newVersion": "studioos-focus-202611171153",
+    "checks": 62,
+    "cases": [
+      {
+        "engine": "chromium",
+        "activeSession": false,
+        "ok": true,
+        "storagePreserved": true,
+        "usedCacheClearOrReinstall": false
+      },
+      {
+        "engine": "chromium",
+        "activeSession": true,
+        "ok": true,
+        "storagePreserved": true,
+        "usedCacheClearOrReinstall": false
+      },
+      {
+        "engine": "webkit",
+        "activeSession": false,
+        "ok": true,
+        "storagePreserved": true,
+        "usedCacheClearOrReinstall": false
+      },
+      {
+        "engine": "webkit",
+        "activeSession": true,
+        "ok": true,
+        "storagePreserved": true,
+        "usedCacheClearOrReinstall": false
+      }
+    ],
+    "errors": [],
+    "ok": true
+  },
+  "actual_text_contrast": [
+    {
+      "theme": "light",
+      "view": "clear settings",
+      "samples": 99,
+      "min": 5.53,
+      "failures": []
+    },
+    {
+      "theme": "light",
+      "view": "clear guide",
+      "samples": 144,
+      "min": 5.53,
+      "failures": []
+    },
+    {
+      "theme": "dark",
+      "view": "clear settings",
+      "samples": 99,
+      "min": 7.21,
+      "failures": []
+    },
+    {
+      "theme": "dark",
+      "view": "clear guide",
+      "samples": 144,
+      "min": 7.21,
+      "failures": []
+    }
+  ],
+  "source_parity": {
+    "ok": true,
+    "base_ref": "origin/main",
+    "base_sha": "3481111d8ff91fef9e8f7773fd2e6a35b8f1d655",
+    "stats": {
+      "production_scripts": 17,
+      "html": {
+        "index.html": {
+          "ids": 252,
+          "hook_nodes": 510,
+          "scripts": 16,
+          "new_ui_ids": 0,
+          "new_inline_ui_blocks": 0,
+          "inline_csp_sha256": []
+        },
+        "setup.html": {
+          "ids": 2,
+          "hook_nodes": 13,
+          "scripts": 2,
+          "new_ui_ids": 0,
+          "new_inline_ui_blocks": 0,
+          "inline_csp_sha256": []
+        }
+      },
+      "literal_selector_calls": 463,
+      "event_bindings": 144,
+      "storage_references": 29
+    },
+    "protected_scripts": [
+      {
+        "path": "adapter.js",
+        "git_blob": "5b87ae06349d789fef8945f1814635356bdafadd",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "app.js",
+        "git_blob": "6dfd0e0f410c26f234c13abb9647b4cf7ecae657",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "career.js",
+        "git_blob": "145581c3c03201ce7205eb5b2c431e971dc22d6f",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "compact.js",
+        "git_blob": "20e787262923e51e78ecf94e98962d225ea0a71f",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "learning-ui.js",
+        "git_blob": "0fc061a0d4eaf9fdee6c248178b3aac677453dcc",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "learning.js",
+        "git_blob": "86869ba7594a7bab4cf2eadc5fdbcbcada1b086e",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "liquid.js",
+        "git_blob": "66759b358fbf3754ceb9bea620e2baf1b07de08e",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "motion.js",
+        "git_blob": "27ff65cf549cd049d06f03ad0baab9cfb3ef422a",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "navigation.js",
+        "git_blob": "7064f4bc7b2e42f654991d104d43a17e00f43fa3",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "picker-config.js",
+        "git_blob": "ebc4ae15d88188d06f25c309eda5713053a87739",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "prerequisites.js",
+        "git_blob": "f5be6d859eaa796dabceb180d416bc50b6d819b2",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "progress.js",
+        "git_blob": "0f5b91199d33985e3bf6d01e75202bb765f4efec",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "release.js",
+        "git_blob": "c95fd8e7f7492f03b5f753e381985c2997309afb",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "sections.js",
+        "git_blob": "a83b133e176cdb9723e4200196d78f7e34097b69",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "setup.js",
+        "git_blob": "cb678c09f1f7d9fecbbcc0ae69d6085b8cca7726",
+        "unchanged": true,
+        "cache_version_only": false
+      },
+      {
+        "path": "sw.js",
+        "git_blob": "4989c883411f075bca85044477cb4e10ee9d6776",
+        "unchanged": false,
+        "cache_version_only": true
+      },
+      {
+        "path": "sync.js",
+        "git_blob": "a0b38e6c6769d51b9a26b2434651ca26ce1545bf",
+        "unchanged": true,
+        "cache_version_only": false
+      }
+    ],
+    "errors": [],
+    "limits": "Source contracts only. Dynamic DOM, timer behavior, rendered layout, and authenticated Google sync require browser/integration checks."
+  },
+  "errors": []
+}

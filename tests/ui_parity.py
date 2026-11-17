@@ -115,11 +115,12 @@ def check_markup(before, after, filename):
 
     prior_scripts = []
     added_inline = []
+    original_inline_ids = {item["attrs"].get("id") for item in old.scripts if not item["attrs"].get("src")}
     for item in new.scripts:
         src = item["attrs"].get("src", "")
         if src and Path(src.split("?", 1)[0]).name.startswith("ui-glass-"):
             continue
-        if not src and item["attrs"].get("id") == "ui-glass-controls":
+        if not src and item["attrs"].get("id") == "ui-glass-controls" and "ui-glass-controls" not in original_inline_ids:
             added_inline.append(item)
             if VISUAL_FORBIDDEN.search(item["text"]):
                 errors.append(f"{filename}: visual inline block touches storage, network, or routing")
