@@ -100,6 +100,8 @@ The HTML contains **23 static paragraphs with at least 90 characters**. Nine are
 
 `sw.js` uses cache-first lookup for the exact CORE list, with cache name `studioos-focus-202611161948`. An installed PWA that already has those cached files will keep the old HTML/CSS if the worker stays byte-identical. New CSS/JS URLs are also absent from its offline CORE cache. A cache-version/CORE-only worker update is the smallest normal release fix, but the user's absolute original-JavaScript rule excludes even that file in this task; this restriction must be stated honestly in the PR unless the user explicitly relaxes it. A fresh browser context does not test an existing installed PWA update.
 
+Follow-up authorization: the user subsequently approved the cache release and merge. Build `202611171128` now changes only the worker cache VERSION. A real installed-client upgrade test passes 52 checks across Chromium/WebKit, retaining active study and local data without clearing the cache manually. The historical restriction above therefore no longer blocks rollout.
+
 Verdict: Fix the stale UI gate first, consolidate component ownership, and prove timer/storage parity with real actions. Keep inherited JavaScript behavior issues visible as separate follow-ups.
 
 Lean: -10 lines, -0 dependencies possible. This is a conservative minimum; it does not count broader cascade consolidation.

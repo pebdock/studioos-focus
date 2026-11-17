@@ -32,87 +32,104 @@
     {
       "path": "adapter.js",
       "git_blob": "5b87ae06349d789fef8945f1814635356bdafadd",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "app.js",
       "git_blob": "6dfd0e0f410c26f234c13abb9647b4cf7ecae657",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "career.js",
       "git_blob": "145581c3c03201ce7205eb5b2c431e971dc22d6f",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "compact.js",
       "git_blob": "20e787262923e51e78ecf94e98962d225ea0a71f",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "learning-ui.js",
       "git_blob": "0fc061a0d4eaf9fdee6c248178b3aac677453dcc",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "learning.js",
       "git_blob": "86869ba7594a7bab4cf2eadc5fdbcbcada1b086e",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "liquid.js",
       "git_blob": "66759b358fbf3754ceb9bea620e2baf1b07de08e",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "motion.js",
       "git_blob": "27ff65cf549cd049d06f03ad0baab9cfb3ef422a",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "navigation.js",
       "git_blob": "7064f4bc7b2e42f654991d104d43a17e00f43fa3",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "picker-config.js",
       "git_blob": "ebc4ae15d88188d06f25c309eda5713053a87739",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "prerequisites.js",
       "git_blob": "f5be6d859eaa796dabceb180d416bc50b6d819b2",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "progress.js",
       "git_blob": "0f5b91199d33985e3bf6d01e75202bb765f4efec",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "release.js",
       "git_blob": "c95fd8e7f7492f03b5f753e381985c2997309afb",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "sections.js",
       "git_blob": "a83b133e176cdb9723e4200196d78f7e34097b69",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "setup.js",
       "git_blob": "cb678c09f1f7d9fecbbcc0ae69d6085b8cca7726",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     },
     {
       "path": "sw.js",
       "git_blob": "4ba150d6d9c0fb549d6a02b5c92744c41ea55106",
-      "unchanged": true
+      "unchanged": false,
+      "cache_version_only": true
     },
     {
       "path": "sync.js",
       "git_blob": "a0b38e6c6769d51b9a26b2434651ca26ce1545bf",
-      "unchanged": true
+      "unchanged": true,
+      "cache_version_only": false
     }
   ],
   "errors": [],

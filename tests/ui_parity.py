@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Check the UI-only change contract against a Git ref. No third-party tools.
+"""Check presentation/rollout source contracts against a Git ref. No dependencies.
 
 Run from any directory: python tests/ui_parity.py --base origin/main
 Git's clean filter is used for byte comparisons so checkout CRLF conversion
-cannot look like a JavaScript edit. This checks source parity, not every runtime
+cannot look like a JavaScript edit. Only the authorized worker cache VERSION
+literal may differ. This checks source parity, not every runtime
 outcome; the browser checks in docs/QA-INVENTORY.md remain necessary.
 """
 
@@ -31,6 +32,14 @@ def git(*args):
 
 def normalized(value):
     return value.replace("\r\n", "\n")
+
+
+def cache_version_only(before, after):
+    """The authorized rollout may change one cache identifier, never handlers."""
+    pattern = r'^const VERSION = "studioos-focus-[0-9]{12}";$'
+    old, old_count = re.subn(pattern, 'const VERSION = "CACHE_VERSION";', before, flags=re.M)
+    new, new_count = re.subn(pattern, 'const VERSION = "CACHE_VERSION";', after, flags=re.M)
+    return old_count == new_count == 1 and old == new
 
 
 def is_hook(name):
@@ -154,9 +163,13 @@ def main():
             errors.append(f"Protected runtime missing: {name}")
             continue
         new_hash = git("hash-object", f"--path={name}", name).decode().strip()
-        if old_hash != new_hash:
+        metadata_only = name == "sw.js" and cache_version_only(
+            normalized(git("show", f"{sha}:{name}").decode("utf-8")),
+            normalized(path.read_text(encoding="utf-8")),
+        ) and old_hash != new_hash
+        if old_hash != new_hash and not metadata_only:
             errors.append(f"Protected runtime changed: {name}")
-        protected.append({"path": name, "git_blob": old_hash, "unchanged": old_hash == new_hash})
+        protected.append({"path": name, "git_blob": old_hash, "unchanged": old_hash == new_hash, "cache_version_only": metadata_only})
         text = path.read_text(encoding="utf-8")
         stats["literal_selector_calls"] += len(re.findall(r"(?:querySelector(?:All)?|getElementById|closest|matches|\$)\(\s*['\"]", text))
         stats["event_bindings"] += len(re.findall(r"\.addEventListener\s*\(|\.on(?:click|change|input|keydown)\s*=", text))

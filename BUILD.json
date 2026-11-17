@@ -1,10 +1,10 @@
 {
- "build": "202611161948",
- "version": "PWA 2.4.0 ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Focus Definitiva",
+ "build": "202611171128",
+ "version": "PWA 2.4.0 · Focus Definitiva",
  "client_id_set": true,
  "files": {
   ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "README.md": "549faebddd43374f44bf20a1a953c9a954f489ab08e26f5d94d9ecf0b025ea9b",
+  "README.md": "6aa3b66361500c8ab8c38a90719ad0dd8ebdb2d7dda5b05f0c4969383d73fe36",
   "adapter.js": "6285ac1b0574aec45c2de053102141ae9f8fbe8ae67e2c1b7243954926c2d61f",
   "app.js": "a1c47d7a05fae768b654800a42d39bace111f66e4add33449130748836c5087a",
   "career.js": "d4a3e4cd25ed197d1e348504262bbe382f3ed4df369360c2412c5f689290e458",
@@ -29,7 +29,7 @@
   "sections.js": "e7da29b1ccc06094d9c9b31d1fe33f8e1f7c814fa7edc8dce8f80d904a58b483",
   "setup.html": "534bbb8e5d80a90e7fd7b596b60afcf46f3e86b78a7d3dd0f0672c9b827f9a52",
   "setup.js": "8b7de9b2c92b6dbbcedc7f94cae4d83caa17c43f52a3f2dcb0b0cd482ac2c09a",
-  "sw.js": "7e99d62c9ed1728fe97a9a953fc9c8ad316a247088a8207c16bd7cfc9c19cbb6",
+  "sw.js": "b5a2552a9e613ebf447539c73c7907cb66b255488b71a490e6d2c7e1815d583d",
   "sync.js": "cad912f417fccb149c2b447e67f635838e15b9cc096f7cde0dba92357840b979",
   "icons/apple-touch-icon.png": "245c26e24e39105c8aa02e7680a09e1390f7eb57042f82f10f06c4d92e5af329",
   "icons/favicon-64.png": "2cfb7c548cba579bc39109fe5fcf064f6c8bc166da5bb183db5cdeb2f15e3a60",

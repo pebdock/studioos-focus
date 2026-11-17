@@ -1,12 +1,12 @@
 # Liquid Glass UI verification
 
-The branch `feat/ios27-liquid-glass-ui` changes presentation while preserving the original application source. The baseline is `0451dcd5f333bc46338acf2f0954f8d52fcdbf08` on `main`. No merge or deployment is part of this change.
+The branch `feat/ios27-liquid-glass-ui` changes presentation while preserving application logic. The baseline is `0451dcd5f333bc46338acf2f0954f8d52fcdbf08` on `main`. The user also authorized the cache-version release, merge and deployment.
 
 ## Result
 
 - **1,081 automated checks passed**, across 28 Chromium/WebKit viewport, theme and browser cases, plus two real functional baseline/candidate runs. No failures.
 - **184 additional interaction checks passed** at 1440×900 and 390×844 in light and dark themes. Every new disclosure and both help drawers were opened and closed. Close buttons, Escape, outside click, focus return and shortcut isolation were exercised.
-- **17 original JavaScript files are byte-identical as Git source blobs.** This includes timer, calculation, learning, storage, routing, sync, navigation, release and service-worker code.
+- **16 original application JavaScript files are byte-identical as Git source blobs.** Timer, calculation, learning, storage, routing, sync, navigation and release code are unchanged. In the service worker, only the cache VERSION changes to `studioos-focus-202611171128`; CORE and every handler remain identical.
 - All **249 original IDs**, **496 original DOM hook elements**, **17 original script tags**, 463 literal selector references, 144 listener bindings and 29 storage references are protected. Original classes, data attributes, functional ARIA attributes, handlers and script order are retained.
 - The single new `ui-glass-controls` inline block only isolates keyboard events while a new help surface is open and manages focus. It does not read or write application data. Its exact SHA-256 is authorized by the original content security policy; no broad inline-script permission was added.
 - Linked and inline CSS decreased from **103,534 to 48,028 bytes**, a **53.6% reduction**. No production dependency was added.
@@ -59,6 +59,8 @@ Chrome DevTools MCP and Playwright MCP could not launch because their configured
 
 A new PWA installation was loaded online, switched offline, reloaded and opened the new guide successfully. New UI behavior travels inside the cached HTML; no uncached runtime dependency was introduced.
 
+The installed-client upgrade test adds **52 passing checks across four Chromium/WebKit idle/active cases**. It installs the old worker and proves the old shell works offline, switches the server at the same origin to the new release, and lets the unchanged adapter activate the new cache. Idle clients reload automatically. A real active run retains its document, run ID and notes until reopening. The upgraded shell then reloads offline, while original saved study records, a localStorage sentinel and an unrelated IndexedDB sentinel remain unchanged. No cache clearing or reinstall is used. Results are in `docs/evidence/cache-update-report.json`.
+
 ## Concept comparison
 
 The generated concept is an art-direction reference, not a replacement for product data. Its native image is 1487×1058; implementation evidence uses the user's requested 1440×900 viewport and responsive 390×844 viewport. The concept and final rendered screenshots were inspected directly with `view_image`.
@@ -92,6 +94,6 @@ All sample study content is synthetic. Before/after empty states use the same vi
 
 ## Limits and rollout
 
-**Existing installed PWAs keep their previous cached shell.** The original cache-first worker and its cache version are intentionally byte-identical under the absolute JavaScript guardrail. A normal release needs a separately authorized cache-version update, or existing clients must clear their app cache/reinstall. The successful fresh-install offline check does not prove an old installation updates automatically. This PR does not change `main` or deploy the new shell.
+**Installed PWAs receive the new shell through the existing update lifecycle.** The separately authorized cache VERSION bump creates a complete new precache and deletes the old shell cache. It does not clear localStorage or IndexedDB. Idle pages reload after activation; an active study page keeps its current document and switches on the next opening. Closed apps check on opening and continuously open apps also check hourly. Cache clearing and reinstallation are not required. Only the cache identifier changed; registration, activation, reload and active-session protection retain their original implementation.
 
 Authenticated Google sign-in, live Sheets/Calendar traffic, real multi-device writes, wake lock, physical-device vibration, notifications and sustained 60/120fps hardware performance were not exercised. Their original code is unchanged. The inherited Escape behavior in the original application sheets remains as documented in the audit; new help drawers handle Escape correctly.

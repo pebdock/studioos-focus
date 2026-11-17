@@ -70,10 +70,13 @@ relationship intact. The browser checks below cover those relationships.
 and synthetic DOM fixtures. This PR repairs the baseline's stale version
 `2.3.1` and twelve-note assumptions: version checks now compare BUILD with
 the actual release version; note counts must match the before variant.
-Every original production script, including the entire service worker and
-release module, must still be identical. The test preserves the existing
-cache version for this presentation-only PR. Installed clients that already
-cached the old shell need an explicit release plan before deployment.
+All sixteen application scripts, including the release module, stay identical.
+The user additionally authorized rollout to installed PWAs. Only the single
+cache VERSION literal in the service worker may change; CORE and every handler
+remain identical. BUILD must name that new cache version. The separate
+cache-update browser test upgrades an already cached installation at the same
+origin, verifies data retention and deferred reload during active study, and
+reloads the upgraded shell offline.
 
 The matrix covers 320, 375, 390, 430, 768, 1280 and 1440 CSS pixels in both
 themes and both browser engines. The requested 390 case uses 844px height;

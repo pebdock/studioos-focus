@@ -19,15 +19,18 @@ for(const name of names){
 for(const [name,digest] of Object.entries(build.files)){
  check(crypto.createHash('sha256').update(fs.readFileSync(name)).digest('hex')===digest,'manifest hash: '+name);
 }
-for(const name of Object.keys(beforeBuild.files).filter(name=>name.endsWith('.js')))
+for(const name of Object.keys(beforeBuild.files).filter(name=>name.endsWith('.js')&&name!=='sw.js'))
  check(fs.readFileSync(name).equals(fs.readFileSync(path.join(baseline,name))),'protected runtime: '+name);
 const sw=fs.readFileSync('sw.js','utf8'),oldSw=fs.readFileSync(path.join(baseline,'sw.js'),'utf8');
-check(sw===oldSw,'worker source and cache version unchanged for presentation-only PR');
+const cacheVersion=/^const VERSION = "studioos-focus-([0-9]{12})";$/m;
+check(cacheVersion.test(sw)&&cacheVersion.test(oldSw),'worker cache identifiers are explicit build versions');
+check(sw.replace(cacheVersion,'const VERSION = "CACHE_VERSION";')===oldSw.replace(cacheVersion,'const VERSION = "CACHE_VERSION";'),'worker handlers and asset list unchanged; only cache version may differ');
 const release=fs.readFileSync('release.js','utf8'),oldRelease=fs.readFileSync(path.join(baseline,'release.js'),'utf8');
 check(release===oldRelease,'release source unchanged');
 const releaseVersion=/const VERSION="([^"]+)"/.exec(release)?.[1];
 check(!!releaseVersion&&build.version.includes(releaseVersion),'BUILD version matches release version');
-check(build.build===beforeBuild.build&&sw.includes('studioos-focus-'+build.build),'presentation-only PR preserves existing cache metadata');
+const shellChanged=Object.keys(beforeBuild.files).filter(name=>/\.(html|css)$/.test(name)).some(name=>!fs.readFileSync(name).equals(fs.readFileSync(path.join(baseline,name))));
+check(cacheVersion.exec(sw)[1]===build.build&&(!shellChanged||build.build!==beforeBuild.build),'changed shell requires a new matching cache build');
 const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json','.webmanifest':'application/manifest+json','.png':'image/png'};
 const server=http.createServer((req,res)=>{
  const u=new URL(req.url,'http://127.0.0.1'),isBefore=u.pathname.startsWith('/before/');
