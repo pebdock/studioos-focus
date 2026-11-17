@@ -35,7 +35,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
         run: |
           node --version
-          npm install --prefix "$RUNNER_TEMP/focus-ui" --no-audit --no-fund --no-save --no-package-lock --ignore-scripts playwright@1.65.1
+          npm install --prefix "$RUNNER_TEMP/focus-ui" --no-audit --no-fund --no-save --no-package-lock --ignore-scripts playwright@1.65.1 pngjs@7.0.0
           "$RUNNER_TEMP/focus-ui/node_modules/.bin/playwright" install --with-deps chromium webkit
       - name: Verify assets and render synthetic study data
         env:
@@ -56,3 +56,40 @@ jobs:
           name: focus-ui-evidence
           path: artifacts-ui/
           retention-days: 7
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install isolated visual audit tools
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
+        run: |
+          npm install --prefix "$RUNNER_TEMP/focus-design" --no-audit --no-fund --no-save --no-package-lock --ignore-scripts playwright@1.65.1 @axe-core/playwright@4.14.0 stylelint@18.0.0 stylelint-config-standard@41.0.0 pixelmatch@8.0.0 pngjs@7.0.0
+          "$RUNNER_TEMP/focus-design/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Lint all CSS with standard rules and documented hook exceptions
+        run: node "$RUNNER_TEMP/focus-design/node_modules/stylelint/bin/stylelint.mjs" '*.css' --config-basedir "$RUNNER_TEMP/focus-design"
+      - name: Capture 96 baseline and 96 candidate states with axe
+        env:
+          NODE_PATH: ${{ runner.temp }}/focus-design/node_modules
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
+          UI_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          AUDIT_VARIANT=before node .github/ui-check/design-audit.cjs
+          AUDIT_VARIANT=after node .github/ui-check/design-audit.cjs
+      - name: Generate paired review heatmaps
+        env:
+          NODE_PATH: ${{ runner.temp }}/focus-design/node_modules
+        run: |
+          cp .github/ui-check/visual-diff.mjs "$RUNNER_TEMP/focus-design/visual-diff.mjs"
+          node "$RUNNER_TEMP/focus-design/visual-diff.mjs"
+      - name: Save screenshot and accessibility gallery
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: focus-liquid-glass-gallery
+          path: artifacts-ui/
+          retention-days: 14

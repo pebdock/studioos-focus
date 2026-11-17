@@ -8,7 +8,7 @@ const crypto = require('node:crypto');
 const { chromium, webkit } = require('playwright');
 
 const root = process.cwd();
-const out = path.join(root, 'artifacts-ui');
+const out = process.env.UI_AUDIT_OUTPUT || path.join(root, 'artifacts-ui');
 fs.mkdirSync(out, { recursive: true });
 const git = (...args) => cp.execFileSync('git', args, { cwd: root, maxBuffer: 8 * 1024 * 1024 });
 const base = git('rev-parse', process.env.UI_BASE || 'origin/main').toString().trim();
@@ -74,6 +74,7 @@ async function installedUpgrade(browser, origin, engine, active) {
   page.on('pageerror', error => errors.push(String(error)));
   await context.route('**/*', route => new URL(route.request().url()).origin === origin ? route.continue() : route.abort());
   await context.addInitScript(() => {
+    sessionStorage.setItem('focus-ui-cache-document-loads', String(Number(sessionStorage.getItem('focus-ui-cache-document-loads') || 0) + 1));
     if (localStorage.getItem('focus-ui-cache-seeded')) return;
     const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
     const block = { id: 'R20-9001', mat: 'MDP', date, from: '00:00', to: '23:59', min: 90, arg: 'Sessione sintetica: aggiornamento PWA', cons: 'SCALETTA: 00:00–00:35 Teoria — Apri: demo.pdf — Fai: Leggi le definizioni.\nVerifica finale: spiega il risultato.' };
@@ -85,6 +86,9 @@ async function installedUpgrade(browser, origin, engine, active) {
   try {
     await page.goto(origin + '/app/?norel#focus', { waitUntil: 'load' });
     await page.waitForFunction(() => !!navigator.serviceWorker.controller && !!window.STUDIOOS_STUDY);
+    // Chromium can expose the claimed controller just before the adapter's first
+    // automatic reload detaches that document. Observe that real reload first.
+    if (engine === 'chromium') await page.waitForFunction(() => Number(sessionStorage.getItem('focus-ui-cache-document-loads')) >= 2 && !!window.STUDIOOS_STUDY?.snapshot);
     await page.reload({ waitUntil: 'load' });
     await page.waitForFunction(() => !!window.STUDIOOS_STUDY?.snapshot);
     check(await page.evaluate(expected => caches.has(expected), oldVersion), engine + ': old shell installed');
@@ -137,6 +141,9 @@ async function installedUpgrade(browser, origin, engine, active) {
     check(!(await page.evaluate(expected => caches.has(expected), oldVersion)), engine + ': obsolete application cache removed');
     check(await cachedDigest(page, newVersion, 'index.html') === digest(fs.readFileSync(path.join(root, 'index.html'))), engine + ': upgraded HTML matches the release');
     check(await cachedDigest(page, newVersion, 'refinement.css') === digest(fs.readFileSync(path.join(root, 'refinement.css'))), engine + ': upgraded styles match the release');
+    for (const asset of ['tokens.css', 'ui-glass-effects.js']) {
+      if (fs.existsSync(path.join(root, asset))) check(await cachedDigest(page, newVersion, asset) === digest(fs.readFileSync(path.join(root, asset))), engine + ': approved aesthetic asset is cached exactly: ' + asset);
+    }
     const after = await preservedData(page);
     check(JSON.stringify(after.record) === JSON.stringify(before.record), engine + ': real application study record unchanged');
     check(JSON.stringify(after.idb) === JSON.stringify(before.idb) && after.sentinel === before.sentinel, engine + ': localStorage and IndexedDB sentinel retained');

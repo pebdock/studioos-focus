@@ -3,8 +3,10 @@
 
 Run from any directory: python tests/ui_parity.py --base origin/main
 Git's clean filter is used for byte comparisons so checkout CRLF conversion
-cannot look like a JavaScript edit. Only the authorized worker cache VERSION
-literal may differ. This checks source parity, not every runtime
+cannot look like a JavaScript edit. The authorized worker cache VERSION and
+the two explicitly approved aesthetic cache assets may differ. The reviewed
+pure lensMap function in liquid.js is pinned by SHA256; its decoded pixels
+are checked separately by the browser runner. This checks source parity, not every runtime
 outcome; the browser checks in docs/QA-INVENTORY.md remain necessary.
 """
 
@@ -24,6 +26,8 @@ ROOT = Path(__file__).resolve().parents[1]
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
 BEHAVIOR = {"id", "role", "name", "type", "for", "href", "src", "value", "min", "max", "step", "required", "disabled", "hidden", "readonly", "multiple", "checked", "selected", "pattern", "maxlength", "autocomplete", "tabindex", "contenteditable", "form", "action", "method"}
 VISUAL_FORBIDDEN = re.compile(r"\b(?:localStorage|sessionStorage|fetch|XMLHttpRequest|indexedDB)\b|\b(?:location|history)\s*\.")
+LENS_MAP_BLOCK = re.compile(r"^  function lensMap\(\)\{[\s\S]*?(?=^  function installRefraction\(\)\{)", re.M)
+APPROVED_LENS_MAP_SHA256 = "8dafb444eb45d0f0d2e038e618dafc0ff5532807b8b503de7d644440c367e808"
 
 
 def git(*args):
@@ -35,11 +39,35 @@ def normalized(value):
 
 
 def cache_version_only(before, after):
-    """The authorized rollout may change one cache identifier, never handlers."""
+    """Only the cache identifier and the two approved aesthetic assets may change."""
     pattern = r'^const VERSION = "studioos-focus-[0-9]{12}";$'
     old, old_count = re.subn(pattern, 'const VERSION = "CACHE_VERSION";', before, flags=re.M)
     new, new_count = re.subn(pattern, 'const VERSION = "CACHE_VERSION";', after, flags=re.M)
-    return old_count == new_count == 1 and old == new
+    core_pattern = r'^const CORE = (\[[\s\S]*?\]);$'
+    old_core, new_core = re.search(core_pattern, old, re.M), re.search(core_pattern, new, re.M)
+    if old_count != 1 or new_count != 1 or not old_core or not new_core:
+        return False
+    try:
+        original, candidate = json.loads(old_core[1]), json.loads(new_core[1])
+    except (json.JSONDecodeError, TypeError):
+        return False
+    approved = {"./tokens.css", "./ui-glass-effects.js"}
+    additions = [name for name in candidate if name not in original]
+    if len(candidate) != len(set(candidate)) or not set(additions) <= approved:
+        return False
+    if [name for name in candidate if name in original] != original:
+        return False
+    return re.sub(core_pattern, 'const CORE = APPROVED_ASSETS;', old, flags=re.M) == re.sub(core_pattern, 'const CORE = APPROVED_ASSETS;', new, flags=re.M)
+
+
+def lens_map_only(before, after):
+    """The reviewed pure canvas optimization is the only permitted legacy UI edit."""
+    old, new = list(LENS_MAP_BLOCK.finditer(before)), list(LENS_MAP_BLOCK.finditer(after))
+    if len(old) != 1 or len(new) != 1:
+        return False
+    if hashlib.sha256(new[0][0].encode("utf-8")).hexdigest() != APPROVED_LENS_MAP_SHA256:
+        return False
+    return LENS_MAP_BLOCK.sub("APPROVED_PURE_LENS_MAP\n", before) == LENS_MAP_BLOCK.sub("APPROVED_PURE_LENS_MAP\n", after)
 
 
 def is_hook(name):
@@ -95,7 +123,12 @@ def check_markup(before, after, filename):
     errors.extend(f"{filename}: duplicate id {key}" for key, count in ids.items() if count > 1)
     old_ids = {a["id"] for _, a in old.nodes if "id" in a}
     new_ids = {key for key in ids if key not in old_ids}
-    errors.extend(f"{filename}: new id must use ui-glass- namespace: {key}" for key in sorted(new_ids) if not key.startswith("ui-glass-"))
+    errors.extend(f"{filename}: new id must use ui-glass- namespace: {key}" for key in sorted(new_ids) if not key.startswith("ui-glass-") and key != "pwaTop")
+    if "pwaTop" in new_ids:
+        skeleton = [(tag, attrs) for tag, attrs in new.nodes if attrs.get("id") == "pwaTop"]
+        empty = re.search(r'''<div\b[^>]*\bid=["']pwaTop["'][^>]*>\s*</div>''', after)
+        if filename != "index.html" or skeleton != [("div", {"id": "pwaTop", "class": "pwatop"})] or not empty:
+            errors.append(f"{filename}: pwaTop may only predeclare the existing empty adapter banner hook")
 
     available = list(enumerate(new.nodes))
     hook_count = 0
@@ -168,9 +201,13 @@ def main():
             normalized(git("show", f"{sha}:{name}").decode("utf-8")),
             normalized(path.read_text(encoding="utf-8")),
         ) and old_hash != new_hash
-        if old_hash != new_hash and not metadata_only:
+        presentation_only = name == "liquid.js" and lens_map_only(
+            normalized(git("show", f"{sha}:{name}").decode("utf-8")),
+            normalized(path.read_text(encoding="utf-8")),
+        ) and old_hash != new_hash
+        if old_hash != new_hash and not metadata_only and not presentation_only:
             errors.append(f"Protected runtime changed: {name}")
-        protected.append({"path": name, "git_blob": old_hash, "unchanged": old_hash == new_hash, "cache_version_only": metadata_only})
+        protected.append({"path": name, "git_blob": old_hash, "unchanged": old_hash == new_hash, "cache_version_only": metadata_only, "presentation_lens_map_only": presentation_only})
         text = path.read_text(encoding="utf-8")
         stats["literal_selector_calls"] += len(re.findall(r"(?:querySelector(?:All)?|getElementById|closest|matches|\$)\(\s*['\"]", text))
         stats["event_bindings"] += len(re.findall(r"\.addEventListener\s*\(|\.on(?:click|change|input|keydown)\s*=", text))
@@ -190,8 +227,8 @@ def main():
     # New test scripts are deliberately outside this check.
     added_scripts = [p for p in ROOT.glob("*.js") if p.name not in paths]
     for path in added_scripts:
-        if not path.name.startswith("ui-glass-"):
-            errors.append(f"New production script needs ui-glass- prefix: {path.name}")
+        if path.name != "ui-glass-effects.js":
+            errors.append(f"New production script is not an approved aesthetic asset: {path.name}")
         source = path.read_text(encoding="utf-8")
         if VISUAL_FORBIDDEN.search(source):
             errors.append(f"Visual module touches storage, network, or routing: {path.name}")

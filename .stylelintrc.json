@@ -1,0 +1,9 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "selector-id-pattern": null,
+    "custom-property-pattern": null,
+    "no-descending-specificity": null,
+    "property-no-vendor-prefix": [true, {"ignoreProperties": ["-webkit-backdrop-filter", "-webkit-text-size-adjust", "-webkit-user-select", "-webkit-appearance", "-webkit-mask", "-webkit-mask-composite"]}]
+  }
+}
