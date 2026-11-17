@@ -1,48 +1,95 @@
 /* Learning-specific content components. Shared tokens/controls live in refinement.css. */
 .study-ratings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
 .study-ratings label{display:grid;gap:6px;min-width:0;margin:0}
-.study-checkin summary{flex-wrap:wrap;gap:6px}.study-checkin summary span{font-weight:400}.study-checkin [id=studyPrerequisites]:empty{display:none}
-.prereq-notice,.prq-how{border-inline-start:3px solid var(--warn);padding:10px 12px;margin-top:12px;border-radius:0 12px 12px 0;background:color-mix(in srgb,var(--warn) 7%,var(--surface));font-size:.86rem;line-height:1.5}
+.study-checkin summary{flex-wrap:wrap;gap:6px}.study-checkin summary span{font-weight:400}.study-checkin [id="studyPrerequisites"]:empty{display:none}
+.prereq-notice,.prq-how{border-inline-start:3px solid var(--warn);padding:10px 12px;margin-top:12px;border-radius:0 12px 12px 0;background:color-mix(in srgb,var(--warn) 7%,var(--surface));font-size:var(--font-13);line-height:1.5}
 .learning-days{display:flex;align-items:end;gap:clamp(3px,1vw,9px);height:120px;padding:12px 0 22px;margin:10px 0 14px}
 .learning-day{position:relative;flex:1;min-width:0;height:100%;display:flex;align-items:end;border-radius:10px;background:var(--surface-inset)}
 .learning-day i{display:block;width:100%;min-height:2px;border-radius:9px;background:var(--acc);opacity:.85}
-.learning-day span{position:absolute;top:calc(100% + 5px);font-size:.65rem;text-align:center;width:100%;font-variant-numeric:tabular-nums;color:var(--mute)}
-.learning-activity-row{display:grid;grid-template-columns:100px minmax(0,1fr) 65px;align-items:center;gap:10px;font-size:.82rem;margin:10px 0}
+.learning-day span{position:absolute;top:calc(100% + 5px);font-size:var(--font-12);text-align:center;width:100%;font-variant-numeric:tabular-nums;color:var(--mute)}
+.learning-activity-row{display:grid;grid-template-columns:100px minmax(0,1fr) 65px;align-items:center;gap:10px;font-size:var(--font-13);margin:10px 0}
 .learning-activity-row progress{width:100%;height:8px;accent-color:var(--acc)}
 .learning-heat{display:grid;gap:10px;padding-block:12px;overflow-x:auto}
-.learning-heat-row{display:grid;grid-template-columns:44px repeat(16,minmax(16px,1fr));gap:4px;align-items:center;min-width:370px;font-size:.65rem;color:var(--mute)}
+.learning-heat-row{display:grid;grid-template-columns:44px repeat(16,minmax(16px,1fr));gap:4px;align-items:center;min-width:370px;font-size:var(--font-12);color:var(--mute)}
 .learning-heat-row i{aspect-ratio:1;border-radius:6px;background:color-mix(in srgb,var(--acc) calc(4% + var(--heat,0)*80%),transparent);border:1px solid color-mix(in srgb,var(--acc) 12%,transparent)}
 #topicList .topic-item{padding:10px 0;border:0;border-bottom:1px solid var(--line)}#topicList .topic-item:last-child{border-bottom:0}
 #topicList .topic-item>summary{display:block;min-height:44px;padding:6px 0;list-style:none;background:none;border:0;border-radius:0;box-shadow:none;transform:none}
 #topicList .topic-item>summary::after{display:none}
 .topic-head{display:flex;align-items:baseline;gap:8px}.topic-head b{flex:1;min-width:0;font-size:.9rem;line-height:1.5;overflow-wrap:anywhere}
-.topic-subj{flex:none;font-size:.68rem;font-weight:700;letter-spacing:.04em;color:var(--sc,var(--mute));padding:3px 6px;border-radius:6px;background:color-mix(in srgb,var(--sc,var(--mute)) 9%,var(--surface))}
-.topic-pct{flex:none;font-size:.8rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--mute)}
-.topic-item .topic-metrics{display:block;margin:5px 0 0;font-size:.76rem;color:var(--mute);line-height:1.5}.topic-item .topic-metrics em{font-style:normal;color:var(--warn)}
+.topic-subj{flex:none;font-size:var(--font-12);font-weight:600;letter-spacing:.04em;color:var(--sc,var(--mute));padding:3px 6px;border-radius:6px;background:color-mix(in srgb,var(--sc,var(--mute)) 9%,var(--surface))}
+.topic-pct{flex:none;font-size:var(--font-13);font-weight:600;font-variant-numeric:tabular-nums;color:var(--mute)}
+.topic-item .topic-metrics{display:block;margin:5px 0 0;font-size:var(--font-12);color:var(--mute);line-height:1.5}.topic-item .topic-metrics em{font-style:normal;color:var(--warn)}
 .topic-item progress{width:100%;height:4px;margin-top:8px;accent-color:var(--sc,var(--acc))}.topic-item ol{padding-inline-start:20px}
-.topic-item .topic-evidence{font-size:.8rem;color:var(--mute);line-height:1.55}.learning-card details,.topic-card details{margin-top:12px}
+.topic-item .topic-evidence{font-size:var(--font-13);color:var(--mute);line-height:1.55}.learning-card details,.topic-card details{margin-top:12px}
 .health-row{display:flex;align-items:center;gap:10px;margin-block:12px}.health-light{width:10px;height:10px;border-radius:50%;background:var(--mute);flex:none}.health-light.ok{background:var(--ok)}.health-light.warning{background:var(--warn)}.health-light.error{background:var(--bad)}.health-row .sp{min-width:0}.health-row small{display:block;overflow-wrap:anywhere}
-.study-quiz{margin-block:14px;padding-top:10px;border-top:1px solid var(--line)}.study-quiz textarea{min-height:70px}.study-quiz fieldset{margin:12px 0;padding:0;border:0}.study-quiz legend{font-weight:600;font-size:.86rem;line-height:1.5}.study-quiz label,.study-quiz .quiz-note{font-size:.8rem;line-height:1.5}.study-empty{padding:14px 0;color:var(--mute);font-size:.86rem;line-height:1.6}
+.study-quiz{margin-block:14px;padding-top:10px;border-top:1px solid var(--line)}.study-quiz textarea{min-height:70px}.study-quiz fieldset{margin:12px 0;padding:0;border:0}.study-quiz legend{font-weight:600;font-size:var(--font-13);line-height:1.5}.study-quiz label,.study-quiz .quiz-note{font-size:var(--font-13);line-height:1.5}.study-empty{padding:14px 0;color:var(--mute);font-size:var(--font-13);line-height:1.6}
 #prqList{display:grid;gap:0}.prq-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}.prq-row:first-child{border-top:0}
-.prq-when{display:grid;justify-items:center;min-width:46px;padding:7px 5px;border-radius:12px;background:color-mix(in srgb,var(--sc) 10%,var(--surface))}.prq-when b{font-size:.95rem;line-height:1.1}.prq-when small{font-size:.72rem;color:var(--mute)}
-.prq-main{display:grid;gap:4px;min-width:0}.prq-main b{font-size:.9rem;line-height:1.4;overflow-wrap:anywhere}.prq-main small{font-size:.76rem;color:var(--mute);line-height:1.5}.prq-subj{font-size:.68rem;font-weight:700;letter-spacing:.04em;color:var(--sc)}
-.prq-row .btn{min-height:44px;padding-inline:12px}.prq-links{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.prq-links .btn{min-height:44px}#prqMore{margin-top:8px}.prq-dialog .rel-list b .pill{margin-left:6px;font-weight:500}
-/* Step titles and instructions wrap completely. Existing .open controls type editing. */
-#steps>li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;padding:12px;cursor:pointer}
+.prq-when{display:grid;justify-items:center;min-width:46px;padding:7px 5px;border-radius:12px;background:color-mix(in srgb,var(--sc) 10%,var(--surface))}.prq-when b{font-size:.95rem;line-height:1.1}.prq-when small{font-size:var(--font-12);color:var(--mute)}
+.prq-main{display:grid;gap:4px;min-width:0}.prq-main b{font-size:.9rem;line-height:1.4;overflow-wrap:anywhere}.prq-main small{font-size:var(--font-12);color:var(--mute);line-height:1.5}.prq-subj{font-size:var(--font-12);font-weight:600;letter-spacing:.04em;color:var(--sc)}
+.prq-row .btn{min-height:44px;padding-inline:12px}.prq-links{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.prq-links .btn{min-height:44px}#prqMore{margin-top:8px}.prq-dialog .rel-list b .pill{margin-left:6px;font-weight:600}
+
+/* Compact summaries use the original .open toggle. Full instructions stay in the DOM. */
+#steps>li{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:center;gap:var(--space-8);padding:var(--space-12);cursor:pointer;border-radius:var(--radius-18)}
 #steps>li>div{min-width:0;line-height:1.5;overflow-wrap:anywhere}
-#steps>li>.ckb{display:grid;place-items:center;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:50%;font-size:.95rem;line-height:1;justify-self:start}
+#steps>li>.ckb{display:grid;place-items:center;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:50%;font-size:.95rem;line-height:1;place-self:start start}
 #steps>li>.ckb.s2{background:var(--action-bg);color:var(--action-ink)}#steps>li>.ckb.s4{color:var(--bad)}
-#steps .st-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 6px}#steps .tm{font-size:.82rem;margin-right:0;font-variant-numeric:tabular-nums}#steps .dur{color:var(--mute);font-size:.8em}
+#steps .st-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 6px}#steps .tm{font-size:var(--font-13);margin-right:0;font-variant-numeric:tabular-nums}#steps .dur{color:var(--mute);font-size:.8em}
 #steps .kind{font-size:.7em;padding:2px 7px;border-radius:9999px;background:var(--surface-inset);margin:0}
-#steps .kind.k-esame,#steps .kind.k-simulazione{background:color-mix(in srgb,var(--warn) 10%,var(--surface));color:var(--warn)}#steps .kind.k-prerequisito{background:color-mix(in srgb,var(--acc) 10%,var(--surface))}
-#steps .st-title{display:block;font-weight:600;font-size:.92em;margin-top:2px}
+#steps .kind.k-esame,#steps .kind.k-simulazione{background:color-mix(in srgb,var(--warn) 10%,var(--surface));color:var(--type-exam)}#steps .kind.k-prerequisito{background:color-mix(in srgb,var(--acc) 10%,var(--surface));color:var(--type-prerequisite)}
+#steps .st-title{display:block;min-width:0;font-weight:600;font-size:var(--font-15);margin-top:0}
 #steps .st-open{font-size:.8em;margin-top:6px;padding:6px 9px;border-radius:9px;background:var(--surface-inset);color:var(--ink)}#steps .st-open b{color:var(--acc)}
 #steps .st-do{display:block;font-size:.86em;margin-top:6px;line-height:1.5;color:var(--ink)}#steps .st-cont{color:var(--mute);font-style:italic}
 #steps .step-type{display:none;flex-wrap:wrap;gap:6px;margin-top:8px}#steps li.open .step-type{display:flex}
 #steps .step-type select{min-width:0;max-width:100%;min-height:44px;padding-inline:10px 34px;font-size:16px}
 #steps>li.exam{box-shadow:inset 3px 0 var(--warn)}#steps>li.pause{padding:5px 12px;border-style:dashed;background:none;cursor:default}
-#steps>li.pause .tm{font-weight:500;color:var(--mute);font-size:.8em}#steps .st-pause{color:var(--mute);font-size:.8em;margin-left:6px}
-#steps>li.ck2 .st-title,#steps>li.ck2 .st-do{color:var(--mute)}.steps-hint{font-size:.78rem;margin-top:8px}
-@media(max-width:430px){.learning-activity-row{grid-template-columns:90px minmax(0,1fr) 52px;gap:6px}.learning-days{height:100px}.learning-heat-row{grid-template-columns:34px repeat(16,minmax(10px,1fr));gap:3px;min-width:0;font-size:.6rem}.learning-card>.row{align-items:start}.learning-card>.row button{font-size:.78rem;line-height:1.4}.study-ratings{gap:8px}.topic-card .row select{max-width:110px}.prq-row{gap:8px}.prq-row .btn{padding-inline:10px;font-size:.8rem}}
-@media(prefers-contrast:more){.learning-day i{opacity:1}.health-light{border:1px solid currentColor}}
+#steps>li.pause .tm{font-weight:600;color:var(--mute);font-size:.8em}#steps .st-pause{color:var(--mute);font-size:.8em;margin-left:6px}
+#steps>li.ck2 .st-title,#steps>li.ck2 .st-do{color:var(--mute)}.steps-hint{font-size:var(--font-12);margin-top:8px}
+
+@media(width <=430px){.learning-activity-row{grid-template-columns:90px minmax(0,1fr) 52px;gap:6px}.learning-days{height:100px}.learning-heat-row{grid-template-columns:34px repeat(16,minmax(10px,1fr));gap:3px;min-width:0;font-size:var(--font-12)}.learning-card>.row{align-items:start}.learning-card>.row button{font-size:var(--font-12);line-height:1.4}.study-ratings{gap:8px}.topic-card .row select{max-width:110px}.prq-row{gap:8px}.prq-row .btn{padding-inline:10px;font-size:var(--font-13)}}
+
+@media(prefers-contrast:more){.learning-day i{opacity:1}.health-light{border:1px solid currentcolor}}
+
 @media(forced-colors:active){#steps .st-open{border:1px solid CanvasText;background:Canvas;color:CanvasText}#steps .st-open b{color:LinkText}}
+
+/* One summary line where space permits; a narrow phone may wrap the title rather
+   than truncate it. Existing Apri/Fai instructions are revealed with one tap. */
+#steps li:not(.pause) .st-body{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:var(--space-8);align-items:center}
+#steps li:not(.pause) .st-head{display:contents}
+#steps li:not(.pause) .st-head>.tm{grid-column:1;grid-row:1;font-size:var(--font-12)}
+#steps li:not(.pause) .st-title{grid-column:2;grid-row:1}
+#steps li:not(.pause) .st-head>.dur{grid-column:1;grid-row:2;font-size:var(--font-12)}
+#steps li:not(.pause) .st-head>.kind{grid-column:2;grid-row:2;justify-self:start;margin-top:var(--space-4);font-size:var(--font-12)}
+
+/* The existing checkbox is keyboard reachable: focus reveals its whole row too.
+   Its original action stays unchanged and all instructions remain readable. */
+#steps li:not(.pause, .open, :focus-within) :is(.st-open,.st-do,.step-type){display:none}
+#steps li:is(.open,:focus-within) :is(.st-open,.st-do,.step-type){grid-column:1/-1}
+#steps li:is(.open,:focus-within) .step-type{display:flex}
+#steps li:is(.open,:focus-within) :is(.st-open,.st-do){animation:ui-glass-enter var(--duration-control) var(--spring-smooth)}
+#steps li:is(.open,:focus-within){background:var(--surface-card);border-color:var(--field-edge)}
+
+@media(width >=768px){
+  #steps li:not(.pause) .st-body{grid-template-columns:auto auto minmax(0,1fr) auto}
+  #steps li:not(.pause) .st-head>.tm{grid-column:1;grid-row:1}
+  #steps li:not(.pause) .st-head>.dur{grid-column:2;grid-row:1}
+  #steps li:not(.pause) .st-title{grid-column:3;grid-row:1}
+  #steps li:not(.pause) .st-head>.kind{grid-column:4;grid-row:1;margin-top:0}
+}
+#steps .kind.k-teoria{color:var(--type-theory)}
+#steps .kind.k-esercizi{color:var(--type-practice)}
+#steps .kind.k-laboratorio{color:var(--type-laboratory)}
+#steps .kind.k-richiamo{color:var(--type-recall)}
+#steps .ckb svg{width:22px;height:22px;overflow:visible}
+#steps .ckb.s2:has(>.ui-glass-check){font-size:0}
+#steps .ckb.s2>.ui-glass-check{fill:none;stroke:currentcolor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:ui-glass-check var(--duration-control) var(--spring-snappy)}
+#steps .ckb.s2>.ui-glass-check path{stroke-dasharray:24;stroke-dashoffset:0;animation:ui-glass-check-stroke var(--duration-control) ease-out}
+
+@keyframes ui-glass-check{from{opacity:.2;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+
+@keyframes ui-glass-check-stroke{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+
+@media(hover:hover){#steps>li:not(.pause):hover{outline:1px solid var(--line);outline-offset:-1px}#steps .kind:hover{background:var(--surface-card)}}
+
+@media(prefers-reduced-motion:reduce){#steps li:is(.open,:focus-within) :is(.st-open,.st-do){animation:ui-glass-fade 100ms ease-out}}
+
+@media(forced-colors:active){#steps .kind{color:CanvasText}#steps li:is(.open,:focus-within){background:Canvas}}

@@ -1,0 +1,186 @@
+/* STUDIOOS Focus · presentation tokens. No runtime dependency or remote font. */
+:root {
+  --surface-canvas: #edf1fb;
+  --surface-card: #fff;
+  --surface-inset: #f0f3f9;
+  --text-primary: #142038;
+  --text-secondary: #46536b;
+  --text-tertiary: #526079;
+  --accent-primary: #2457d5;
+  --ok: #216f48;
+  --warn: #875207;
+  --bad: #b52635;
+  --MDP: #5949b8;
+  --BD: #08715a;
+  --MN: #a9490a;
+  --FIS: #ad1e57;
+  --OOP: #245fc1;
+  --RETI: #426e1a;
+  --type-theory: var(--MDP);
+  --type-practice: var(--BD);
+  --type-laboratory: var(--OOP);
+  --type-recall: var(--RETI);
+  --type-exam: var(--warn);
+  --type-prerequisite: var(--FIS);
+  --glass-tint: .5;
+  --glass-clear: 60%;
+  --glass-range: 26%;
+  --glass-blur: 20px;
+  --glass-saturation: 165%;
+  --glass-brightness: 1.02;
+  --glass-bg: color-mix(in srgb, var(--surface-card) calc(var(--glass-clear) + var(--glass-tint) * var(--glass-range)), transparent);
+  --glass-panel-bg: color-mix(in srgb, var(--surface-card) calc(84% + var(--glass-tint) * 12%), transparent);
+  --glass-border: #ffffffa6;
+  --glass-edge: var(--glass-border);
+  --glass-highlight: #ffffff4d;
+  --glass-highlight-soft: #ffffff12;
+  --glass-specular: inset 0 1px 0 #ffffffa6, inset 0 -1px 0 #53617a12;
+  --glass-shadow: 0 12px 32px -16px #16264f47;
+  --line: #dbe2ef;
+  --field-edge: color-mix(in srgb, var(--text-secondary) 72%, var(--surface-card));
+  --depth-1: 0 3px 12px -8px #203a6426;
+  --depth-2: 0 12px 32px -16px #16264f47;
+  --depth-3: 0 24px 64px -20px #14203852;
+  --radius-12: 12px;
+  --radius-18: 18px;
+  --radius-24: 24px;
+  --radius-32: 32px;
+  --radius-outer: var(--radius-32);
+  --radius-inner: var(--radius-12);
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --pad-card: var(--space-24);
+  --font-12: .75rem;
+  --font-13: .8125rem;
+  --font-15: .9375rem;
+  --font-17: 1.0625rem;
+  --font-20: 1.25rem;
+  --font-24: 1.5rem;
+  --font-34: 2.125rem;
+  --f-body: -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --f-display: -apple-system, "SF Pro Display", system-ui, sans-serif;
+  --spring-snappy: cubic-bezier(.22, 1, .36, 1);
+  --spring-smooth: cubic-bezier(.32, .72, 0, 1);
+  --spring-bouncy: cubic-bezier(.34, 1.24, .64, 1);
+  --duration-fast: 180ms;
+  --duration-control: 280ms;
+  --duration-sheet: 450ms;
+  --ease-spring: var(--spring-snappy);
+  --ease-sheet: var(--spring-smooth);
+  --z-base: 1;
+  --z-sticky: 10;
+  --z-floating-glass: 50;
+  --z-sheet-drawer: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+  --bg: var(--surface-canvas);
+  --surface: var(--surface-card);
+  --ink: var(--text-primary);
+  --mute: var(--text-secondary);
+  --acc: var(--accent-primary);
+  --tint: var(--acc);
+  --action-bg: color-mix(in srgb, var(--tint) 82%, #132448);
+  --action-ink: #fff;
+  --r-card: var(--radius-outer);
+  --r-inner: var(--radius-inner);
+  --r-field: var(--radius-12);
+  --r-sheet: var(--radius-32);
+  --r-btn: 9999px;
+  --r-cap: 9999px;
+  --ease: var(--ease-spring);
+  --spring: var(--ease-spring);
+  --glass: var(--glass-bg);
+  --glass-fill: var(--glass-bg);
+  --glass-hi: var(--glass-highlight);
+  --nav-height: 76px;
+  --soft-shadow: var(--depth-1);
+
+  color-scheme: light;
+}
+
+:root.dark {
+  --surface-canvas: #101724;
+  --surface-card: #1b2535;
+  --surface-inset: #253145;
+  --text-primary: #edf2ff;
+  --text-secondary: #b4c1d8;
+  --text-tertiary: #b4c1d8;
+  --accent-primary: #a8bfff;
+  --glass-clear: 68%;
+  --glass-range: 22%;
+  --glass-border: #ffffff36;
+  --glass-highlight: #ffffff05;
+  --glass-highlight-soft: #ffffff02;
+  --glass-specular: inset 0 1px 0 #ffffff36, inset 0 -1px 0 #0003;
+  --glass-shadow: 0 12px 32px -16px #0009;
+  --line: #3e4e68;
+  --ok: #7bd4a3;
+  --warn: #f1bc73;
+  --bad: #ff9eaa;
+  --MDP: #baaaff;
+  --BD: #80dbc0;
+  --MN: #ffb881;
+  --FIS: #ff9fc4;
+  --OOP: #a0c6ff;
+  --RETI: #b6db8d;
+  --action-bg: var(--tint);
+  --action-ink: #101b30;
+  --depth-1: 0 3px 12px -8px #0006;
+  --depth-2: 0 12px 32px -16px #0009;
+  --depth-3: 0 24px 64px -20px #000b;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light, [data-theme="light"]) {
+    --surface-canvas: #101724;
+    --surface-card: #1b2535;
+    --surface-inset: #253145;
+    --text-primary: #edf2ff;
+    --text-secondary: #b4c1d8;
+    --text-tertiary: #b4c1d8;
+    --accent-primary: #a8bfff;
+    --glass-clear: 68%;
+    --glass-range: 22%;
+    --glass-border: #ffffff36;
+    --glass-highlight: #ffffff05;
+    --glass-highlight-soft: #ffffff02;
+    --glass-specular: inset 0 1px 0 #ffffff36, inset 0 -1px 0 #0003;
+    --glass-shadow: 0 12px 32px -16px #0009;
+    --line: #3e4e68;
+    --ok: #7bd4a3;
+    --warn: #f1bc73;
+    --bad: #ff9eaa;
+    --MDP: #baaaff;
+    --BD: #80dbc0;
+    --MN: #ffb881;
+    --FIS: #ff9fc4;
+    --OOP: #a0c6ff;
+    --RETI: #b6db8d;
+    --action-bg: var(--tint);
+    --action-ink: #101b30;
+    --depth-1: 0 3px 12px -8px #0006;
+    --depth-2: 0 12px 32px -16px #0009;
+    --depth-3: 0 24px 64px -20px #000b;
+
+    color-scheme: dark;
+  }
+}
+
+@media (width <= 979px) {
+  :root {
+    --pad-card: var(--space-16);
+    --radius-outer: var(--radius-24);
+  }
+}
+
+@media (width <= 359px) {
+  :root {
+    --radius-outer: var(--radius-18);
+  }
+}

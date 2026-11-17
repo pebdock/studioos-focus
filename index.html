@@ -17,14 +17,33 @@
 <meta name="robots" content="noindex,nofollow">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-+vy4yaT4BVRBzzBTDCI1Nw9qdZ+/wVOTo+uFR0n8tc4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://sheets.googleapis.com https://www.googleapis.com https://oauth2.googleapis.com; frame-src 'none'; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
 <title>STUDIOOS Focus</title>
+<link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="refinement.css">
 <link rel="stylesheet" href="interaction.css">
 <link rel="stylesheet" href="ios.css">
 <link rel="stylesheet" href="liquid.css">
 <link rel="stylesheet" href="learning.css">
+<!-- Fetch the original scripts together; their execution order and attributes stay intact. -->
+<link rel="preload" as="script" href="sync.js">
+<link rel="preload" as="script" href="picker-config.js">
+<link rel="preload" as="script" href="adapter.js">
+<link rel="preload" as="script" href="progress.js">
+<link rel="preload" as="script" href="career.js">
+<link rel="preload" as="script" href="learning.js">
+<link rel="preload" as="script" href="motion.js">
+<link rel="preload" as="script" href="navigation.js">
+<link rel="preload" as="script" href="app.js">
+<link rel="preload" as="script" href="learning-ui.js">
+<link rel="preload" as="script" href="liquid.js">
+<link rel="preload" as="script" href="prerequisites.js">
+<link rel="preload" as="script" href="sections.js">
+<link rel="preload" as="script" href="release.js">
+<link rel="preload" as="script" href="compact.js">
+<link rel="preload" as="script" href="ui-glass-effects.js">
 </head>
 <body>
 <div id="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div id="pwaTop" class="pwatop"></div>
 <main>
 <header class="top">
   <div class="brand"><h1>STUDIOOS Focus</h1><span id="todayLbl">Sessione invernale 2026/27</span></div>
@@ -340,6 +359,7 @@
 <script src="sections.js"></script>
 <script src="release.js"></script>
 <script src="compact.js"></script>
+<script src="ui-glass-effects.js"></script>
 <script id="ui-glass-controls">
 /* ui-glass-controls: keep application shortcuts behind the open help surface. */
 (function () {

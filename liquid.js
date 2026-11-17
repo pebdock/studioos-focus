@@ -19,11 +19,8 @@
   /* ---------- rifrazione dei bordi (solo motori che la supportano) ---------- */
   function chromium(){const b=root.navigator&&navigator.userAgentData&&navigator.userAgentData.brands;return !!(b&&b.some(x=>/Chromium/.test(x.brand)))}
   function lensMap(){
-    /* Mappa di spostamento: neutra al centro (0,5), cresce solo vicino ai bordi, come una lente spessa ai margini. */
-    const c=doc.createElement("canvas");c.width=c.height=128;const g=c.getContext("2d");if(!g)return "";
-    const img=g.createImageData(128,128),edge=v=>{const d=Math.min(v,1-v),k=Math.max(0,1-d/.22);return .5+(v<.5?-1:1)*.5*k*k};
-    for(let y=0;y<128;y++)for(let x=0;x<128;x++){const i=(y*128+x)*4;img.data[i]=Math.round(edge(x/127)*255);img.data[i+1]=Math.round(edge(y/127)*255);img.data[i+2]=128;img.data[i+3]=255}
-    g.putImageData(img,0,0);return c.toDataURL("image/png");
+    /* Same 128×128 RGBA edge map, encoded offline to avoid blocking canvas readback at startup. */
+    return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAABl0lEQVR4Ae3BuQHcBgADMOhEfVt7c7vIAulJIPz5++HDixcvHjx4cOPGjQsXLgRBcOLEiRM//HDgwOE/h/k/Dhw48MMPJ06cOBEEwYULF27cuPHgwYMXL158+BCfKRafKRavKRavKRavKRaPKRaPKRaPKRa3KRa3KRa3KRaXKRaXKRaXKRYxxSKmWMQUi9MUi9MUi9MUi9MUi58pFj9TLA5TLA5TLA5TLKZaHKZYTLWYajHVYqrFVIupFlMtplpMtZhqMdViqsVUi6kWUy2mWky1mGox1WKqxVSLqRZTLaZaTLWYajHVYqrFVIupFlMtplpMtZhqMdViqsVUi6kWUy2mWky1mGox1WKqxVSLqRZTLaZaTLWYajHVYqrFVIupFlMtplpMtZhqMdViqsVUi6kWUy2mWky1mGox1WKqxVSLqRZTLaZaTLU4TLE4TLE4TLH4mWLxM8XiNMXiNMXiNMXiNMUipljEFIuYYnGZYnGZYnGZYnGbYnGbYnGbYvGYYvGYYvGYYvGaYvGaYvGaYvGZYvGZYv8A/YoFfghioXMAAAAASUVORK5CYII=";
   }
   function installRefraction(){
     if(!chromium()||!root.CSS||!CSS.supports("backdrop-filter","url(#x)"))return false;
