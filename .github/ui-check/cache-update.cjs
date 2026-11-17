@@ -4,6 +4,7 @@ const path = require('node:path');
 const http = require('node:http');
 const cp = require('node:child_process');
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const { chromium, webkit } = require('playwright');
 
 const root = process.cwd();
@@ -18,6 +19,7 @@ const baseline = new Map([...new Set([...Object.keys(beforeBuild.files), 'appell
 const version = source => /const VERSION = "([^"]+)"/.exec(source)?.[1];
 const oldVersion = version(baseline.get('sw.js').toString());
 const newVersion = version(fs.readFileSync(path.join(root, 'sw.js'), 'utf8'));
+const digest = data => crypto.createHash('sha256').update(data).digest('hex');
 const report = { base, oldVersion, newVersion, checks: 0, cases: [], errors: [] };
 const check = (ok, label) => { report.checks++; assert.ok(ok, label); };
 const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.png': 'image/png' };
@@ -52,6 +54,16 @@ async function preservedData(page) {
   });
 }
 
+async function cachedDigest(page, version, asset) {
+  return page.evaluate(async ({ version, asset }) => {
+    const cache = await caches.open(version);
+    const response = await cache.match(new URL(asset, location.href).href);
+    if (!response) return null;
+    const bytes = await crypto.subtle.digest('SHA-256', await response.arrayBuffer());
+    return [...new Uint8Array(bytes)].map(v => v.toString(16).padStart(2, '0')).join('');
+  }, { version, asset });
+}
+
 async function installedUpgrade(browser, origin, engine, active) {
   serving = 'before';
   const item = { engine, activeSession: active, ok: false };
@@ -76,7 +88,8 @@ async function installedUpgrade(browser, origin, engine, active) {
     await page.reload({ waitUntil: 'load' });
     await page.waitForFunction(() => !!window.STUDIOOS_STUDY?.snapshot);
     check(await page.evaluate(expected => caches.has(expected), oldVersion), engine + ': old shell installed');
-    check(await page.locator('#ui-glass-guide').count() === 0, engine + ': baseline is the original shell');
+    check(await cachedDigest(page, oldVersion, 'index.html') === digest(baseline.get('index.html')), engine + ': installed baseline HTML is exact');
+    check(await cachedDigest(page, oldVersion, 'refinement.css') === digest(baseline.get('refinement.css')), engine + ': installed baseline styles are exact');
     await page.evaluate(async () => {
       await window.STUDIOOS_STUDY.saveError({ id: 'cache-update-record', materia: 'MDP', text: 'Synthetic saved study record', fix: 'Preserve through the cache upgrade', at: Date.now() });
       await new Promise((resolve, reject) => {
@@ -101,7 +114,7 @@ async function installedUpgrade(browser, origin, engine, active) {
     await context.setOffline(true);
     await page.reload({ waitUntil: 'load' });
     await page.waitForFunction(() => !!window.STUDIOOS_STUDY?.snapshot);
-    check(await page.locator('#ui-glass-guide').count() === 0, engine + ': installed old shell reloads offline');
+    check(await cachedDigest(page, oldVersion, 'index.html') === digest(baseline.get('index.html')), engine + ': installed old shell reloads offline');
     const before = await preservedData(page);
     check(!!before.record && !!before.idb && !!before.sentinel, engine + ': synthetic local data stored before upgrade');
     if (active) check(before.run?.phase === 'work', engine + ': old offline shell restores the running session');
@@ -112,17 +125,18 @@ async function installedUpgrade(browser, origin, engine, active) {
     if (active) {
       await page.waitForFunction(() => document.getElementById('toasts')?.textContent.includes('Nuova versione installata'));
       check(await page.evaluate(() => window.__cacheUpdateOldDocument === 'kept until safe to reload'), engine + ': update leaves the active document running');
-      check(await page.locator('#ui-glass-guide').count() === 0, engine + ': active old UI stays until reopening');
       const during = await preservedData(page);
       check(during.run?.runId === before.run.runId && during.run.phase === 'work' && during.run.notes === before.run.notes, engine + ': run and notes survive controller change');
       await page.reload({ waitUntil: 'load' });
     } else {
-      await page.waitForSelector('#ui-glass-guide', { state: 'attached' });
+      await page.waitForFunction(() => window.__cacheUpdateOldDocument === undefined);
       check(await page.evaluate(() => window.__cacheUpdateOldDocument === undefined), engine + ': idle document automatically reloads into the new shell');
     }
     await page.waitForSelector('#ui-glass-guide', { state: 'attached' });
     await page.waitForFunction(async expected => (await caches.keys()).includes(expected) && navigator.serviceWorker.controller?.state === 'activated', newVersion);
     check(!(await page.evaluate(expected => caches.has(expected), oldVersion)), engine + ': obsolete application cache removed');
+    check(await cachedDigest(page, newVersion, 'index.html') === digest(fs.readFileSync(path.join(root, 'index.html'))), engine + ': upgraded HTML matches the release');
+    check(await cachedDigest(page, newVersion, 'refinement.css') === digest(fs.readFileSync(path.join(root, 'refinement.css'))), engine + ': upgraded styles match the release');
     const after = await preservedData(page);
     check(JSON.stringify(after.record) === JSON.stringify(before.record), engine + ': real application study record unchanged');
     check(JSON.stringify(after.idb) === JSON.stringify(before.idb) && after.sentinel === before.sentinel, engine + ': localStorage and IndexedDB sentinel retained');

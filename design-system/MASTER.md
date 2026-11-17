@@ -15,7 +15,7 @@ Focus is a personal study workspace. The primary task is to begin, run, pause an
 
 ## Source guidance and verified skill searches
 
-[Apple HIG: Materials](https://developer.apple.com/design/human-interface-guidelines/materials) separates Liquid Glass controls/navigation from content surfaces. Text-heavy popovers use a regular, legible material. The implementation uses an 86–98% card-color glass fill, `blur(24px) saturate(180%)`, a directional white inset highlight, and diffuse shadows. Dense content never relies on a translucent card.
+[Apple HIG: Materials](https://developer.apple.com/design/human-interface-guidelines/materials) separates Liquid Glass controls/navigation from content surfaces. Text-heavy popovers use a regular, legible material. The implementation separates compact control glass (64–92% surface color in light mode, 72–94% in dark mode) from denser reading overlays (86–96%), with `blur(24px) saturate(180%)`, a directional white inset highlight, and diffuse shadows. Dense content never relies on a translucent card.
 
 The `ui-ux-pro-max` design-system generator was queried with `study productivity calm glass` and, once, a narrower `productivity tool minimal glassmorphism` rewrite. Both returned a marketing-page layout and unrelated teal/orange branding. That output was rejected rather than persisted. This master uses the user's specific product direction and the verified domain results below.
 
@@ -47,7 +47,8 @@ All global tokens live in `:root` in `refinement.css`. Existing aliases such as 
 | `--text-primary` | `#142038` | `#edf2ff` |
 | `--text-secondary` | `#53617a` | `#b4c1d8` |
 | `--accent-primary` | `#2457d5` | `#a8bfff` |
-| `--glass-bg` | 86–98% card color | 86–98% card color |
+| `--glass-bg` | 64–92% card color; 78% at the default midpoint | 72–94% card color; 83% at the default midpoint |
+| `--glass-panel-bg` | 86–96% card color for text-heavy overlays | 86–96% card color for text-heavy overlays |
 | `--glass-specular` | `inset 0 1px 0 0 rgba(255,255,255,.55)` | same directional highlight |
 | `--radius-outer` | 28px desktop; 24px mobile; 22px narrow | same |
 | `--pad-card` | 24px desktop; 20px mobile; 16px narrow | same |
@@ -55,7 +56,7 @@ All global tokens live in `:root` in `refinement.css`. Existing aliases such as 
 | `--ease-spring` | `cubic-bezier(.22,1,.36,1)` | same |
 | `--ease-sheet` | `cubic-bezier(.32,.72,0,1)` | same |
 
-Nested card surfaces derive their radius from their actual inset. Capsule controls and circular timer/status components retain their semantic shape. The glass tint slider still changes control opacity through the original `--glass-tint` property. The `standard` appearance uses opaque controls. The `essential` atmosphere removes the optional greeting illustration; existing settings and saved values are retained.
+Nested card surfaces derive their radius from their actual inset. Capsule controls and circular timer/status components retain their semantic shape. The glass tint slider changes surface coverage through the original `--glass-tint` property; it never fades foreground text. Its increasing clear/midpoint/tinted range is checked in Chromium and WebKit. The header guide and status control share the same compact material. The `standard` appearance uses opaque controls. Reduced transparency, increased contrast and browsers without backdrop-filter also use opaque materials; none depends on blur to keep labels readable. The `essential` atmosphere removes the optional greeting illustration; existing settings and saved values are retained.
 
 ## Typography and iconography
 
@@ -98,6 +99,6 @@ The opaque token pairs have these calculated WCAG contrast ratios:
 | Secondary text / card | 6.25:1 | 8.48:1 |
 | Accent text / card | 6.18:1 | 8.48:1 |
 
-Glass uses a high-opacity surface color to keep those roles legible over content. Runtime browser checks must also inspect composed backgrounds. Fields use a stronger border token than decorative dividers. Keyboard focus has a 3px accent outline with a 4px offset. Text, filenames, instructions, topic names and status chips wrap instead of being line-clamped.
+Compact glass uses primary text for inactive navigation and segmented labels: at the clearest setting it retains at least 6.45:1 contrast in light mode and 5.48:1 in dark mode, even over the worst black/white backdrop. Active blue labels keep their opaque selection indicator. Text-heavy overlays retain at least 4.52:1 for secondary text through their denser material. These bounds cover arbitrary blurred backdrop colors; text opacity itself remains 1. Runtime browser checks must also inspect composed backgrounds. Fields use a stronger border token than decorative dividers. Keyboard focus has a 3px accent outline with a 4px offset. Text, filenames, instructions, topic names and status chips wrap instead of being line-clamped.
 
 Verification targets: desktop 1440×900; phone 390×844; narrow 375px; landscape; both supported themes; reduced motion; reduced transparency; long fixture text; active timer; original OLED and StandBy modes; existing sheets and release/prerequisite dialogs; all new popovers and disclosures. Test results and any limits belong in `docs/QA-RESULTS.md` or the PR description, not in claims of pixel-perfect fidelity here.

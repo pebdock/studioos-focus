@@ -102,3 +102,9 @@ Authenticated Google sign-in, live Sheets/Calendar reads and writes, actual
 notifications, wake lock, device vibration, and installed-PWA updates cannot
 be certified by offline public-asset UI tests. Their original source remains
 protected by the parity test; live service behavior is outside this test run.
+
+## Glass transparency regression
+
+At 390×844 and 1440×900, in both themes and browser engines, the UI matrix changes the existing Vetro slider through clear, midpoint and tinted values. Surface coverage must increase by at least twenty percentage points, while content cards and text stay opaque. Dock and header guide materials must agree. Foreground contrast is checked over black and white backdrop extremes, and text-heavy overlays must remain denser than compact controls. The original published 86–98% range fails the visible-range guard.
+
+The same journey switches to Standard, verifies opaque unblurred controls, restores saved preferences and reloads them. Chromium additionally emulates reduced transparency and increased contrast; both compact and dense materials must become opaque and lose blur. The installed-PWA test checks exact cached HTML/CSS bytes rather than assuming a newly introduced DOM ID, so later CSS-only releases are tested too.
