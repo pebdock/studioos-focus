@@ -3,11 +3,14 @@ on:
   pull_request:
     paths:
       - '*.css'
+      - '*.html'
+      - 'learning*.js'
       - 'release.js'
       - 'sw.js'
       - 'BUILD.json'
       - '.github/ui-check/**'
       - '.github/workflows/ui-check.yml'
+      - 'tests/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +26,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Protect application logic and DOM contracts
+        env:
+          UI_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: python3 tests/ui_parity.py --base "${UI_BASE:-origin/main}" --json artifacts-ui/source-parity.json
       - name: Install isolated browser test tools
         env:
           PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers

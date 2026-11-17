@@ -1,0 +1,120 @@
+{
+  "ok": true,
+  "base_ref": "origin/main",
+  "base_sha": "0451dcd5f333bc46338acf2f0954f8d52fcdbf08",
+  "stats": {
+    "production_scripts": 17,
+    "html": {
+      "index.html": {
+        "ids": 247,
+        "hook_nodes": 485,
+        "scripts": 15,
+        "new_ui_ids": 5,
+        "new_inline_ui_blocks": 1,
+        "inline_csp_sha256": [
+          "'sha256-+vy4yaT4BVRBzzBTDCI1Nw9qdZ+/wVOTo+uFR0n8tc4='"
+        ]
+      },
+      "setup.html": {
+        "ids": 2,
+        "hook_nodes": 11,
+        "scripts": 2,
+        "new_ui_ids": 0,
+        "new_inline_ui_blocks": 0,
+        "inline_csp_sha256": []
+      }
+    },
+    "literal_selector_calls": 463,
+    "event_bindings": 144,
+    "storage_references": 29
+  },
+  "protected_scripts": [
+    {
+      "path": "adapter.js",
+      "git_blob": "5b87ae06349d789fef8945f1814635356bdafadd",
+      "unchanged": true
+    },
+    {
+      "path": "app.js",
+      "git_blob": "6dfd0e0f410c26f234c13abb9647b4cf7ecae657",
+      "unchanged": true
+    },
+    {
+      "path": "career.js",
+      "git_blob": "145581c3c03201ce7205eb5b2c431e971dc22d6f",
+      "unchanged": true
+    },
+    {
+      "path": "compact.js",
+      "git_blob": "20e787262923e51e78ecf94e98962d225ea0a71f",
+      "unchanged": true
+    },
+    {
+      "path": "learning-ui.js",
+      "git_blob": "0fc061a0d4eaf9fdee6c248178b3aac677453dcc",
+      "unchanged": true
+    },
+    {
+      "path": "learning.js",
+      "git_blob": "86869ba7594a7bab4cf2eadc5fdbcbcada1b086e",
+      "unchanged": true
+    },
+    {
+      "path": "liquid.js",
+      "git_blob": "66759b358fbf3754ceb9bea620e2baf1b07de08e",
+      "unchanged": true
+    },
+    {
+      "path": "motion.js",
+      "git_blob": "27ff65cf549cd049d06f03ad0baab9cfb3ef422a",
+      "unchanged": true
+    },
+    {
+      "path": "navigation.js",
+      "git_blob": "7064f4bc7b2e42f654991d104d43a17e00f43fa3",
+      "unchanged": true
+    },
+    {
+      "path": "picker-config.js",
+      "git_blob": "ebc4ae15d88188d06f25c309eda5713053a87739",
+      "unchanged": true
+    },
+    {
+      "path": "prerequisites.js",
+      "git_blob": "f5be6d859eaa796dabceb180d416bc50b6d819b2",
+      "unchanged": true
+    },
+    {
+      "path": "progress.js",
+      "git_blob": "0f5b91199d33985e3bf6d01e75202bb765f4efec",
+      "unchanged": true
+    },
+    {
+      "path": "release.js",
+      "git_blob": "c95fd8e7f7492f03b5f753e381985c2997309afb",
+      "unchanged": true
+    },
+    {
+      "path": "sections.js",
+      "git_blob": "a83b133e176cdb9723e4200196d78f7e34097b69",
+      "unchanged": true
+    },
+    {
+      "path": "setup.js",
+      "git_blob": "cb678c09f1f7d9fecbbcc0ae69d6085b8cca7726",
+      "unchanged": true
+    },
+    {
+      "path": "sw.js",
+      "git_blob": "4ba150d6d9c0fb549d6a02b5c92744c41ea55106",
+      "unchanged": true
+    },
+    {
+      "path": "sync.js",
+      "git_blob": "a0b38e6c6769d51b9a26b2434651ca26ce1545bf",
+      "unchanged": true
+    }
+  ],
+  "errors": [],
+  "limits": "Source contracts only. Dynamic DOM, timer behavior, rendered layout, and authenticated Google sync require browser/integration checks."
+}
