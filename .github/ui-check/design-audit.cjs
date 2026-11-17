@@ -43,6 +43,9 @@ async function seed(context,theme) {
 async function capture(page,engine,viewport,theme,state,target) {
  if(target) await page.locator(target).scrollIntoViewIfNeeded();
  await page.waitForTimeout(450);
+ // This matrix compares steady screens. Let live feedback dismiss naturally;
+ // fading transient text is covered separately by the touch/overlap journey.
+ await page.waitForFunction(()=>!document.querySelector('#toasts .toast'),null,{timeout:7000});
  const name=`${engine}-${viewport.width}x${viewport.height}-${theme}-${state}.png`;
  const file=path.join(out,name);
  await page.screenshot({path:file,animations:'disabled',caret:'hide'});

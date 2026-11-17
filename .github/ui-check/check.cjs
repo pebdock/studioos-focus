@@ -295,7 +295,7 @@ async function touchTimer(browser,origin,engine,theme){
   await page.locator('#t-piano').tap();await page.waitForFunction(()=>document.getElementById('island').classList.contains('on'));
   const overlap=await page.evaluate(()=>{
    const island=document.getElementById('island').getBoundingClientRect();
-   return [...document.querySelectorAll('#toasts .toast')].map(el=>{const t=el.getBoundingClientRect();return {text:el.textContent,overlap:t.left<island.right&&t.right>island.left&&t.top<island.bottom&&t.bottom>island.top}});
+   return [...document.querySelectorAll('#toasts .toast')].map(el=>{const t=el.getBoundingClientRect();return {text:el.textContent,toast:t.toJSON(),island:island.toJSON(),overlap:t.left<island.right&&t.right>island.left&&t.top<island.bottom&&t.bottom>island.top}});
   });item.toasts=overlap;
   extraCheck(overlap.length>0&&overlap.every(t=>!t.overlap),engine+'/'+theme+': real application toast does not overlap the island');
   await page.locator('#isGo').tap();await page.waitForFunction(()=>document.getElementById('v-focus').classList.contains('on')&&scrollY<1);await hit('bDone','Concludi dopo ritorno dall’isola');await page.locator('#bDone').tap();
