@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "total": 184,
+  "cases": [
+    {
+      "label": "mobile dark",
+      "checks": 46,
+      "ok": true
+    },
+    {
+      "label": "desktop dark",
+      "checks": 46,
+      "ok": true
+    },
+    {
+      "label": "desktop light",
+      "checks": 46,
+      "ok": true
+    },
+    {
+      "label": "mobile light",
+      "checks": 46,
+      "ok": true
+    }
+  ]
+}

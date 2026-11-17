@@ -1,0 +1,109 @@
+{
+  "contrast": [
+    {
+      "theme": "light",
+      "view": "focus",
+      "samples": 73,
+      "min": 5.53,
+      "failures": []
+    },
+    {
+      "theme": "light",
+      "view": "giorno",
+      "samples": 33,
+      "min": 5.53,
+      "failures": []
+    },
+    {
+      "theme": "light",
+      "view": "piano",
+      "samples": 47,
+      "min": 5.53,
+      "failures": []
+    },
+    {
+      "theme": "light",
+      "view": "registro",
+      "samples": 20,
+      "min": 5.53,
+      "failures": []
+    },
+    {
+      "theme": "light",
+      "view": "settimana",
+      "samples": 80,
+      "min": 5.53,
+      "failures": []
+    },
+    {
+      "theme": "light",
+      "view": "impostazioni",
+      "samples": 99,
+      "min": 5.53,
+      "failures": []
+    },
+    {
+      "theme": "dark",
+      "view": "focus",
+      "samples": 73,
+      "min": 7.21,
+      "failures": []
+    },
+    {
+      "theme": "dark",
+      "view": "giorno",
+      "samples": 33,
+      "min": 7.21,
+      "failures": []
+    },
+    {
+      "theme": "dark",
+      "view": "piano",
+      "samples": 47,
+      "min": 7.21,
+      "failures": []
+    },
+    {
+      "theme": "dark",
+      "view": "registro",
+      "samples": 20,
+      "min": 8.48,
+      "failures": []
+    },
+    {
+      "theme": "dark",
+      "view": "settimana",
+      "samples": 80,
+      "min": 7.21,
+      "failures": []
+    },
+    {
+      "theme": "dark",
+      "view": "impostazioni",
+      "samples": 99,
+      "min": 7.21,
+      "failures": []
+    },
+    {
+      "theme": "light",
+      "view": "guide",
+      "samples": 144,
+      "min": 5.53,
+      "failures": []
+    },
+    {
+      "theme": "dark",
+      "view": "guide",
+      "samples": 144,
+      "min": 7.21,
+      "failures": []
+    }
+  ],
+  "reduced": {
+    "transparency": true,
+    "motion": true,
+    "blur": "none",
+    "animation": "none"
+  },
+  "console": []
+}

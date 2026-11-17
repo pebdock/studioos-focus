@@ -1,0 +1,979 @@
+{
+  "checks": 1081,
+  "cases": [
+    {
+      "engine": "chromium",
+      "width": 320,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 320,
+          "zoomScroll": 320,
+          "touchHeights": [
+            44.02587890625,
+            44.02587890625,
+            44.02587890625,
+            44.02587890625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 320,
+          "zoomScroll": 320,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 320,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 320,
+          "zoomScroll": 320,
+          "touchHeights": [
+            44.043701171875,
+            44.043701171875,
+            44.0435791015625,
+            44.0438232421875
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 320,
+          "zoomScroll": 320,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 375,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 375,
+          "zoomScroll": 375,
+          "touchHeights": [
+            44.0408935546875,
+            44.041015625,
+            44.041015625,
+            44.041015625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 375,
+          "zoomScroll": 375,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 375,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 375,
+          "zoomScroll": 375,
+          "touchHeights": [
+            44.0408935546875,
+            44.041015625,
+            44.041015625,
+            44.041015625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 375,
+          "zoomScroll": 375,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 390,
+          "zoomScroll": 390,
+          "touchHeights": [
+            44.0408935546875,
+            44.041015625,
+            44.041015625,
+            44.041015625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 390,
+          "zoomScroll": 390,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 390,
+          "zoomScroll": 390,
+          "touchHeights": [
+            44.041015625,
+            44.041015625,
+            44.041015625,
+            44.041015625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 390,
+          "zoomScroll": 390,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 430,
+          "zoomScroll": 430,
+          "touchHeights": [
+            44.042724609375,
+            44.042724609375,
+            44.042724609375,
+            44.042724609375
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 430,
+          "zoomScroll": 430,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 430,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 430,
+          "zoomScroll": 430,
+          "touchHeights": [
+            44.0408935546875,
+            44.041015625,
+            44.041015625,
+            44.041015625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 430,
+          "zoomScroll": 430,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 768,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 758,
+          "zoomScroll": 758,
+          "touchHeights": [
+            32.02978515625,
+            30.0279541015625,
+            32.02978515625,
+            30.0279541015625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 768,
+          "zoomScroll": 768,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 768,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 758,
+          "zoomScroll": 758,
+          "touchHeights": [
+            32.031005859375,
+            30.029052734375,
+            32.0311279296875,
+            30.0291748046875
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 768,
+          "zoomScroll": 768,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 1280,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 1270,
+          "zoomScroll": 1270,
+          "touchHeights": [
+            32.02978515625,
+            30.0279541015625,
+            32.02978515625,
+            30.0279541015625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 1280,
+          "zoomScroll": 1280,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 1280,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 1270,
+          "zoomScroll": 1270,
+          "touchHeights": [
+            32.02978515625,
+            30.0279541015625,
+            32.02978515625,
+            30.0279541015625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 1280,
+          "zoomScroll": 1280,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 1430,
+          "zoomScroll": 1430,
+          "touchHeights": [
+            32.02978515625,
+            30.0279541015625,
+            32.02978515625,
+            30.02783203125
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 1440,
+          "zoomScroll": 1440,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "chromium",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 1430,
+          "zoomScroll": 1430,
+          "touchHeights": [
+            32.031005859375,
+            30.0291748046875,
+            32.031005859375,
+            30.0291748046875
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 1440,
+          "zoomScroll": 1440,
+          "touchHeights": [
+            44,
+            45,
+            44,
+            45
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 320,
+          "zoomScroll": 320,
+          "touchHeights": [
+            44.0421142578125,
+            44.0421142578125,
+            44.0419921875,
+            44.0419921875
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 320,
+          "zoomScroll": 320,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 320,
+          "zoomScroll": 320,
+          "touchHeights": [
+            44.042724609375,
+            44.042724609375,
+            44.042724609375,
+            44.0426025390625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 320,
+          "zoomScroll": 320,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 375,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 375,
+          "zoomScroll": 375,
+          "touchHeights": [
+            44.04150390625,
+            44.04150390625,
+            44.04150390625,
+            44.04150390625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 375,
+          "zoomScroll": 375,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 375,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 375,
+          "zoomScroll": 375,
+          "touchHeights": [
+            44.041748046875,
+            44.041748046875,
+            44.041748046875,
+            44.041748046875
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 375,
+          "zoomScroll": 375,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "height": 844,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 390,
+          "zoomScroll": 390,
+          "touchHeights": [
+            44.042724609375,
+            44.0428466796875,
+            44.042724609375,
+            44.042724609375
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 390,
+          "zoomScroll": 390,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 390,
+      "height": 844,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 390,
+          "zoomScroll": 390,
+          "touchHeights": [
+            44.042236328125,
+            44.042236328125,
+            44.042236328125,
+            44.042236328125
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 390,
+          "zoomScroll": 390,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 430,
+          "zoomScroll": 430,
+          "touchHeights": [
+            44.043212890625,
+            44.043212890625,
+            44.043212890625,
+            44.043212890625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 430,
+          "zoomScroll": 430,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 430,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 430,
+          "zoomScroll": 430,
+          "touchHeights": [
+            44.0423583984375,
+            44.0423583984375,
+            44.0423583984375,
+            44.04248046875
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 430,
+          "zoomScroll": 430,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 768,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 768,
+          "zoomScroll": 768,
+          "touchHeights": [
+            32.022216796875,
+            30.0208740234375,
+            32.0223388671875,
+            30.0208740234375
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 768,
+          "zoomScroll": 768,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 768,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 768,
+          "zoomScroll": 768,
+          "touchHeights": [
+            32.0318603515625,
+            30.0299072265625,
+            32.0318603515625,
+            30.0299072265625
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 768,
+          "zoomScroll": 768,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 1280,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 1280,
+          "zoomScroll": 1280,
+          "touchHeights": [
+            32.0311279296875,
+            30.0291748046875,
+            32.0311279296875,
+            30.0291748046875
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 1280,
+          "zoomScroll": 1280,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 1280,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 1280,
+          "zoomScroll": 1280,
+          "touchHeights": [
+            32.0106201171875,
+            30.010009765625,
+            32.0106201171875,
+            30.0098876953125
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 1280,
+          "zoomScroll": 1280,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 1440,
+      "height": 900,
+      "theme": "light",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 1440,
+          "zoomScroll": 1440,
+          "touchHeights": [
+            32.0306396484375,
+            30.02880859375,
+            32.0306396484375,
+            30.02880859375
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 1440,
+          "zoomScroll": 1440,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    },
+    {
+      "engine": "webkit",
+      "width": 1440,
+      "height": 900,
+      "theme": "dark",
+      "variants": [
+        {
+          "variant": "before",
+          "scrollWidth": 1440,
+          "zoomScroll": 1440,
+          "touchHeights": [
+            32.0069580078125,
+            30.0064697265625,
+            32.0069580078125,
+            30.006591796875
+          ]
+        },
+        {
+          "variant": "after",
+          "scrollWidth": 1440,
+          "zoomScroll": 1440,
+          "touchHeights": [
+            44,
+            50,
+            44,
+            50
+          ]
+        }
+      ],
+      "releaseNotes": 4,
+      "ok": true
+    }
+  ],
+  "functional": [
+    {
+      "variant": "before",
+      "viewport": "1440x900",
+      "theme": "light",
+      "ok": true,
+      "summary": {
+        "confirmed": {
+          "blockId": "R20-9001",
+          "materia": "MDP",
+          "plannedMin": 90,
+          "status": "confirmed",
+          "phase": "done",
+          "outcome": "Affrontato",
+          "evidence": "Due esercizi sintetici completati.",
+          "notes": "Punto sintetico: pagina 4, esercizio 2.",
+          "interruptions": [
+            "Altro"
+          ],
+          "segments": 4
+        },
+        "discarded": {
+          "blockId": "R20-9001",
+          "materia": "MDP",
+          "plannedMin": 90,
+          "status": "discarded",
+          "phase": "done",
+          "outcome": null,
+          "evidence": null,
+          "notes": "Punto sintetico: pagina 4, esercizio 2.",
+          "interruptions": [],
+          "segments": 1
+        },
+        "checklist": 1,
+        "active": null,
+        "hash": "#registro"
+      }
+    },
+    {
+      "variant": "after",
+      "viewport": "1440x900",
+      "theme": "light",
+      "ok": true,
+      "summary": {
+        "confirmed": {
+          "blockId": "R20-9001",
+          "materia": "MDP",
+          "plannedMin": 90,
+          "status": "confirmed",
+          "phase": "done",
+          "outcome": "Affrontato",
+          "evidence": "Due esercizi sintetici completati.",
+          "notes": "Punto sintetico: pagina 4, esercizio 2.",
+          "interruptions": [
+            "Altro"
+          ],
+          "segments": 4
+        },
+        "discarded": {
+          "blockId": "R20-9001",
+          "materia": "MDP",
+          "plannedMin": 90,
+          "status": "discarded",
+          "phase": "done",
+          "outcome": null,
+          "evidence": null,
+          "notes": "Punto sintetico: pagina 4, esercizio 2.",
+          "interruptions": [],
+          "segments": 1
+        },
+        "checklist": 1,
+        "active": null,
+        "hash": "#registro"
+      }
+    }
+  ],
+  "errors": [],
+  "ok": true
+}

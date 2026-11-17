@@ -1,0 +1,38 @@
+{
+  "base": "0451dcd5f333bc46338acf2f0954f8d52fcdbf08",
+  "oldVersion": "studioos-focus-202611161948",
+  "newVersion": "studioos-focus-202611171128",
+  "checks": 52,
+  "cases": [
+    {
+      "engine": "chromium",
+      "activeSession": false,
+      "ok": true,
+      "storagePreserved": true,
+      "usedCacheClearOrReinstall": false
+    },
+    {
+      "engine": "chromium",
+      "activeSession": true,
+      "ok": true,
+      "storagePreserved": true,
+      "usedCacheClearOrReinstall": false
+    },
+    {
+      "engine": "webkit",
+      "activeSession": false,
+      "ok": true,
+      "storagePreserved": true,
+      "usedCacheClearOrReinstall": false
+    },
+    {
+      "engine": "webkit",
+      "activeSession": true,
+      "ok": true,
+      "storagePreserved": true,
+      "usedCacheClearOrReinstall": false
+    }
+  ],
+  "errors": [],
+  "ok": true
+}
