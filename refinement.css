@@ -252,7 +252,9 @@ body.rm .view.on,body.rm .sheet.on,body.rm .rel-dialog[open] .rel-card{animation
 #topicList .topic-item:has(> summary[style*="--FIS"]) {
   display: none !important;
 }
+
 .exam-focus-date,.exam-focus-note {
   line-height: 1.5;
 }
+
 .exam-focus-date strong,.exam-focus-note strong { color: var(--ink); }
