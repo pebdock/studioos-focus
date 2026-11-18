@@ -46,7 +46,7 @@ const reviewedFiveExamsUI = {
  'learning-ui.js':['0fc061a0d4eaf9fdee6c248178b3aac677453dcc','be355196165c041b5911066d07fee4bc59ac077e'],
  'prerequisites.js':['f5be6d859eaa796dabceb180d416bc50b6d819b2','94886f2227c1bc6fdbc59956bac01150d300314e']
 };
-function gitBlobHash(buf){return crypto.createHash('sha1').update('blob '+buf.length+'\\0').update(buf).digest('hex')}
+function gitBlobHash(buf){return crypto.createHash('sha1').update('blob '+buf.length+'\0').update(buf).digest('hex')}
 for(const name of Object.keys(beforeBuild.files).filter(name=>name.endsWith('.js')&&name!=='sw.js')){
  const candidate=fs.readFileSync(name),original=fs.readFileSync(path.join(baseline,name));
  const approved=reviewedFiveExamsUI[name],exactVisual=approved&&gitBlobHash(original)===approved[0]&&gitBlobHash(candidate)===approved[1];
