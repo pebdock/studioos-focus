@@ -337,7 +337,11 @@ async function informationParity(browser,origin){
    while(walker.nextNode())if(!walker.currentNode.parentElement?.closest('script,style'))text.push(walker.currentNode.textContent);
    return text.join(' ').replace(/\s+/g,' ').trim();
   });
-  const missing=before.filter(text=>!normalized.includes(text));report.information.push({baselineFragments:before.length,missing,source:'All informative static/seeded DOM text nodes, including closed disclosures; excludes clock/date, connection status and live toast regions.'});
+  const oldSix='MDP 0.0% · BD 0.0% · MN 0.0% · FIS 0.0% · OOP 0.0% · RETI 0.0%';
+  const intendedFive='MDP 0.0% · BD 0.0% · MN 0.0% · OOP 0.0% · RETI 0.0%';
+  const missing=before.filter(text=>!normalized.includes(text)&&!(text===oldSix&&normalized.includes(intendedFive)));
+  extraCheck(normalized.includes(intendedFive)&&!normalized.includes(oldSix),'five subjects shown in plan percentages; retired FIS row absent');
+  report.information.push({baselineFragments:before.length,missing,source:'All informative static/seeded DOM text nodes, including closed disclosures; excludes clock/date, connection status and live toast regions.'});
   extraCheck(before.length>50&&missing.length===0,'all baseline informative text fragments remain in candidate DOM: '+JSON.stringify(missing));
  }catch(error){report.errors.push({information:String(error)});}
  finally{await context.close();}
