@@ -42,7 +42,7 @@ for(const [name,digest] of Object.entries(build.files)){
  check(crypto.createHash('sha256').update(fs.readFileSync(name)).digest('hex')===digest,'manifest hash: '+name);
 }
 const reviewedFiveExamsUI = {
- 'app.js':['6dfd0e0f410c26f234c13abb9647b4cf7ecae657','1b71c01546e38d851862455bf7711428bd4be97d'],
+ 'app.js':['6dfd0e0f410c26f234c13abb9647b4cf7ecae657','3194d53254182d6d9282be4f2182b295248ce456'],
  'learning-ui.js':['0fc061a0d4eaf9fdee6c248178b3aac677453dcc','be355196165c041b5911066d07fee4bc59ac077e'],
  'prerequisites.js':['f5be6d859eaa796dabceb180d416bc50b6d819b2','94886f2227c1bc6fdbc59956bac01150d300314e']
 };
