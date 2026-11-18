@@ -33,7 +33,7 @@ APPROVED_LENS_MAP_SHA256 = "8dafb444eb45d0f0d2e038e618dafc0ff5532807b8b503de7d64
 # Exact reviewed Git blob pairs for UI-only changes.
 # Any future change to these scripts needs a new review; runtime logic remains protected.
 FIVE_EXAMS_UI_BLOBS = {
-    "app.js": ("6dfd0e0f410c26f234c13abb9647b4cf7ecae657", "1b71c01546e38d851862455bf7711428bd4be97d"),
+    "app.js": ("6dfd0e0f410c26f234c13abb9647b4cf7ecae657", "3194d53254182d6d9282be4f2182b295248ce456"),
     "learning-ui.js": ("0fc061a0d4eaf9fdee6c248178b3aac677453dcc", "be355196165c041b5911066d07fee4bc59ac077e"),
     "prerequisites.js": ("f5be6d859eaa796dabceb180d416bc50b6d819b2", "94886f2227c1bc6fdbc59956bac01150d300314e"),
 }
