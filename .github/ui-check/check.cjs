@@ -339,7 +339,14 @@ async function informationParity(browser,origin){
   });
   const oldSix='MDP 0.0% · BD 0.0% · MN 0.0% · FIS 0.0% · OOP 0.0% · RETI 0.0%';
   const intendedFive='MDP 0.0% · BD 0.0% · MN 0.0% · OOP 0.0% · RETI 0.0%';
-  const missing=before.filter(text=>!normalized.includes(text)&&!(text===oldSix&&normalized.includes(intendedFive)));
+  const classDateClarifications = [
+   ['Data indicata nel piano, da confermare in AlmaEsami.','Data comunicata a lezione; orario e iscrizione da verificare su AlmaEsami.'],
+   ['Per OOP è indicato il','Per OOP il'],
+   ['; data e orario da confermare in AlmaEsami.','è stato comunicato a lezione; orario e iscrizione da verificare su AlmaEsami.']
+  ];
+  const acceptedText=text=>normalized.includes(text)||classDateClarifications.some(([oldText,newText])=>text===oldText&&normalized.includes(newText));
+  const missing=before.filter(text=>!acceptedText(text)&&!(text===oldSix&&normalized.includes(intendedFive)));
+  extraCheck(classDateClarifications.every(([,text])=>normalized.includes(text)),'OOP date communicated in class; time and booking still unverified');
   extraCheck(normalized.includes(intendedFive)&&!normalized.includes(oldSix),'five subjects shown in plan percentages; retired FIS row absent');
   report.information.push({baselineFragments:before.length,missing,source:'All informative static/seeded DOM text nodes, including closed disclosures; excludes clock/date, connection status and live toast regions.'});
   extraCheck(before.length>50&&missing.length===0,'all baseline informative text fragments remain in candidate DOM: '+JSON.stringify(missing));
