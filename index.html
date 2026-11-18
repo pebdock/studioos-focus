@@ -79,6 +79,7 @@
       <div id="tdNext" class="small"></div>
       <div id="tdTodo" class="small"></div>
       <div class="chips" id="tdExams" style="margin-top:8px"></div>
+      <p class="small mute exam-focus-date"><strong>OOP · 12 febbraio 2027</strong> <span>Data indicata nel piano, da confermare in AlmaEsami.</span></p>
     </article>
     <article class="card" id="focusCard" aria-labelledby="fTitle">
       <div class="hero-top hideable"><span id="fSub" class="pill">—</span><span id="fTime" class="mute small"></span><span class="sp"></span><span id="fFlag" class="flag"></span></div>
@@ -172,12 +173,12 @@
     <details><summary>Pesi basati sui tempi reali</summary><div id="learningWeights"></div><p class="small mute">Una proposta richiede almeno 5 blocchi verificati su 3 giorni, contenuti invariati e tempo misurato. Le correzioni suggerite restano entro ±20% e richiedono approvazione.</p></details>
   </article>
   <article class="card topic-card" aria-labelledby="topicTitle">
-    <div class="row"><h2 id="topicTitle" class="sp">Argomento per argomento</h2><select id="topicSubject" aria-label="Materia degli argomenti"><option value="">Tutte</option><option>MDP</option><option>BD</option><option>MN</option><option>FIS</option><option>OOP</option><option>RETI</option></select></div>
+    <div class="row"><h2 id="topicTitle" class="sp">Argomento per argomento</h2><select id="topicSubject" aria-label="Materia degli argomenti"><option value="">Tutte</option><option>MDP</option><option>BD</option><option>MN</option><option>OOP</option><option>RETI</option></select></div>
     <input id="topicSearch" type="search" placeholder="Cerca un argomento" aria-label="Cerca un argomento"><div id="topicList"></div>
     <p class="small mute">Copertura dichiarata, tempo misurato, fiducia e prove autonome restano separati. Se la consegna non distingue le unità, il dato è a livello di blocco. I minuti di blocchi con più argomenti restano non attribuiti finché scegli l'argomento.</p>
   </article>
   <article class="card progress-card" aria-labelledby="prTitle">
-    <div class="row"><div class="sp"><span class="eyebrow">Un passo alla volta</span><h2 id="prTitle">La tua preparazione</h2></div><select id="prSubject" aria-label="Materia per le percentuali"><option value="">Tutte le materie</option><option>MDP</option><option>BD</option><option>MN</option><option>FIS</option><option>OOP</option><option>RETI</option></select></div>
+    <div class="row"><div class="sp"><span class="eyebrow">Un passo alla volta</span><h2 id="prTitle">La tua preparazione</h2></div><select id="prSubject" aria-label="Materia per le percentuali"><option value="">Tutte le materie</option><option>MDP</option><option>BD</option><option>MN</option><option>OOP</option><option>RETI</option></select></div>
     <p class="small mute">Copertura del piano attivo basata sui completamenti dichiarati. Il timer, da solo, non completa le attività.</p>
     <div id="prMetrics" class="progress-grid"></div><details class="ui-glass-details"><summary>Qualità e limiti dei dati</summary><p id="prQuality" class="small mute"></p></details>
     <details class="formula-details"><summary>Come vengono calcolate le percentuali</summary><div class="small">
@@ -207,22 +208,22 @@
     <details class="ui-glass-details"><summary><h3>Fattibilità e scenari</h3></summary><div id="anFeas" class="small"></div></details>
     <details class="ui-glass-details"><summary><h3>Esercizi, verifiche e simulazioni</h3></summary><div id="anEx" class="small"></div></details>
     <details class="ui-glass-details"><summary><h3>Stima del voto</h3></summary><div id="anGrade" class="small"></div></details></article>
-  <article class="card"><h3>Appelli</h3><div id="exams"></div></article>
+  <article class="card"><h3>Appelli</h3><p class="small mute exam-focus-note">5 esami in preparazione: MDP, BD, MN, OOP e RETI. Per OOP è indicato il <strong>12/02/2027</strong>; data e orario da confermare in AlmaEsami.</p><div id="exams"></div></article>
   <article class="card"><h3>Simula la media</h3><p class="small mute">Un'ipotesi personale: non cambia i voti di AlmaEsami.</p><label for="averageExam">Esame da sostenere</label><select id="averageExam"></select><label for="averageGrade">Voto ipotetico</label><input id="averageGrade" type="number" min="18" max="30" step="1" value="27"><p id="averageResult" role="status"></p></article>
 </section>
 
 <!-- ================= REGISTRO ================= -->
 <section class="view" id="v-registro" role="tabpanel" aria-labelledby="t-registro">
-  <article class="card"><div class="row"><h2 class="sp">Materiali</h2><select id="mFilter" aria-label="Materia" style="width:auto"><option value="">Tutte</option><option>MDP</option><option>BD</option><option>MN</option><option>FIS</option><option>OOP</option><option>RETI</option></select></div>
-    <input id="mSearch" type="search" placeholder="Cerca file o argomento (es. normalizzazione, cinematica, lab)" aria-label="Cerca materiali">
+  <article class="card"><div class="row"><h2 class="sp">Materiali</h2><select id="mFilter" aria-label="Materia" style="width:auto"><option value="">Tutte</option><option>MDP</option><option>BD</option><option>MN</option><option>OOP</option><option>RETI</option></select></div>
+    <input id="mSearch" type="search" placeholder="Cerca file o argomento (es. normalizzazione, polimorfismo, lab)" aria-label="Cerca materiali">
     <div id="mList" class="small"></div></article>
   <article class="card"><h2>Ripassi di oggi</h2><p class="small mute">Errori registrati da rifare a intervalli crescenti (1, 3, 7, 14, 30 giorni). Rispondi prima di guardare la correzione.</p><div id="rvList" class="small"></div></article>
   <article class="card"><h2>Simulazioni d'esame</h2>
-    <div class="row"><select id="smMat" aria-label="Materia" style="width:auto"><option>MDP</option><option>BD</option><option>MN</option><option>FIS</option><option>OOP</option><option>RETI</option></select><input id="smName" type="text" placeholder="Prova (es. Giugno 2024)" class="sp"></div>
+    <div class="row"><select id="smMat" aria-label="Materia" style="width:auto"><option>MDP</option><option>BD</option><option>MN</option><option>OOP</option><option>RETI</option></select><input id="smName" type="text" placeholder="Prova (es. Giugno 2024)" class="sp"></div>
     <div class="row"><input id="smScore" type="number" step="0.5" placeholder="Punti" style="width:90px"><input id="smMax" type="number" value="30" style="width:80px" aria-label="Punteggio massimo"><input id="smMin" type="number" placeholder="Minuti" style="width:90px"><input id="smErr" type="text" placeholder="Errori principali" class="sp"></div>
     <div class="row"><button class="btn" id="bSim">Registra simulazione</button></div>
     <div id="smList" class="small"></div></article>
-  <article class="card"><div class="row"><h2 class="sp">Errori registrati</h2><select id="eFilter" aria-label="Filtra per materia" style="width:auto"><option value="">Tutte le materie</option><option>MDP</option><option>BD</option><option>MN</option><option>FIS</option><option>OOP</option><option>RETI</option></select></div>
+  <article class="card"><div class="row"><h2 class="sp">Errori registrati</h2><select id="eFilter" aria-label="Filtra per materia" style="width:auto"><option value="">Tutte le materie</option><option>MDP</option><option>BD</option><option>MN</option><option>OOP</option><option>RETI</option></select></div>
     <input id="eSearch" type="search" placeholder="Cerca negli errori" aria-label="Cerca negli errori">
     <div id="allErr" class="small"></div></article>
   <article class="card"><h3>Sessioni confermate</h3><div id="runList" class="small"></div></article>

@@ -9,7 +9,7 @@
   "use strict";
   const doc=root.document;
   const SRC={
-    R13:{file:"Fisica_Prerequisiti_Consolidamento_R13.pdf",short:"Scheda Fisica R13"},
+    R13:{file:"Fisica_Prerequisiti_Consolidamento_R13.pdf",short:"Scheda matematica R13"},
     R13i:{file:"Prerequisiti_Matematica_FIS_MDP_R13i.pdf",short:"Scheda R13i"},
     T04:{file:"04 - Trig_Deriv_Integr.pdf",short:"Dispensa 04"}};
   // codice → [titolo, scheda, pagina della traccia, pagina della soluzione]
@@ -94,7 +94,7 @@
   function glossary(all){const use={};for(const b of all){const p=parse(b.cons);if(!p)continue;for(const c of p.codes)(use[c.code]=use[c.code]||[]).push(b)}
     const rows=Object.keys(CATALOG).map(code=>{const k=CATALOG[code],s=SRC[k[1]]||{},u=use[code]||[];
       return `<div class="prq-gl-row"><b>${esc(code)}</b><span><b>${esc(k[0])}</b><small>${esc(s.short||s.file||"")} · p. ${esc(k[2])}, soluzioni p. ${esc(k[3])}</small><small>${u.length?"Nel piano: "+u.map(b=>esc(b.mat)+" "+esc(dm(b.date))).join(", "):"Non ancora nel piano: ripassala se un esercizio la usa"}</small></span></div>`}).join("");
-    return `<details class="prq-glossary"><summary>Basi usate ma non spiegate nei corsi (${Object.keys(CATALOG).length+Object.values(BASI).reduce((n,a)=>n+a.length,0)})</summary><p class="small mute">Matematica usata da Fisica e MDP senza essere spiegata nei loro materiali. Sotto, per MN, BD, OOP e Reti, le basi usate dai materiali ma non spiegate lì.</p>${rows}${basi()}</details>`}
+    return `<details class="prq-glossary"><summary>Basi usate ma non spiegate nei corsi (${Object.keys(CATALOG).length+Object.values(BASI).reduce((n,a)=>n+a.length,0)})</summary><p class="small mute">Matematica utile a MDP e ai prerequisiti comuni, non sempre approfondita nei materiali del corso. Sotto, per MN, BD, OOP e Reti, le basi usate dai materiali ma non spiegate lì.</p>${rows}${basi()}</details>`}
   function basi(){const plan=blocks().filter(b=>b&&b.stato!=="Rinviato");const t=today();
     return Object.keys(BASI).map(s=>`<h4 class="prq-gl-subj">${esc(s)}</h4>`+BASI[s].map(([name,ev,st,kw])=>{const rx=new RegExp(kw,"i"),u=plan.filter(b=>b.mat===s&&String(b.date)>=t&&rx.test(String(b.arg||""))).slice(0,4);
       return `<div class="prq-gl-row"><b>•</b><span><b>${esc(name)}</b><small>${esc(st)} · ${esc(ev)}</small><small>${u.length?"Serve per: "+u.map(b=>esc(dm(b.date))+" "+esc(String(b.arg||"").slice(0,40))).join(" · "):"Nessun blocco futuro collegato"}</small></span></div>`}).join("")).join("")
