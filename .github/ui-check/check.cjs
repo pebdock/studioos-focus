@@ -344,7 +344,7 @@ async function informationParity(browser,origin){
    ['Per OOP è indicato il','Per OOP il'],
    ['; data e orario da confermare in AlmaEsami.','è stato comunicato a lezione; orario e iscrizione da verificare su AlmaEsami.']
   ];
-  const acceptedText=text=>normalized.includes(text)||classDateClarifications.some(([oldText,newText])=>text===oldText&&normalized.includes(newText));
+  const acceptedText=text=>normalized.includes(text)||classDateClarifications.some(([oldText,newText])=>text.includes(oldText)&&normalized.includes(text.replace(oldText,newText)));
   const missing=before.filter(text=>!acceptedText(text)&&!(text===oldSix&&normalized.includes(intendedFive)));
   extraCheck(classDateClarifications.every(([,text])=>normalized.includes(text)),'OOP date communicated in class; time and booking still unverified');
   extraCheck(normalized.includes(intendedFive)&&!normalized.includes(oldSix),'five subjects shown in plan percentages; retired FIS row absent');
