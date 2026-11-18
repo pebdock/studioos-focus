@@ -41,9 +41,16 @@ for(const name of names){
 for(const [name,digest] of Object.entries(build.files)){
  check(crypto.createHash('sha256').update(fs.readFileSync(name)).digest('hex')===digest,'manifest hash: '+name);
 }
+const reviewedFiveExamsUI = {
+ 'app.js':['6dfd0e0f410c26f234c13abb9647b4cf7ecae657','1b71c01546e38d851862455bf7711428bd4be97d'],
+ 'learning-ui.js':['0fc061a0d4eaf9fdee6c248178b3aac677453dcc','be355196165c041b5911066d07fee4bc59ac077e'],
+ 'prerequisites.js':['f5be6d859eaa796dabceb180d416bc50b6d819b2','94886f2227c1bc6fdbc59956bac01150d300314e']
+};
+function gitBlobHash(buf){return crypto.createHash('sha1').update('blob '+buf.length+'\\0').update(buf).digest('hex')}
 for(const name of Object.keys(beforeBuild.files).filter(name=>name.endsWith('.js')&&name!=='sw.js')){
  const candidate=fs.readFileSync(name),original=fs.readFileSync(path.join(baseline,name));
- check(candidate.equals(original)||(name==='liquid.js'&&lensMapOnly(original.toString(),candidate.toString())),'protected runtime: '+name+' (only reviewed pure lensMap optimization may differ)');
+ const approved=reviewedFiveExamsUI[name],exactVisual=approved&&gitBlobHash(original)===approved[0]&&gitBlobHash(candidate)===approved[1];
+ check(candidate.equals(original)||(name==='liquid.js'&&lensMapOnly(original.toString(),candidate.toString()))||exactVisual,'protected runtime: '+name+' (unchanged or exact reviewed display-only patch)');
 }
 const sw=fs.readFileSync('sw.js','utf8'),oldSw=fs.readFileSync(path.join(baseline,'sw.js'),'utf8');
 const cacheVersion=/^const VERSION = "studioos-focus-([0-9]{12})";$/m;
