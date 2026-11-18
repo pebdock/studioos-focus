@@ -245,10 +245,6 @@ body.rm .view.on,body.rm .sheet.on,body.rm .rel-dialog[open] .rel-card{animation
 /* Five-exam presentation only. Do not mutate plan data, timer state or exam APIs.
    The historical FIS entries are preserved in read-only sources and logs. */
 #exams > .exam-subj[style*="--FIS"],
-#anHours > .hbar:nth-child(4),
-#anGrade > p:nth-child(4),
-#crBody .career-subj > li:nth-child(4),
-#learningHeat > .learning-heat-row:nth-child(5),
 #topicList .topic-item:has(> summary[style*="--FIS"]) {
   display: none !important;
 }
