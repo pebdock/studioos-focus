@@ -1,8 +1,8 @@
 {
  "v": 1,
  "source": "Pagine pubbliche UniBo · GitHub Actions ogni 3 ore",
- "checkedAt": "2026-11-18T11:52:30.883Z",
- "changedAt": "2026-11-15T22:56:20.951Z",
+ "checkedAt": "2026-11-19T02:38:02.591Z",
+ "changedAt": "2026-11-19T02:38:02.591Z",
  "status": "ok",
  "error": null,
  "items": [
@@ -101,6 +101,25 @@
    ]
   },
   {
+   "code": "70219",
+   "name": "PROGRAMMAZIONE AD OGGETTI",
+   "teacher": "VIROLI MIRKO",
+   "date": "2027-01-15",
+   "time": "09:00",
+   "type": "Pratico",
+   "from": "2026-12-11",
+   "to": "2027-01-10",
+   "room": "Laboratorio informatico 4.2 (CAD) Piano secondo (livello 4) Ex-Zuccherificio – Edificio 1, Ingresso Via dell’Università 50 Via dell’Università, 50, Cesena",
+   "notes": "L'effettivo inizio della prova per ciascuno sarà comunicato 2-3 giorni prima sul sito virtuale del corso, e potrebbe essere di mattina o pomeriggio. Lo studente che partecipa all'esame è tenuto a conoscerne tutte le regole, pubblicate anch'esse sul sito virtuiale del corso.",
+   "component": "",
+   "subject": "OOP",
+   "key": "70219|2027-01-15|09:00|pratico",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/mirko.viroli/didattica?tab=appelli"
+   ]
+  },
+  {
    "code": "10906",
    "name": "BASI DI DATI",
    "teacher": "FRANCO ANNALISA",
@@ -155,6 +174,25 @@
    "sources": [
     "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
     "https://www.unibo.it/sitoweb/fabrizio.caselli/didattica?tab=appelli"
+   ]
+  },
+  {
+   "code": "70219",
+   "name": "PROGRAMMAZIONE AD OGGETTI",
+   "teacher": "VIROLI MIRKO",
+   "date": "2027-01-28",
+   "time": "09:00",
+   "type": "Pratico",
+   "from": "2027-01-01",
+   "to": "2027-01-24",
+   "room": "Laboratorio informatico 4.2 (CAD) Piano secondo (livello 4) Ex-Zuccherificio – Edificio 1, Ingresso Via dell’Università 50 Via dell’Università, 50, Cesena",
+   "notes": "L'effettivo inizio della prova per ciascuno sarà comunicato 2-3 giorni prima sul sito virtuale del corso, e potrebbe essere di mattina o pomeriggio. Lo studente che partecipa all'esame è tenuto a conoscerne tutte le regole, pubblicate anch'esse sul sito virtuiale del corso.",
+   "component": "",
+   "subject": "OOP",
+   "key": "70219|2027-01-28|09:00|pratico",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/mirko.viroli/didattica?tab=appelli"
    ]
   },
   {
@@ -253,6 +291,25 @@
    ]
   },
   {
+   "code": "70219",
+   "name": "PROGRAMMAZIONE AD OGGETTI",
+   "teacher": "VIROLI MIRKO",
+   "date": "2027-02-12",
+   "time": "09:00",
+   "type": "Pratico",
+   "from": "2027-01-18",
+   "to": "2027-02-07",
+   "room": "Laboratorio informatico 4.2 (CAD) Piano secondo (livello 4) Ex-Zuccherificio – Edificio 1, Ingresso Via dell’Università 50 Via dell’Università, 50, Cesena",
+   "notes": "L'effettivo inizio della prova per ciascuno sarà comunicato 2-3 giorni prima sul sito virtuale del corso, e potrebbe essere di mattina o pomeriggio. Lo studente che partecipa all'esame è tenuto a conoscerne tutte le regole, pubblicate anch'esse sul sito virtuiale del corso.",
+   "component": "",
+   "subject": "OOP",
+   "key": "70219|2027-02-12|09:00|pratico",
+   "sources": [
+    "https://corsi.unibo.it/laurea/IngegneriaScienzeInformatiche/appelli",
+    "https://www.unibo.it/sitoweb/mirko.viroli/didattica?tab=appelli"
+   ]
+  },
+  {
    "code": "B2561",
    "name": "METODI NUMERICI PER L'INTELLIGENZA ARTIFICIALE",
    "teacher": "LAZZARO DAMIANA",
@@ -273,6 +330,48 @@
   }
  ],
  "eventi": [
+  {
+   "id": "nuova:70219|2027-01-15|09:00|pratico",
+   "kind": "nuova_data",
+   "subject": "OOP",
+   "code": "70219",
+   "date": "2027-01-15",
+   "time": "09:00",
+   "type": "Pratico",
+   "from": "2026-12-11",
+   "to": "2027-01-10",
+   "at": "2026-11-19T02:38:02.591Z",
+   "msg": "OOP: nuova data d'esame 15/01/2027 09:00 · Pratico",
+   "silent": false
+  },
+  {
+   "id": "nuova:70219|2027-01-28|09:00|pratico",
+   "kind": "nuova_data",
+   "subject": "OOP",
+   "code": "70219",
+   "date": "2027-01-28",
+   "time": "09:00",
+   "type": "Pratico",
+   "from": "2027-01-01",
+   "to": "2027-01-24",
+   "at": "2026-11-19T02:38:02.591Z",
+   "msg": "OOP: nuova data d'esame 28/01/2027 09:00 · Pratico",
+   "silent": false
+  },
+  {
+   "id": "nuova:70219|2027-02-12|09:00|pratico",
+   "kind": "nuova_data",
+   "subject": "OOP",
+   "code": "70219",
+   "date": "2027-02-12",
+   "time": "09:00",
+   "type": "Pratico",
+   "from": "2027-01-18",
+   "to": "2027-02-07",
+   "at": "2026-11-19T02:38:02.591Z",
+   "msg": "OOP: nuova data d'esame 12/02/2027 09:00 · Pratico",
+   "silent": false
+  },
   {
    "id": "aperta:10906|2027-01-07|10:00|altro",
    "kind": "iscrizioni_aperte",
