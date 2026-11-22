@@ -4,7 +4,7 @@
  * Sicurezza
  *  - Ambito OAuth predefinito: drive.file (non sensibile). L'app vede SOLO i fogli che scegli tu
  *    con il selettore Google (setup.html); sugli altri dispositivi li ritrova da sola.
- *  - Calendar è facoltativo e in sola lettura (calendar.readonly), chiesto solo se lo attivi.
+ *  - Solo Google Sheets e Drive: nessun Calendar, nessun ICS.
  *  - Nessun segreto nel codice. Il Client ID OAuth è pubblico per natura. Gli ID dei fogli
  *    restano solo su questo dispositivo e non passano mai in un URL.
  *  - Scritture limitate per foglio, scheda, intervallo e valori (vedi WRITE_RULES).
@@ -12,7 +12,7 @@
  */
 (function () {
   "use strict";
-  var VERSION = "pwa-2.4.0 · Definitiva";
+  var VERSION = "pwa-2.5.0 · Definitiva";
   var CLIENT_ID = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var P = "sfocus.pwa.";
   var ls = {
@@ -21,10 +21,8 @@
     del: function (k) { try { localStorage.removeItem(P + k); } catch (e) {} }
   };
   var S_FILE = "https://www.googleapis.com/auth/drive.file";
-  var S_CAL = "https://www.googleapis.com/auth/calendar.readonly";
   var SH = "https://sheets.googleapis.com/v4/spreadsheets/";
   var DRV = "https://www.googleapis.com/drive/v3/files";
-  var CAL = "https://www.googleapis.com/calendar/v3/";
   var TAB = "FOCUS_DB";
   var enc = encodeURIComponent;
   var RE_FILE = /^[\w-]{25,60}$/;
@@ -36,9 +34,7 @@
   if (CFG.readOnly == null) CFG.readOnly = true;
   ls.del("cfg"); /* eventuale configurazione della 1.0 con link #cfg: non più usata */
   function saveCfg() {
-    var previous = window.STUDIOOS_CFG && window.STUDIOOS_CFG.cal;
-    ls.set("cfg2", CFG); window.STUDIOOS_CFG = { sheet: CFG.sheet || "", arch: CFG.arch || "", cal: CFG.calOn ? (CFG.cal || "") : "" };
-    if(previous!==window.STUDIOOS_CFG.cal)window.dispatchEvent(new CustomEvent("studioos:calendar-config",{detail:{id:window.STUDIOOS_CFG.cal}}));
+    ["cal","calOn","calChoices","calendarName"].forEach(function(k){delete CFG[k];});ls.set("cfg2", CFG); window.STUDIOOS_CFG = { sheet: CFG.sheet || "", arch: CFG.arch || "" };
   }
   function configured() { return !!(CFG.sheet && CFG.arch); }
   window.STUDIOOS_PWA = true;
@@ -57,7 +53,6 @@
       ls.set("tok", { t: q.get("access_token"), exp: Date.now() + (Number(q.get("expires_in") || 3600) - 120) * 1000, scope: granted });
       ls.del("authErr");
       if (granted.indexOf(S_FILE) < 0) ls.set("authErr", "Non hai concesso l'accesso ai file scelti: Focus non può leggere il piano.");
-      else if (st.wantCal && granted.indexOf(S_CAL) < 0) { CFG.calOn = false; saveCfg(); ls.set("authErr", "Accesso a Calendar non concesso: il controllo resta spento."); }
     } else if (q.get("error")) {
       ls.set("authErr", q.get("error") === "access_denied" ? "Accesso annullato." : "Accesso non riuscito (" + q.get("error") + ").");
     } else {
@@ -75,9 +70,8 @@
     var a = new Uint32Array(4); crypto.getRandomValues(a);
     var nonce = Array.prototype.join.call(a, "-");
     var keep = /^#(focus|giorno|piano|registro|settimana|impostazioni)$/.test(location.hash) ? location.hash : "";
-    var wantCal = opts.cal != null ? !!opts.cal : !!CFG.calOn;
-    ls.set("oauthState", { nonce: nonce, hash: keep, at: Date.now(), wantCal: wantCal, back: opts.back || "" });
-    var scopes = [S_FILE].concat(wantCal ? [S_CAL] : []).join(" ");
+    ls.set("oauthState", { nonce: nonce, hash: keep, at: Date.now(), back: opts.back || "" });
+    var scopes = [S_FILE].join(" ");
     var redirect = location.origin + location.pathname.replace(/[^/]*$/, "");
     var u = "https://accounts.google.com/o/oauth2/v2/auth?" + new URLSearchParams({
       client_id: CLIENT_ID, redirect_uri: redirect, response_type: "token", scope: scopes,
@@ -161,16 +155,6 @@
         checkWrite(input.spreadsheetId, input.range, input.values);
         return g(SH + enc(input.spreadsheetId) + "/values/" + enc(input.range) + "?valueInputOption=RAW",
           { method: "PUT", body: JSON.stringify({ range: input.range, majorDimension: "ROWS", values: input.values }) });
-      }
-      if (server === "Google Calendar" && tool === "list_events") {
-        if (!CFG.calOn || !CFG.cal || input.calendarId !== CFG.cal) throw new Error("Calendar non attivo");
-        var tz = input.timeZone || "Europe/Rome";
-        var qs = new URLSearchParams({ singleEvents: "true", orderBy: "startTime", maxResults: String(Math.min(250, input.pageSize || 100)), timeZone: tz });
-        if (input.startTime) qs.set("timeMin", toRfc(input.startTime, tz));
-        if (input.endTime) qs.set("timeMax", toRfc(input.endTime, tz));
-        var items = [], page = "";
-        do { if(page)qs.set("pageToken",page);var ev=await g(CAL+"calendars/"+enc(input.calendarId)+"/events?"+qs.toString());items=items.concat(ev.items||[]);page=ev.nextPageToken||""; } while(page);
-        return { events: items.filter(function(e){return e.status!=="cancelled";}).map(function (e) { return { summary: e.summary || "", description: e.description || "", start: e.start, end: e.end }; }) };
       }
       throw new Error("Funzione non disponibile nella versione autonoma: " + server + " · " + tool);
     }
@@ -361,38 +345,17 @@
     saveCfg();
     return msg;
   }
-  async function findCalendar() {
-    var list = [], page = "";
-    do {
-      var qs=new URLSearchParams({minAccessRole:"reader",maxResults:"250",fields:"nextPageToken,items(id,summary,primary)"});
-      if(page)qs.set("pageToken",page);
-      var r=await g(CAL+"users/me/calendarList?"+qs.toString());list=list.concat(r.items||[]);page=r.nextPageToken||"";
-    }while(page);
-    return list;
-  }
   async function sharePreferences() {
     if(window.STUDIOOS_PICKER_CONFIG&&window.STUDIOOS_PICKER_CONFIG.valid(CFG)&&token()&&CFG.arch) {
       try {await window.STUDIOOS_PICKER_CONFIG.save(tokObj(),CFG);return true;} catch(e){return false;}
     }
     return false;
   }
-  async function connectCalendar(quiet) {
-    CFG.calOn=true;saveCfg();
-    if(!hasScope(S_CAL)){signIn({cal:true});return;}
-    try {
-      var list=await findCalendar();CFG.calChoices=list;
-      var selected=list.find(function(c){return c.id===CFG.cal;});
-      if(!selected){var study=list.filter(function(c){return /studio/i.test(c.summary||"");});if(study.length===1)selected=study[0];}
-      if(selected){var changed=CFG.cal!==selected.id;CFG.cal=selected.id;CFG.calendarName=selected.summary;saveCfg();if(!quiet||changed)await sharePreferences();if(!quiet)toast("Calendar «"+selected.summary+"» collegato in sola lettura");}
-      else {delete CFG.cal;saveCfg();toast(list.length?"Scegli il calendario di studio nell'elenco":"Nessun calendario leggibile trovato");}
-    } catch(error){setErr("Calendar: "+error.message);}
-    renderPanel();
-  }
   async function diagnose() {
     var out = [];
     var t = tokObj();
     out.push(t ? "Google collegato · accesso valido ancora per circa " + Math.max(0, Math.round((t.exp - Date.now()) / 60000)) + " min" : "Google non collegato");
-    if (t) out.push("Autorizzazioni: " + (t.scope || []).map(function (s) { return s === S_FILE ? "solo i file scelti (drive.file)" : s === S_CAL ? "Calendar in sola lettura" : s.replace("https://www.googleapis.com/auth/", ""); }).join(", "));
+    if (t) out.push("Autorizzazioni: " + (t.scope || []).map(function (s) { return s === S_FILE ? "solo i file scelti (drive.file)" : s.replace("https://www.googleapis.com/auth/", ""); }).join(", "));
     if (CFG.sheet) {
       try { var a = await g(SH + enc(CFG.sheet) + "/values/" + enc("PROGRAMMA!L6:L427")); var ids = (a.values || []).filter(function (x) { return /^R20-\d{4}$/.test(x[0] || ""); }).length; out.push("Piano «" + (CFG.names && CFG.names.sheet || "D-035") + "»: " + ids + " blocchi letti ✓"); }
       catch (e) { out.push("Piano: ✗ " + e.message); }
@@ -402,10 +365,6 @@
       catch (e) { out.push("Archivio: ✗ " + e.message); }
     } else out.push("Archivio: non collegato");
     out.push(CFG.readOnly ? "Registrazione nei fogli: spenta (sola lettura)" : "Registrazione nei fogli: attiva (solo campi previsti)");
-    if(!(CFG.calOn&&CFG.cal)) out.push("Calendar: non configurato (facoltativo)");
-    else if(!t||!hasScope(S_CAL)) out.push("Calendar «"+(CFG.calendarName||"calendario selezionato")+"»: non autorizzato · ricollega Google Calendar");
-    else { try { var d0=new Date();d0.setHours(0,0,0,0);var qs=new URLSearchParams({singleEvents:"true",maxResults:"50",timeMin:d0.toISOString(),timeMax:new Date(d0.getTime()+864e5).toISOString(),fields:"items(summary,description)"});var ev=await g(CAL+"calendars/"+enc(CFG.cal)+"/events?"+qs.toString());var nn=(ev.items||[]).filter(function(x){return /\[R20:R20-\d{4}\]/.test((x.summary||"")+" "+(x.description||""));}).length;out.push("Calendar «"+(CFG.calendarName||"calendario selezionato")+"»: lettura riuscita · "+(nn?nn+" eventi STUDIOOS oggi":"nessun evento STUDIOOS oggi")+" · sola lettura"); }
-      catch (e) { out.push("Calendar «"+(CFG.calendarName||"calendario selezionato")+"»: ✗ "+e.message); } }
     out.push(lastCloudWrite?"Ultimo salvataggio verificato: "+new Date(lastCloudWrite).toLocaleTimeString("it-IT"):"Nessuna nuova scrittura verificata in questa apertura");
     var le = ls.get("lastApiErr", ""); if (le) out.push("Ultimo errore Google: " + le);
     out.push("Versione " + VERSION + (navigator.serviceWorker && navigator.serviceWorker.controller ? " · funziona anche offline" : ""));
@@ -454,12 +413,8 @@
       '<div class="row" style="margin-top:6px">' + (ok ? '<button class="btn" data-pwa="diag">Verifica connessione</button><button class="btn" data-pwa="out">Disconnetti</button>' : '<button class="btn primary" data-pwa="in">Collega Google</button>') +
       (ok ? '<button class="btn" data-pwa="find">Cerca i fogli</button><a class="btn" href="setup.html">Scegli i fogli</a>' : "") + "</div>" +
       '<pre class="cons small" id="pwaDiag" hidden></pre>' +
-      '<div class="pwa-save"><span class="pwa-save-label">Le tue sessioni</span><p id="pwaSaveState" role="status" aria-live="polite">Controllo dei salvataggi…</p><button class="btn" data-pwa="sync-now">Sincronizza ora</button><p class="small mute">Puoi passare a un altro dispositivo dopo «Salvato su Google». Piano e Calendar si aggiornano automaticamente ogni 30 secondi e alla riapertura. Recupero anche la sessione; senza rete conservo le modifiche qui e le invio quando torni online.</p></div>' +
+      '<div class="pwa-save"><span class="pwa-save-label">Le tue sessioni</span><p id="pwaSaveState" role="status" aria-live="polite">Controllo dei salvataggi…</p><button class="btn" data-pwa="sync-now">Sincronizza ora</button><p class="small mute">Puoi passare a un altro dispositivo dopo «Salvato su Google». Il piano si aggiorna automaticamente ogni 30 secondi e alla riapertura. Recupero anche la sessione; senza rete conservo le modifiche qui e le invio quando torni online.</p></div>' +
       (configured() ? '<p class="small"><b>Registrazione nei fogli:</b> ' + (CFG.readOnly ? 'spenta su questo dispositivo. <button class="btn" data-pwa="wr-on">Attiva</button><span id="pwaWr" hidden> Le sessioni si salvano nel tuo archivio Google e l\'attivazione segue lo stesso archivio sugli altri dispositivi. Il registro PROGRAMMA richiede sempre la tua conferma. Usa la PWA come timer operativo. <button class="btn primary" data-pwa="wr-on-ok">Conferma attivazione</button></span>' : 'attiva. <button class="btn" data-pwa="wr-off">Solo salvataggio locale qui</button>') + '</p>' : '') +
-      '<div class="pwa-calendar"><label><input type="checkbox" id="pwaCal"' + (CFG.calOn ? " checked" : "") + '> Confronta il piano con Google Calendar</label><p class="small mute">Solo lettura. Google richiede accesso in lettura ai calendari; Focus usa quello che scegli e non modifica gli eventi.</p>' +
-      (CFG.calOn&&CFG.cal?'<p class="small">Collegato a <b>'+esc(CFG.calendarName||"calendario selezionato")+'</b>.</p>':"")+
-      '<div class="row"><button class="btn" data-pwa="cal-connect">'+(CFG.calOn&&CFG.cal?"Cambia calendario":"Collega Google Calendar")+'</button></div>'+
-      (CFG.calChoices&&CFG.calChoices.length?'<label for="pwaCalSelect">Calendario di studio</label><select id="pwaCalSelect"><option value="">Scegli un calendario…</option>'+CFG.calChoices.map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===CFG.cal?' selected':'')+'>'+esc(c.summary||c.id)+'</option>';}).join("")+'</select>':"")+'</div>'+
       '<p class="small mute">' + esc(platformHelp()) + '</p>' +
       '<details><summary class="small">Configurazione avanzata</summary>' +
       '<p class="small mute">La configurazione del selettore si recupera con lo stesso account Google. Questi campi servono per il primo collegamento: il salvataggio la rende disponibile anche agli altri dispositivi tramite i metadati privati dell\'archivio autorizzato.</p>' +
@@ -500,7 +455,6 @@
       else if (a === "wr-on-ok") { CFG.readOnly = false;CFG.writesOverride=false;saveCfg();await sharePreferences();toast("Salvataggio e sincronizzazione attivi");window.dispatchEvent(new CustomEvent("studioos:sync-now"));renderPanel(); }
       else if (a === "wr-off") { CFG.readOnly = true;CFG.writesOverride=true;saveCfg();toast("Su questo dispositivo salvo solo in locale");window.dispatchEvent(new CustomEvent("studioos:sync-now"));renderPanel(); }
       else if (a === "sync-now") { window.dispatchEvent(new CustomEvent("studioos:sync-now"));toast("Controllo i salvataggi e gli altri dispositivi…"); }
-      else if (a === "cal-connect") { await connectCalendar(); }
       else if (a === "diag") { var d = el("pwaDiag"); d.hidden = false; d.textContent = "Verifico…"; try { d.textContent = (await diagnose()).join("\n"); } catch (x) { d.textContent = "Verifica non riuscita: " + x.message; } }
       else if (a === "choose") { CFG.sheet = el("pwaSelSheet").value; CFG.arch = el("pwaSelArch").value; CFG.names = { sheet: el("pwaSelSheet").selectedOptions[0].text, arch: el("pwaSelArch").selectedOptions[0].text }; delete CFG.choices;ls.del("authErr");saveCfg(); location.reload(); }
       else if (a === "saveadv") {
@@ -513,25 +467,14 @@
       }
       else if (a === "reset") { delete CFG.sheet; delete CFG.arch; delete CFG.names; delete CFG.choices; CFG.readOnly = true; saveCfg(); location.reload(); }
     });
-    document.addEventListener("change", async function (e) {
-      if (e.target && e.target.id === "pwaCal") {
-        if (e.target.checked) await connectCalendar();
-        else {CFG.calOn=false;saveCfg();await sharePreferences();toast("Confronto con Calendar spento");renderPanel();}
-      }
-      if(e.target&&e.target.id==="pwaCalSelect"){
-        var selected=(CFG.calChoices||[]).find(function(c){return c.id===e.target.value;});
-        if(selected){CFG.cal=selected.id;CFG.calOn=true;CFG.calendarName=selected.summary;saveCfg();await sharePreferences();toast("Calendar «"+selected.summary+"» collegato");renderPanel();}
-      }
-    });
     window.addEventListener("studioos:sync-status",function(e){appSaveStatus=e.detail;updateSavePanel();});
     setInterval(function(){if(!el("pwaCard")||!el("pwaCard").contains(document.activeElement))updateSavePanel();},60000);
     /* La configurazione del Picker segue l'account, anche se i fogli sono già collegati. */
     if (token() && window.STUDIOOS_PICKER_CONFIG) {
-      window.STUDIOOS_PICKER_CONFIG.load(tokObj(), CFG,{refresh:true,preferences:true}).then(function () { saveCfg(); renderPanel();window.dispatchEvent(new CustomEvent("studioos:sync-now"));if(CFG.calOn&&hasScope(S_CAL))connectCalendar(true); }).catch(function () {});
+      window.STUDIOOS_PICKER_CONFIG.load(tokObj(), CFG,{refresh:true,preferences:true}).then(function () { saveCfg(); renderPanel();window.dispatchEvent(new CustomEvent("studioos:sync-now")); }).catch(function () {});
     }
-    /* dopo l'accesso: collega i fogli e, se richiesto, il calendario */
+    /* dopo l'accesso: collega i fogli */
     if (token() && !configured()) runFind();
-    if (token() && CFG.calOn && hasScope(S_CAL) && !window.STUDIOOS_PICKER_CONFIG) connectCalendar(true);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
 

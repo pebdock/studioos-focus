@@ -100,7 +100,7 @@
   }
   function health(input,now=Date.now()){
     const item=(id,label,t,max,detail)=>({id,label,at:t||null,level:!t?'unknown':now-Date.parse(t)>max?'warning':'ok',detail:detail||''});
-    const s=input.system||{},out=[item('calendar','Calendar',s.calendarAt,2.5*3600e3,s.calendarStatus),item('bridge','Ponte UniBoh',input.career?.checkedAt,3*3600e3,input.career?.outcome),item('tutor','Tutor',s.tutorAt,30*3600e3,s.tutorStatus),item('backup','Backup',s.backupAt,30*3600e3,s.backupStatus)];
+    const s=input.system||{},out=[item('bridge','Ponte UniBoh',input.career?.checkedAt,3*3600e3,input.career?.outcome),item('tutor','Tutor',s.tutorAt,30*3600e3,s.tutorStatus),item('backup','Backup',s.backupAt,30*3600e3,s.backupStatus)];
     if(input.outbox>0)out.push({id:'outbox',label:'Salvataggi in attesa',at:null,level:'warning',detail:String(input.outbox)});
     for(const x of out)if(/errore|error|failed|sospeso|conflitto/i.test(x.detail))x.level='error';
     return out;

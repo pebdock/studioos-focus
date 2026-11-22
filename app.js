@@ -1,5 +1,4 @@
 "use strict";
-let CAL_ID=(window.STUDIOOS_CFG||{}).cal||"";
 const SHEET_ID=(window.STUDIOOS_CFG||{}).sheet||"";
 const ARCH_ID=(window.STUDIOOS_CFG||{}).arch||"";
 const SUBJ=["MDP","BD","MN","FIS","OOP","RETI"];
@@ -69,7 +68,7 @@ let localSaveFailed=false;
 const LS={get(k,d){try{const v=localStorage.getItem(storageKey(k));return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(storageKey(k),JSON.stringify(v));return true}catch(e){localSaveFailed=true;return false}},remove(k){try{localStorage.removeItem(storageKey(k))}catch(e){localSaveFailed=true}}};
 const deviceId=LS.get("device",null)||(()=>{const d="dev-"+Math.random().toString(36).slice(2,10);LS.set("device",d);return d})();
 const settings=Object.assign({work:50,brk:10,auto:true,resume:false,smart:true,sound:"soft",vol:.6,rm:false,theme:"auto",look:"auto",atmosphere:"cozy",motion:"elastic",glass:50,breathe:true,haptic:true,wake:true,night:"auto",amb:"none",ambVol:.35},LS.get("settings",{}));
-let mcp=null,db=null,index={},dayEvents=[],calDay={},curDay=todayIso(),wkRef=todayIso(),runs={},errors={},syncState={},cur=null,run=null,wake=null,actx=null,stars=0,liveOK=false,lastKey="",lastSec=-1,STEPS=[];
+let mcp=null,db=null,index={},dayEvents=[],curDay=todayIso(),wkRef=todayIso(),runs={},errors={},syncState={},cur=null,run=null,wake=null,actx=null,stars=0,liveOK=false,lastKey="",lastSec=-1,STEPS=[];
 const UA=navigator.userAgent||"";
 const isApple=/iPhone|iPad|iPod|Macintosh|Mac OS X/.test(UA)&&!/Windows|Android/.test(UA);
 const isIOS=/iPhone|iPad|iPod/.test(UA)||(/Macintosh/.test(UA)&&navigator.maxTouchPoints>1);
@@ -112,35 +111,18 @@ async function loadIndex(){
   if($("cSh"))$("cSh").title="Aggiornamento automatico · "+hm(Date.now());
   return changed;
 }
-function calTip(t){const c=$("cCal");if(c)c.title=t}
 let dayRequest=0,daySignature="";
 async function loadDay(day){
   const request=++dayRequest;
   if(!dayEvents.length&&!daySignature)$("sessions").innerHTML='<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
-  let cal=null,calState="",calText="Calendar: non configurato",tip="Nessun calendario scelto: Impostazioni > Collega Google Calendar";
-  const calendar=CAL_ID;
-  if(calendar&&mcp){try{
-    const p=await call("Google Calendar","list_events",{calendarId:calendar,startTime:day+"T00:00:00",endTime:addDays(day,1)+"T00:00:00",pageSize:80,orderBy:"startTime",timeZone:"Europe/Rome"});
-    if(request!==dayRequest||calendar!==CAL_ID||day!==curDay)return false;
-    cal={};for(const ev of ((p&&(p.events||p.items))||[])){if(ev.status==="cancelled")continue;const m=/\[R20:(R20-\d{4})\]/.exec((ev.summary||"")+" "+(ev.description||""));if(!m)continue;
-      cal[m[1]]={start:Date.parse(ev.start&&(ev.start.dateTime||ev.start.date)),end:Date.parse(ev.end&&(ev.end.dateTime||ev.end.date)),title:ev.summary||""};}
-    const n=Object.keys(cal).length;calState="ok";calText=n?`Calendar ✓ ${n} eventi`:"Calendar ✓ · nessun evento";
-    tip=`Letto alle ${hm(Date.now())}: ${n} eventi STUDIOOS il ${day}`;LS.set("cal."+day,cal);
-  }catch(err){const em=String(err&&err.message||err),auth=/\b(401|403)\b|non attivo|autorizz|scope|Collega/i.test(em);
-    calState="bad";calText=auth?"Calendar: non autorizzato":"Calendar: errore";tip="Copia locale, lettura non aggiornata: "+em.slice(0,140);cal=LS.get("cal."+day,null);
-  }}else if(calendar){calState="bad";calText="Calendar: non autorizzato";tip="Accesso Google da ricollegare";}
-  if(request!==dayRequest||calendar!==CAL_ID||day!==curDay)return false;
-  chip("cCal",calState,calText);calTip(tip);
-  calDay=cal||{};const blocks=Object.values(index).filter(b=>b.date===day);
-  const next=blocks.map(b=>{const start=at(day,b.from),end=at(day,b.to),c=calDay[b.id];let flag="";
-    if(cal&&b.stato!=="Rinviato"){if(!c)flag="Non ancora in Calendar";else if(Math.abs(c.start-start)>60000||Math.abs(c.end-end)>60000)flag=`Calendar ${hm(c.start)}–${hm(c.end)}: vale PROGRAMMA`;}
-    return {id:b.id,mat:b.mat,start,end,title:b.arg,rinv:b.stato==="Rinviato",flag};});
-  for(const [id,c] of Object.entries(calDay))if(!blocks.some(b=>b.id===id)){const b=index[id];next.push({id,mat:(b&&b.mat)||(SUBJ.find(x=>c.title.includes(x))||""),start:c.start,end:c.end,title:c.title.replace(/\s*\[R20:[^\]]+\]/,""),rinv:true,flag:b?`In PROGRAMMA il ${dayLabel(b.date,{day:"numeric",month:"short"})}: evento da riallineare`:"Non presente in PROGRAMMA",ghost:true});}
+  if(request!==dayRequest||day!==curDay)return false;
+  const blocks=Object.values(index).filter(b=>b.date===day);
+  const next=blocks.map(b=>({id:b.id,mat:b.mat,start:at(day,b.from),end:at(day,b.to),title:b.arg,rinv:b.stato==="Rinviato",flag:""}));
   next.sort((a,b)=>a.start-b.start);const signature=day+SYNC.fingerprint(next);
   dayEvents=next;if(signature!==daySignature){daySignature=signature;renderDay();renderStats();renderNext();renderToday();}
   return true;
 }
-// Schedule/Calendar changes are independent from the live timer and its outbox.
+// Schedule changes are independent from the live timer and its outbox.
 let dataReady=false,dataRefreshing=null,lastDataRefresh=0,lastDataDay=todayIso();
 async function refreshData(force=false){
   if(!dataReady||!mcp||document.hidden||navigator.onLine===false)return;
@@ -393,7 +375,7 @@ function timeline(el,evs){const S=420,E=1350,span=E-S,p=x=>Math.max(0,Math.min(1
   if(curDay===todayIso()){const n=romeMin(Date.now());if(n>=S&&n<=E)h+=`<span class="nowl" style="left:${p(n)}%"></span>`}el.innerHTML=h}
 function renderDay(){const lbl=dayLabel(curDay);$("dLabel").textContent=lbl;$("miniLbl").textContent=curDay===todayIso()?"Oggi":lbl;
   const act=dayEvents.filter(e=>!e.rinv&&e.mat!=="FIS"),pl=act.reduce((t,e)=>t+((index[e.id]||{}).min||0),0),reg=act.reduce((t,e)=>t+Math.max(statusOf(e.id).sheetMin,statusOf(e.id).focusMin),0);
-  $("dayKpi").innerHTML=`<div class="kpi"><b>${act.length}</b><span>blocchi attivi</span></div><div class="kpi"><b>${Math.floor(pl/60)}h ${String(pl%60).padStart(2,"0")}</b><span>netti pianificati</span></div><div class="kpi"><b>${reg}</b><span>min registrati</span></div><div class="kpi"><b>${dayEvents.filter(e=>e.flag).length}</b><span>da controllare in Calendar</span></div>`;
+  $("dayKpi").innerHTML=`<div class="kpi"><b>${act.length}</b><span>blocchi attivi</span></div><div class="kpi"><b>${Math.floor(pl/60)}h ${String(pl%60).padStart(2,"0")}</b><span>netti pianificati</span></div><div class="kpi"><b>${reg}</b><span>min registrati</span></div><div class="kpi"><b>${dayEvents.filter(e=>e.rinv).length}</b><span>rinviati</span></div>`;
   const historical=dayEvents.filter(e=>e.rinv&&e.mat!=="FIS");
   $("sessions").innerHTML=(act.length?act.map(e=>sessHTML(e,false)).join(""):'<p class="mute">Nessun blocco attivo in questo giorno.</p>')+(historical.length?`<details class="past-sessions"><summary>${historical.length} blocchi rinviati o da riallineare</summary><div>${historical.map(e=>sessHTML(e,false)).join("")}</div></details>`:"");
   $("mini").innerHTML=act.length?act.map(e=>sessHTML(e,true)).join(""):'<p class="mute">Nessun blocco attivo.</p>';
@@ -617,7 +599,6 @@ window.addEventListener("pagehide",persistSession);window.addEventListener("page
 window.addEventListener("online",refreshAll);window.addEventListener("offline",reportSave);
 window.addEventListener("studioos:sync-now",refreshAll);
 window.addEventListener("studioos:archive-update",()=>{if(document.visibilityState==="visible"){clearTimeout(window.__archiveRefresh);window.__archiveRefresh=setTimeout(refreshSync,150)}});
-window.addEventListener("studioos:calendar-config",e=>{CAL_ID=e.detail.id||"";if(mcp)loadDay(curDay)});
 window.addEventListener("storage",e=>{if(e.key&&e.key.startsWith(DATA_PREFIX+"outbox.")&&e.newValue===null)delete memoryOutbox[e.key.slice((DATA_PREFIX+"outbox.").length)];if(e.key&&e.key.startsWith(DATA_PREFIX))reportSave()});
 setInterval(flush,30000);setInterval(()=>{renderNext();renderToday();timeline($("tlMini"),dayEvents);timeline($("tlDay"),dayEvents)},60000);
 window.addEventListener("resize",()=>{moveInd()});
@@ -762,19 +743,14 @@ function applyPlanMeta(){if(Array.isArray(planMeta.exams)){EXAMS=planMeta.exams;
 async function loadPlanMeta(force=false){
   if(!mcp||navigator.onLine===false)return;if(metaBusy)return metaBusy;if(!force&&Date.now()-lastMetaAttempt<180000)return;lastMetaAttempt=Date.now();
   metaBusy=(async()=>{const results=await Promise.allSettled([sheetGet("SISTEMA!A1:D70"),sheetGet("SCADENZE!A1:Q30")]);let changed=false;
-    if(results[0].status==="fulfilled"){const rows=results[0].value,head=rows.findIndex(r=>r[0]==="CHIAVE"&&r[1]==="VALORE");if(head>=0){const keys=["max_net_day_minutes","max_net_week_minutes","start_iso","cutoff_iso","end_iso","versione_piano","planning_frozen_from","baseline_weight_tab","auto_sync_d035","auto_sync_last"],rules={};for(const r of rows.slice(head+1))if(keys.includes(r[0]))rules[r[0]]=String(r[1]||"");planMeta.rules=rules;planMeta.rulesAt=Date.now();changed=true}}
+    if(results[0].status==="fulfilled"){const rows=results[0].value,head=rows.findIndex(r=>r[0]==="CHIAVE"&&r[1]==="VALORE");if(head>=0){const keys=["max_net_day_minutes","max_net_week_minutes","start_iso","cutoff_iso","end_iso","versione_piano","planning_frozen_from","baseline_weight_tab"],rules={};for(const r of rows.slice(head+1))if(keys.includes(r[0]))rules[r[0]]=String(r[1]||"");planMeta.rules=rules;planMeta.rulesAt=Date.now();changed=true}}
     if(results[1].status==="fulfilled"){const rows=results[1].value;if(rows[0]?.[0]==="Materia"&&rows[0]?.[1]==="Prova"){const exams=[];for(const r of rows.slice(1)){if(!SUBJ.includes(r[0]))continue;const date=r[7]==="UFFICIALE"?okDate(r[8]):"";exams.push([date||null,r[0],date?String(r[1]||"Appello"):"Data non pubblicata"])}for(const s of SUBJ)if(!exams.some(e=>e[1]===s))exams.push([null,s,"Data non pubblicata"]);planMeta.exams=exams.sort((a,b)=>(a[0]||"9999").localeCompare(b[0]||"9999"));planMeta.examsAt=Date.now();changed=true}}
     if(changed){planMeta.at=Date.now();LS.set("planMeta",planMeta);applyPlanMeta();renderToday();renderStats();renderWeek();renderAnalysis()}
     renderPlanRules();
   })();try{await metaBusy}finally{metaBusy=null}
 }
-/* Esito della sincronizzazione in parole semplici (il codice resta nel foglio SISTEMA). */
-function syncWords(s){const m=String(s||"").match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) · ([A-Z0-9_]+)/);if(!m)return "Ultimo controllo: "+s;
-  const W={ALREADY_ALIGNED:"Calendar già allineato al piano",D035_SYNC_CONFIRMED:"Calendar aggiornato e verificato",PARTIAL_CONTINUA_TRA_60s:"aggiornamento di Calendar in corso",APPLICATA_VERIFICA_TRA_60s:"Calendar aggiornato, verifica in corso",AUTO_SYNC_OFF:"aggiornamento automatico spento"};
-  const w=W[m[3]]||(/^(SOSPESO|AUTO_RECUPERO|ERROR|PRECONDITION|D035_SYNC_CHECK_FAILED|CONFLICT|TOO_MANY)/.test(m[3])?"Calendar da controllare ("+m[3]+")":m[3]);
-  return "Ultimo controllo "+m[1].split("-").reverse().slice(0,2).join("/")+" alle "+m[2]+": "+w+"."}
 function renderPlanRules(){const el=$("planRules");if(!el)return;const rules=planMeta.rules||{},A=analysisData(),total=Math.max(1,A.total);
-  el.innerHTML=`<div class="rule-chips"><span class="pill">${planLimit("max_net_day_minutes",660)}′ / giorno</span><span class="pill">${planLimit("max_net_week_minutes",4410)}′ / settimana</span>${rules.start_iso?`<span class="pill">Avvio ${esc(rules.start_iso)}</span>`:""}</div><p>${rules.planning_frozen_from?"Ripianificazione automatica sospesa dal "+esc(rules.planning_frozen_from)+". ":""}${/^si$/i.test(rules.auto_sync_d035||"")?"Calendar si aggiorna da solo ogni ora.":rules.auto_sync_d035?"Aggiornamento automatico di Calendar spento.":""}</p>${rules.auto_sync_last?`<p class="mute">${esc(syncWords(rules.auto_sync_last))}</p>`:""}<p class="mute">${planMeta.rulesAt?"Regole lette "+new Date(planMeta.rulesAt).toLocaleString("it-IT",{dateStyle:"short",timeStyle:"short"})+(Date.now()-planMeta.rulesAt>240000?" · copia precedente, aggiornamento da verificare":" · controllo automatico ogni 3 minuti a pagina visibile"):"Regole non ancora lette: limiti predefiniti."}</p><p><b>Quote del piano attuale</b> ${DISPLAY_SUBJ.map(s=>`${s} ${(100*A.per[s].plan/total).toFixed(1)}%`).join(" · ")}</p><p class="mute">Quota = minuti pianificati della materia sul totale; non sostituisce i pesi didattici approvati.</p>`;
+  el.innerHTML=`<div class="rule-chips"><span class="pill">${planLimit("max_net_day_minutes",660)}′ / giorno</span><span class="pill">${planLimit("max_net_week_minutes",4410)}′ / settimana</span>${rules.start_iso?`<span class="pill">Avvio ${esc(rules.start_iso)}</span>`:""}</div><p>${rules.planning_frozen_from?"Ripianificazione automatica sospesa dal "+esc(rules.planning_frozen_from)+". ":""}</p><p class="mute">${planMeta.rulesAt?"Regole lette "+new Date(planMeta.rulesAt).toLocaleString("it-IT",{dateStyle:"short",timeStyle:"short"})+(Date.now()-planMeta.rulesAt>240000?" · copia precedente, aggiornamento da verificare":" · controllo automatico ogni 3 minuti a pagina visibile"):"Regole non ancora lette: limiti predefiniti."}</p><p><b>Quote del piano attuale</b> ${DISPLAY_SUBJ.map(s=>`${s} ${(100*A.per[s].plan/total).toFixed(1)}%`).join(" · ")}</p><p class="mute">Quota = minuti pianificati della materia sul totale; non sostituisce i pesi didattici approvati.</p>`;
 }
 function draftRecovery(){const B=Object.values(index).filter(b=>b.stato!=="Rinviato"&&b.stato!=="Verificato autonomamente"&&at(b.date,b.to)<Date.now()&&b.min>doneMin(b)).sort((a,b)=>(a.date+a.from).localeCompare(b.date+b.from));
   if(!B.length){toast("Non risultano minuti arretrati nei blocchi attivi passati");return}const per={};for(const b of B)per[b.mat]=(per[b.mat]||0)+Math.max(0,b.min-doneMin(b));
@@ -873,7 +849,7 @@ const BOOT_HASH=location.hash;
   const to=ms=>new Promise(r=>setTimeout(()=>r(null),ms));
   try{mcp=await Promise.race([window.claude&&window.claude.use?window.claude.use("mcp"):null,to(10000)])}catch(e){mcp=null}
   try{db=await Promise.race([window.claude&&window.claude.use?window.claude.use("db"):null,to(10000)])}catch(e){db=null}
-  if(!mcp){chip("cCal","bad",CAL_ID?"Calendar: non autorizzato":"Calendar: non configurato");calTip(CAL_ID?"Google non collegato o accesso scaduto: Impostazioni › Collega Google":"Nessun calendario scelto");chip("cSh",Object.keys(index).length?"warn":"bad",Object.keys(index).length?"Sheets: copia locale":"Sheets ✗")}
+  if(!mcp){chip("cSh",Object.keys(index).length?"warn":"bad",Object.keys(index).length?"Sheets: copia locale":"Sheets ✗")}
   if(db){try{await loadArchive();await flush()}catch(e){chip("cDb","warn","Archivio: solo locale")}
     try{const s=await db.doc("state/live").get();if(s.exists)adopt(s.data(),"init")}catch(e){}subscribeLive()}
   else{chip("cDb","bad","Archivio ✗ (solo locale)");syncUI(false,bc?"Sync tra schede":"Sync assente")}

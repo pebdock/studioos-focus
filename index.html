@@ -49,7 +49,7 @@
   <div class="brand"><h1>STUDIOOS Focus</h1><span id="todayLbl">Sessione invernale 2026/27</span></div>
   <button type="button" class="btn ui-glass-guide-open" popovertarget="ui-glass-guide"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>Guida</span></button>
   <div class="chips" aria-label="Stato dei collegamenti">
-    <span id="cCal" class="pill">Calendar …</span><span id="cSh" class="pill">Sheets …</span><span id="cDb" class="pill">Archivio …</span><span id="cQ" class="pill warn" hidden></span><span id="cSync" class="pill"><i class="syncdot" id="syncDot"></i><span id="syncTxt">Sync</span></span>
+    <span id="cSh" class="pill">Sheets …</span><span id="cDb" class="pill">Archivio …</span><span id="cQ" class="pill warn" hidden></span><span id="cSync" class="pill"><i class="syncdot" id="syncDot"></i><span id="syncTxt">Sync</span></span>
   </div>
 </header>
 <nav id="tabbar" class="bar" role="tablist" aria-label="Sezioni">
@@ -158,7 +158,7 @@
     <div class="tl" id="tlDay" aria-hidden="true"></div><div class="tl-ax"><span>07:00</span><span>10:00</span><span>13:00</span><span>16:00</span><span>19:00</span><span>22:30</span></div>
     <div id="dayKpi" class="kpis"></div>
     <div id="sessions"><p class="mute">Caricamento…</p></div>
-    <div class="row"><button class="btn ghost" id="bReload">Aggiorna da PROGRAMMA e Calendar</button><span class="mute small sp">Orari e minuti vengono da PROGRAMMA. Calendar serve solo a controllare che l'evento ci sia.</span></div>
+    <div class="row"><button class="btn ghost" id="bReload">Aggiorna da PROGRAMMA</button><span class="mute small sp">Orari e minuti vengono da PROGRAMMA (Google Sheets).</span></div>
   </article>
 </section>
 
@@ -389,5 +389,7 @@
   }, true);
 })();
 </script>
+<script src="travel.js"></script>
+<script src="travel-ui.js"></script>
 </body>
 </html>

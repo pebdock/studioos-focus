@@ -5,7 +5,7 @@
   "use strict";
   var CLIENT = "588484343295-379le6qi7t5340nv4toi6vav0nqpg13q.apps.googleusercontent.com";
   var DRIVE = "https://www.googleapis.com/drive/v3/files";
-  var FIELDS = { client: "sfocus.picker.client", key: "sfocus.picker.key", project: "sfocus.picker.project", calendar:"sfocus.calendar", calOn:"sfocus.calendar.on", save:"sfocus.save" };
+  var FIELDS = { client: "sfocus.picker.client", key: "sfocus.picker.key", project: "sfocus.picker.project", save:"sfocus.save" };
   function valid(cfg) {
     return !!(cfg && /^AIza[\w-]{35}$/.test(cfg.pickerKey || "") && /^\d{6,15}$/.test(cfg.project || "") && cfg.project === CLIENT.split("-")[0]);
   }
@@ -43,8 +43,6 @@
           cfg.pickerKey = candidate.pickerKey; cfg.project = candidate.project;
           if (options.preferences && files[i].id === cfg.arch) {
             if (!cfg.writesOverride && p[FIELDS.save] === "1") cfg.readOnly = false;
-            if (cfg.calOn == null && p[FIELDS.calOn] != null) cfg.calOn = p[FIELDS.calOn] === "1";
-            if (!cfg.cal && typeof p[FIELDS.calendar] === "string" && p[FIELDS.calendar].length <= 240) cfg.cal = p[FIELDS.calendar];
           }
           return cfg;
         }
@@ -59,8 +57,7 @@
     var old = await request(url, tok), properties = Object.assign({}, old.appProperties || {});
     properties[FIELDS.client] = CLIENT; properties[FIELDS.key] = cfg.pickerKey; properties[FIELDS.project] = cfg.project;
     if (cfg.readOnly === false) properties[FIELDS.save] = "1";
-    if (cfg.calOn != null) properties[FIELDS.calOn] = cfg.calOn ? "1" : "0";
-    if (cfg.cal) properties[FIELDS.calendar] = new TextEncoder().encode(FIELDS.calendar + cfg.cal).length <= 124 ? cfg.cal : null;
+    properties["sfocus.calendar.on"] = null; properties["sfocus.calendar"] = null;   /* pulizia: Calendar non e' piu' usato */
     await request(url, tok, { appProperties: properties });
     var check = (await request(url, tok)).appProperties || {};
     if (check[FIELDS.client] !== CLIENT || check[FIELDS.key] !== cfg.pickerKey || check[FIELDS.project] !== cfg.project) {
