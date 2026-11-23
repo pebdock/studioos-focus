@@ -21,53 +21,59 @@ button,a,input,textarea,select,summary{touch-action:manipulation}button,summary{
 #aurora,#lgBg{display:none}html[data-atmosphere="essential"] .daily-greeting svg{display:none}
 
 /* Shared control family. */
-.btn,.chipbtn,.ckb,.ui-glass-guide-open,.ui-glass-close{position:relative;display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:44px;max-width:100%;padding:10px 17px;border:1px solid var(--line);border-radius:9999px;background:var(--surface-inset);color:var(--ink);font-size:var(--font-13);font-weight:600;line-height:1.4;text-decoration:none;overflow-wrap:anywhere;transition:transform var(--duration-control) var(--ease-spring),opacity var(--duration-control) var(--ease-spring)}
+.btn,.chipbtn,.ckb,.ui-glass-guide-open,.ui-glass-close{position:relative;display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:44px;max-width:100%;padding:10px 17px;border:1px solid var(--line);border-radius:var(--r-field);background:var(--surface-inset);color:var(--ink);font-size:var(--font-13);font-weight:600;line-height:1.4;text-decoration:none;overflow-wrap:anywhere;transition:transform var(--duration-control) var(--ease-spring),opacity var(--duration-control) var(--ease-spring)}
 .btn.primary,.btn.big{background:var(--action-bg);border-color:transparent;color:var(--action-ink)}.btn.ghost{background:transparent;border-color:transparent;color:var(--mute)}.btn.danger,.btn.bad{background:var(--bad);color:var(--surface);border-color:transparent}.btn:disabled{opacity:.45;box-shadow:none}
 :is(.btn,.chipbtn,.ckb,.ui-glass-guide-open,.ui-glass-close):not(:disabled):active{transform:scale(.96)}.btn.big{width:100%;min-height:52px;font-size:var(--font-15)}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;max-width:100%;border:1px solid var(--line);border-radius:9999px;background:var(--surface-inset);color:var(--mute);font-size:var(--font-12);font-weight:600;line-height:1.5;white-space:normal;overflow-wrap:anywhere}
 button.pill,.pill[role="button"]{min-height:44px}.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.booked{color:var(--ok);border-color:var(--ok)}.subj{color:var(--action-ink);background:var(--tint);border-color:transparent}a.pill{text-decoration:none}
 .badge{display:inline-grid;place-items:center;min-width:18px;min-height:18px;border-radius:9999px;padding:0 5px;background:var(--bad);color:var(--surface);font-size:var(--font-12);font-weight:600}.kbd{display:inline-block;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font:600 .72rem ui-monospace,monospace}
 
-@media(hover:hover){.btn:not(:disabled):hover,.chipbtn:hover,.ui-glass-guide-open:hover{outline:1px solid var(--acc);outline-offset:1px}}
+@media(hover:hover){:is(.btn:not(:disabled),.chipbtn,.ui-glass-guide-open):hover:not(:focus-visible){outline:1px solid var(--acc);outline-offset:1px}}
 
-/* Two materials: compact controls and denser reading surfaces. Text never fades.
-   Gradient rim/reflection is the Safari fallback; only the small island can use SVG. */
+/* Compact controls and denser reading surfaces keep opaque text.
+   Gradient rim and blur are the fallback for the single active refractive control. */
 #tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog{background:var(--surface-card)}
-.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.sess,.pill,.top{--glass-material-bg:var(--glass-panel-bg)}
+.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top{--glass-material-bg:var(--glass-panel-bg)}
 #tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open{--glass-material-bg:var(--glass-bg)}
 
 .glass :is(#tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top){
-  background:radial-gradient(ellipse at var(--ui-light-x,var(--ui-tilt-x,35%)) var(--ui-light-y,var(--ui-tilt-y,0%)),var(--glass-highlight),transparent 65%),linear-gradient(135deg,var(--glass-highlight-soft),transparent 48%,var(--glass-highlight-soft)),var(--glass-material-bg,var(--glass-bg));
+  background:linear-gradient(160deg,var(--glass-highlight-soft),transparent 48%),var(--glass-material-bg,var(--glass-bg));
   border:1px solid var(--glass-border);box-shadow:var(--glass-specular),var(--glass-shadow);
   -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturation)) brightness(var(--glass-brightness));backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturation)) brightness(var(--glass-brightness));
 }
 
-/* Lists/chips share the tint but skip costly per-row backdrop surfaces. */
-.glass .sess{padding:var(--space-12);margin-block:var(--space-8);border:1px solid var(--line);border-radius:var(--radius-18);background:linear-gradient(135deg,var(--glass-highlight-soft),transparent 70%),var(--glass-panel-bg);box-shadow:var(--depth-1)}
+/* Reading rows use separators rather than a glass surface for every session. */
+.glass .sess{padding:var(--space-12);background:transparent}
 .glass .pill{background:var(--glass-panel-bg);box-shadow:var(--glass-specular)}
 .glass .pill.subj{color:var(--action-ink);background:var(--tint);box-shadow:none}
 
 .glass :is(#tabbar,#island,#focusCard,.top,.sheet>div,.rel-card,.ui-glass-dialog)::before{
   content:"";position:absolute;inset:0;z-index:var(--z-base);padding:1px;border-radius:inherit;pointer-events:none;
-  background:conic-gradient(from 150deg at var(--ui-light-x,var(--ui-tilt-x,35%)) var(--ui-light-y,var(--ui-tilt-y,15%)),transparent 0deg,var(--glass-highlight) 65deg,transparent 125deg,var(--glass-border) 205deg,transparent 270deg,var(--glass-highlight) 320deg,transparent 360deg);
+  background:linear-gradient(150deg,var(--glass-highlight),transparent 34%,transparent 72%,var(--glass-highlight-soft));
   -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
   -webkit-mask-composite:xor;mask-composite:exclude;
 }
-.glass .top{padding:var(--space-12) var(--space-16);border-radius:var(--radius-24)}
+.glass .top{padding:var(--space-12) var(--space-16);border-radius:var(--radius-12)}
 .glass .tab:not([aria-selected="true"]),.glass .lg-seg button:not([aria-selected="true"], [aria-checked="true"]){color:var(--ink)}
 .glass #tabbar.nav-scrub .tab[aria-selected="true"]:not(.nav-preview){color:var(--ink)}
 
-@supports (backdrop-filter:url("#ui-glass-lens")){
-  .ui-glass-lens-ready .glass #island{backdrop-filter:url("#ui-glass-lens") blur(14px) saturate(var(--glass-saturation))}
+/* The existing SVG lens belongs to the floating timer when visible, or to the dock. */
+@supports (backdrop-filter: url("#ui-glass-lens")) {
+  @media (prefers-reduced-motion: no-preference) {
+    .glass:where(.ui-glass-lens-ready:not(:has(body.rm, body.oled, #standby.on))) #island:where(.on),
+    .glass:where(.ui-glass-lens-ready:not(:has(body.rm, body.oled, #standby.on, #island.on))) #tabbar {
+      backdrop-filter: url("#ui-glass-lens") blur(var(--glass-blur)) saturate(var(--glass-saturation)) brightness(var(--glass-brightness));
+    }
+  }
 }
 .glass :is(#focusCard,.top).ui-glass-offscreen{-webkit-backdrop-filter:none;backdrop-filter:none}
 
 /* Fixed dock: original JS owns the spring-driven indicator geometry. */
-#tabbar{position:fixed;z-index:var(--z-floating-glass);left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));display:flex;isolation:isolate;gap:4px;padding:6px;margin:0 auto;width:min(840px,calc(100% - 24px));max-width:100%;border:1px solid var(--line);border-radius:9999px;box-shadow:var(--soft-shadow)}
-.tab{position:relative;z-index:var(--z-base);display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:58px;padding:7px 10px;border:0;border-radius:9999px;background:transparent;color:var(--mute);font-size:var(--font-13);font-weight:600;line-height:1.3}
+#tabbar{position:fixed;z-index:var(--z-floating-glass);left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));display:flex;isolation:isolate;gap:4px;padding:6px;margin:0 auto;width:min(840px,calc(100% - 24px));max-width:100%;border:1px solid var(--line);border-radius:var(--radius-18);box-shadow:var(--soft-shadow)}
+.tab{position:relative;z-index:var(--z-base);display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:58px;padding:7px 10px;border:0;border-radius:var(--radius-12);background:transparent;color:var(--mute);font-size:var(--font-13);font-weight:600;line-height:1.3}
 .tab svg{width:22px;height:22px;fill:none;stroke:currentcolor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}.tab[aria-selected="true"],.tab.nav-preview{color:var(--acc);font-weight:600}.tab[aria-selected="true"] svg{stroke-width:2.1}.tab:active svg{transform:scale(.96)}.tlbl{overflow-wrap:normal}
 #tabbar,.tab{touch-action:pinch-zoom;-webkit-user-select:none;user-select:none}
-#tabInd{position:absolute;top:0;left:0;z-index:0;border:1px solid color-mix(in srgb,var(--acc) 16%,var(--line));border-radius:9999px;background:color-mix(in srgb,var(--acc) 10%,var(--surface));box-shadow:var(--glass-specular);pointer-events:none;transition:none}
+#tabInd{position:absolute;top:0;left:0;z-index:0;border:1px solid color-mix(in srgb,var(--acc) 16%,var(--line));border-bottom:2px solid var(--acc);border-radius:var(--radius-12);background:color-mix(in srgb,var(--acc) 10%,var(--surface));box-shadow:var(--glass-specular);pointer-events:none;transition:none}
 #tabbar.nav-moving #tabInd{will-change:transform}#tabbar.nav-scrub #tabInd{box-shadow:var(--glass-specular),0 6px 18px #18264a1f}#tabbar.nav-scrub .tab[aria-selected="true"]:not(.nav-preview){color:var(--mute)}.tab .badge{position:absolute;top:1px;right:9%}
 .sec-nav{grid-column:1/-1;position:sticky;top:8px;z-index:var(--z-sticky);margin-bottom:4px;max-width:600px}
 .lg-hidden-select{display:none!important}
@@ -78,7 +84,7 @@ button.pill,.pill[role="button"]{min-height:44px}.pill.ok{color:var(--ok)}.pill.
 .row>.sp:has(>.lg-seg){flex:1 1 100%}.sec-nav .lg-seg{margin:0}
 
 /* Existing connection popover. */
-#lgStatus{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:8px 15px;border:1px solid var(--line);border-radius:9999px;font-size:var(--font-13);font-weight:600}
+#lgStatus{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:8px 15px;border:1px solid var(--line);border-radius:var(--r-field);font-size:var(--font-13);font-weight:600}
 .lg-dot,.syncdot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:var(--ok)}#lgStatus[data-level="warn"] .lg-dot{background:var(--warn)}#lgStatus[data-level="bad"] .lg-dot{background:var(--bad)}.syncdot{background:var(--mute)}.syncdot.on{background:var(--ok)}
 .top .chips.lg-popover{display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:var(--z-floating-glass);width:min(350px,100%);flex-direction:column;gap:8px;padding:14px;border:1px solid var(--line);border-radius:24px}.top.lg-open .chips.lg-popover{display:flex;animation:ui-glass-enter var(--duration-control) var(--ease-spring)}.top .chips.lg-popover .pill{justify-content:flex-start;min-height:36px}
 .top.lg-open{z-index:var(--z-sheet-drawer)}
@@ -146,11 +152,11 @@ pre.cons{max-width:100%;max-height:46vh;overflow:auto;margin:0;white-space:pre-w
 
 /* Existing sheets and native help popovers. */
 .sheet{display:none;position:fixed;inset:0;z-index:var(--z-modal);align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:#0b15275c;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}.sheet.on{display:flex;animation:ui-glass-fade var(--duration-sheet) var(--ease-sheet)}
-.sheet>div{position:relative;display:grid;gap:12px;width:min(620px,100%);max-height:calc(100dvh - 32px);padding:24px;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:var(--r-sheet)}.sheet.on>div{animation:ui-glass-sheet var(--duration-sheet) var(--ease-sheet)}.sheet .row>.btn{flex:1 1 130px}
+.sheet>div{position:relative;display:grid;gap:12px;width:min(620px,100%);max-height:calc(100dvh - 32px);padding:24px;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:var(--radius-18)}.sheet.on>div{animation:ui-glass-sheet var(--duration-sheet) var(--ease-sheet)}.sheet .row>.btn{flex:1 1 130px}
 .grab{justify-self:center;width:40px;height:5px;margin:-8px 0 4px;border-radius:9999px;background:var(--line);touch-action:none;cursor:grab}.stars{display:flex;gap:6px}.stars button{min-width:44px}
 .rel-dialog{z-index:var(--z-modal);padding:0;border:0;background:transparent;color:var(--ink);width:min(660px,calc(100% - 32px));max-width:100%;max-height:calc(100dvh - 32px)}.rel-dialog::backdrop,.ui-glass-dialog::backdrop{background:#0b15275c;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.rel-card{position:relative;display:grid;gap:12px;padding:24px;max-height:calc(100dvh - 32px);overflow:auto;border:1px solid var(--line);border-radius:var(--r-sheet)}.rel-card h2{font-size:1.3rem;margin:0 0 8px}.rel-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0;margin:0;list-style:none}.rel-list li{display:grid;gap:4px;padding:12px;background:var(--surface-card);border-radius:12px;min-width:0;overflow-wrap:anywhere}.rel-list b{font-size:var(--font-13)}.rel-list span{color:var(--mute);font-size:var(--font-13);line-height:1.5}.rel-bye,.rel-sign{margin:4px 0}.rel-sign{color:var(--mute)}.rel-actions{display:flex;justify-content:flex-end;padding-top:8px}.rel-actions .btn{min-width:140px}.rel-dialog[open] .rel-card{animation:ui-glass-sheet var(--duration-sheet) var(--ease-sheet)}
-.ui-glass-dialog{position:fixed;z-index:var(--z-sheet-drawer);inset:12px 12px 12px auto;width:min(560px,calc(100% - 24px));height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);margin:0;padding:24px;color:var(--ink);border:1px solid var(--line);border-radius:var(--r-sheet);overflow:auto;overscroll-behavior:contain;opacity:0;transform:translateX(24px);transition:transform var(--duration-sheet) var(--ease-sheet),opacity var(--duration-sheet) var(--ease-sheet),display var(--duration-sheet) allow-discrete,overlay var(--duration-sheet) allow-discrete}
+.rel-card{position:relative;display:grid;gap:12px;padding:24px;max-height:calc(100dvh - 32px);overflow:auto;border:1px solid var(--line);border-radius:var(--radius-18)}.rel-card h2{font-size:1.3rem;margin:0 0 8px}.rel-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0;margin:0;list-style:none}.rel-list li{display:grid;gap:4px;padding:12px;background:var(--surface-card);border-radius:12px;min-width:0;overflow-wrap:anywhere}.rel-list b{font-size:var(--font-13)}.rel-list span{color:var(--mute);font-size:var(--font-13);line-height:1.5}.rel-bye,.rel-sign{margin:4px 0}.rel-sign{color:var(--mute)}.rel-actions{display:flex;justify-content:flex-end;padding-top:8px}.rel-actions .btn{min-width:140px}.rel-dialog[open] .rel-card{animation:ui-glass-sheet var(--duration-sheet) var(--ease-sheet)}
+.ui-glass-dialog{position:fixed;z-index:var(--z-sheet-drawer);inset:12px 12px 12px auto;width:min(560px,calc(100% - 24px));height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);margin:0;padding:24px;color:var(--ink);border:1px solid var(--line);border-radius:var(--radius-18);overflow:auto;overscroll-behavior:contain;opacity:0;transform:translateX(24px);transition:transform var(--duration-sheet) var(--ease-sheet),opacity var(--duration-sheet) var(--ease-sheet),display var(--duration-sheet) allow-discrete,overlay var(--duration-sheet) allow-discrete}
 .ui-glass-dialog:popover-open{opacity:1;transform:none}.ui-glass-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-16);position:sticky;top:-24px;z-index:var(--z-base);margin:-24px -24px 20px;padding:20px 24px;background:var(--surface-card);border-bottom:1px solid var(--line)}.ui-glass-dialog-head h2{font-size:1.2rem}.ui-glass-close{flex:none;width:44px;padding:8px}.ui-glass-guide-open svg,.ui-glass-close svg{width:18px;height:18px;fill:none;stroke:currentcolor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .ui-glass-help-body{line-height:1.65;font-size:var(--font-15);overflow-wrap:anywhere}.ui-glass-help-body h3{margin:20px 0 10px;font-size:var(--font-15)}.ui-glass-help-body h3:first-child{margin-top:0}.ui-glass-help-body p{margin-bottom:12px}.ui-glass-help-body ul,.ui-glass-help-body ol{margin:8px 0 16px;padding-left:22px}.ui-glass-help-body li{margin-block:7px}.ui-glass-help-body details{margin-block:12px}
 
@@ -231,13 +237,13 @@ body.rm .view.on,body.rm .sheet.on,body.rm .rel-dialog[open] .rel-card{animation
 
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
   :root{--glass-bg:var(--surface-card);--glass-panel-bg:var(--surface-card);--glass-highlight:transparent;--glass-highlight-soft:transparent}
-  .glass :is(#tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top),.ui-glass-lens-ready .glass #island,.sheet,.rel-dialog::backdrop,.ui-glass-dialog::backdrop{-webkit-backdrop-filter:none;backdrop-filter:none}
+  .glass :is(#tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top),.sheet,.rel-dialog::backdrop,.ui-glass-dialog::backdrop{-webkit-backdrop-filter:none;backdrop-filter:none}
   .glass :is(#tabbar,#island,#focusCard,.top,.sheet>div,.rel-card,.ui-glass-dialog)::before{display:none}
 }
 
 @media(forced-colors:active){
   .card,.btn,.pill,.lg-seg,#tabbar,.sheet>div,.rel-card,.ui-glass-dialog{border:1px solid CanvasText}
-  .glass :is(#tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top,.sess,.pill),.ui-glass-lens-ready .glass #island{background:Canvas;color:CanvasText;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .glass :is(#tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top,.sess,.pill){background:Canvas;color:CanvasText;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
   .glass :is(#tabbar,#island,#focusCard,.top,.sheet>div,.rel-card,.ui-glass-dialog)::before{display:none}
   #tabInd,.lg-seg-ind{background:Highlight;border:1px solid Highlight}.tab[aria-selected="true"]{color:Highlight;outline:2px solid Highlight}
 }
