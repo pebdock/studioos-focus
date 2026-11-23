@@ -371,7 +371,7 @@ async function run(){
     const layout=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,targets:[...document.querySelectorAll('#steps .ckb,#steps select')].map(e=>({height:e.getBoundingClientRect().height,text:e.textContent})),text:document.getElementById('steps').textContent}));
     check(layout.scroll<=layout.width+1,`${engine}/${width}/${theme}/${variant}: no page overflow`);
     check(layout.text.includes('Materiale_dimostrativo_con_un_nome_molto_lungo.pdf'),'full filename in DOM');
-    if(variant==='after'&&coarse)check(layout.targets.every(t=>t.height>=44),`${engine}/${width}: touch target 44px`);
+    if(variant==='after'&&coarse)check(layout.targets.every(t=>t.height>=43.99),`${engine}/${width}: touch target 44px`); // 0,01 px di tolleranza: il select misura 43,9999 px per arrotondamento sub-pixel
     for(const id of ['piano','registro','settimana','impostazioni','focus']){
      await page.locator('#t-'+id).click();
      check(await page.locator('#t-'+id).getAttribute('aria-selected')==='true','navigation: '+id);
