@@ -11,6 +11,8 @@ on:
       - '.github/ui-check/**'
       - '.github/workflows/ui-check.yml'
       - 'tests/**'
+      - 'ripasso/**'
+      - 'test/ripasso.test.js'
   workflow_dispatch:
 permissions:
   contents: read
@@ -93,3 +95,30 @@ jobs:
           name: focus-liquid-glass-gallery
           path: artifacts-ui/
           retention-days: 14
+  ripasso:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install isolated browser test tools
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
+        run: |
+          npm install --prefix "$RUNNER_TEMP/focus-ripasso" --no-audit --no-fund --no-save --no-package-lock --ignore-scripts playwright@1.65.1
+          "$RUNNER_TEMP/focus-ripasso/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Ripasso engine, bank and generators
+        run: node test/ripasso.test.js
+      - name: Ripasso on Chromium and WebKit (Safari engine), phone and desktop, light and dark
+        env:
+          NODE_PATH: ${{ runner.temp }}/focus-ripasso/node_modules
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
+        run: node .github/ui-check/ripasso.cjs
+      - name: Save Ripasso evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ripasso-evidence
+          path: artifacts-ui/ripasso/
+          retention-days: 7
