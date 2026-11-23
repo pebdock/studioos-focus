@@ -1,5 +1,5 @@
 {
- "build": "202611231000",
+ "build": "202611231001",
  "version": "PWA 2.6.0 \u00b7 Ripasso rapido + viaggi dinamici (Sheets-Only)",
  "client_id_set": true,
  "files": {
@@ -29,14 +29,14 @@
   "sections.js": "e7da29b1ccc06094d9c9b31d1fe33f8e1f7c814fa7edc8dce8f80d904a58b483",
   "setup.html": "0b7f203fb33bb4e07415f26b8f06aa4f127d418cb962a0bf81fa0b72d0ad4ede",
   "setup.js": "8b7de9b2c92b6dbbcedc7f94cae4d83caa17c43f52a3f2dcb0b0cd482ac2c09a",
-  "sw.js": "748393a81b81a014ab834b9048dc4f76e3d050747d0636393d815e63571269bd",
+  "sw.js": "3a2aa588c262bccd3901732ea313f561d5040bf0a52cd05e6f1e8914506f16e2",
   "sync.js": "cad912f417fccb149c2b447e67f635838e15b9cc096f7cde0dba92357840b979",
   "icons/apple-touch-icon.png": "245c26e24e39105c8aa02e7680a09e1390f7eb57042f82f10f06c4d92e5af329",
   "icons/favicon-64.png": "2cfb7c548cba579bc39109fe5fcf064f6c8bc166da5bb183db5cdeb2f15e3a60",
   "icons/icon-192.png": "03d3febd2f8a7abd3091d3728b31e5b452b0c6cba8f1e5eecb060330b6a3fd95",
   "icons/icon-512.png": "795f37bc65620162d3c99a8189a6a2f86c20d38b2367234e43ce879b32e4bbd0",
   "icons/maskable-512.png": "3610ee2f26dac63f7ac8e00d556f5363708174805d50278faf7c58aacf1c2d31",
-  "tokens.css": "e66292ff82d1c82f4b0fd7754071627ea4b6f933588f2fa636cb7b91631e9412",
+  "tokens.css": "117275a636c00fdd27b52fb04b716e3183211efd91cebeaef66459f82479313f",
   "travel.js": "8a6c46c8c816fec6e7113bfaab2bab30b64948c028ec35073c4a70e3c7b4dd81",
   "travel-ui.js": "baa10cc796142adafc246afe9434db45b34f35492040d20a385505776edefe88",
   "ui-glass-effects.js": "2b0647a53722c474446b954968d24e5eedde25c13a1374b4af245513700aac34",
