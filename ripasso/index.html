@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f3f5f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1118" media="(prefers-color-scheme: dark)">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Ripasso · STUDIOOS Focus</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/favicon-64.png" sizes="64x64">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="ripasso.css">
+<script src="core.js" defer></script>
+<script src="gen.js" defer></script>
+<script src="bank.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="rp-top">
+  <a class="rp-back" href="../">‹ Focus</a>
+  <h1>Ripasso</h1>
+  <span class="rp-sp"></span>
+  <button class="rp-ghost" type="button" data-act="stats">Progressi</button>
+</header>
+<main class="rp-main">
+  <section id="rpHome">
+    <div class="rp-exams" id="rpExams" aria-label="Giorni agli esami"></div>
+    <div class="rp-card rp-suggest" id="rpSuggest"></div>
+    <h2 class="rp-h">Scegli come ripassare</h2>
+    <div class="rp-modes" id="rpModes"></div>
+    <div class="rp-card">
+      <label class="rp-lbl" for="rpBlock">Blocco per «Fine blocco»</label>
+      <select id="rpBlock" class="rp-input"></select>
+    </div>
+    <details class="rp-card rp-free">
+      <summary>Libero: scegli materie e tipi</summary>
+      <p class="rp-lbl">Materie</p><div class="rp-chips" id="rpFreeSubj"></div>
+      <p class="rp-lbl">Tipi di domanda</p><div class="rp-chips" id="rpFreeType"></div>
+      <label class="rp-check"><input type="checkbox" id="rpStudied"> Solo argomenti già in calendario fino a oggi</label>
+      <div class="rp-row"><button class="rp-btn primary" type="button" data-act="free">Inizia</button></div>
+    </details>
+    <p class="rp-note" id="rpPlanNote"></p>
+  </section>
+  <section id="rpRun" hidden>
+    <div class="rp-runbar"><button class="rp-ghost" type="button" data-act="quit">Chiudi</button></div>
+    <article id="rpCard" class="rp-card rp-run"></article>
+    <p class="rp-hint rp-keys">Da tastiera: spazio mostra o va avanti · 1-2-3 valutano la scheda · A-D scelgono · Ctrl+Invio corregge la risposta aperta.</p>
+  </section>
+  <section id="rpEnd" hidden></section>
+  <section id="rpStats" hidden></section>
+</main>
+<div id="rpToast" class="rp-toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
