@@ -1,12 +1,12 @@
 /* STUDIOOS Focus · presentation tokens. No runtime dependency or remote font. */
 :root {
-  --surface-canvas: #edf1fb;
-  --surface-card: #fff;
-  --surface-inset: #f0f3f9;
-  --text-primary: #142038;
-  --text-secondary: #46536b;
-  --text-tertiary: #526079;
-  --accent-primary: #2457d5;
+  --surface-canvas: #f1eee4;
+  --surface-card: #fdfbf5;
+  --surface-inset: #eae8de;
+  --text-primary: #162a25;
+  --text-secondary: #41574e;
+  --text-tertiary: #465c52;
+  --accent-primary: #006254;
   --ok: #216f48;
   --warn: #875207;
   --bad: #b52635;
@@ -32,15 +32,15 @@
   --glass-panel-bg: color-mix(in srgb, var(--surface-card) calc(84% + var(--glass-tint) * 12%), transparent);
   --glass-border: #ffffffa6;
   --glass-edge: var(--glass-border);
-  --glass-highlight: #ffffff4d;
+  --glass-highlight: #ffffff36;
   --glass-highlight-soft: #ffffff12;
-  --glass-specular: inset 0 1px 0 #ffffffa6, inset 0 -1px 0 #53617a12;
-  --glass-shadow: 0 12px 32px -16px #16264f47;
-  --line: #dbe2ef;
+  --glass-specular: inset 0 1px 0 #ffffffa6, inset 0 -1px 0 #193b2a17;
+  --glass-shadow: 0 12px 32px -16px #29443552;
+  --line: #d2d8cc;
   --field-edge: color-mix(in srgb, var(--text-secondary) 72%, var(--surface-card));
-  --depth-1: 0 3px 12px -8px #203a6426;
-  --depth-2: 0 12px 32px -16px #16264f47;
-  --depth-3: 0 24px 64px -20px #14203852;
+  --depth-1: 0 3px 12px -8px #2944352b;
+  --depth-2: 0 12px 32px -16px #29443541;
+  --depth-3: 0 24px 64px -20px #162a2552;
   --radius-12: 12px;
   --radius-18: 18px;
   --radius-24: 24px;
@@ -71,6 +71,12 @@
   --duration-sheet: 450ms;
   --ease-spring: var(--spring-snappy);
   --ease-sheet: var(--spring-smooth);
+  --motion-feedback-time: 120ms;
+  --motion-reveal-time: var(--duration-fast);
+  --motion-overlay-time: var(--duration-control);
+  --motion-quiet-ease: var(--spring-smooth);
+  --motion-breath-time: 8s;
+  --motion-loading-time: 1.4s;
   --z-base: 1;
   --z-sticky: 10;
   --z-floating-glass: 50;
@@ -83,7 +89,7 @@
   --mute: var(--text-secondary);
   --acc: var(--accent-primary);
   --tint: var(--acc);
-  --action-bg: color-mix(in srgb, var(--tint) 82%, #132448);
+  --action-bg: color-mix(in srgb, var(--tint) 82%, #162a25);
   --action-ink: #fff;
   --r-card: var(--radius-outer);
   --r-inner: var(--radius-inner);
@@ -103,21 +109,21 @@
 }
 
 :root.dark {
-  --surface-canvas: #101724;
-  --surface-card: #1b2535;
-  --surface-inset: #253145;
-  --text-primary: #edf2ff;
-  --text-secondary: #b4c1d8;
-  --text-tertiary: #b4c1d8;
-  --accent-primary: #a8bfff;
+  --surface-canvas: #111a16;
+  --surface-card: #1a2720;
+  --surface-inset: #223329;
+  --text-primary: #edf3e9;
+  --text-secondary: #bacbbf;
+  --text-tertiary: #aec2b5;
+  --accent-primary: #86ddbe;
   --glass-clear: 68%;
   --glass-range: 22%;
-  --glass-border: #ffffff36;
-  --glass-highlight: #ffffff05;
-  --glass-highlight-soft: #ffffff02;
-  --glass-specular: inset 0 1px 0 #ffffff36, inset 0 -1px 0 #0003;
+  --glass-border: #d5f8e344;
+  --glass-highlight: #c0edd105;
+  --glass-highlight-soft: #c0edd102;
+  --glass-specular: inset 0 1px 0 #bedbcd38, inset 0 -1px 0 #080e0bb3;
   --glass-shadow: 0 12px 32px -16px #0009;
-  --line: #3e4e68;
+  --line: #394d42;
   --ok: #7bd4a3;
   --warn: #f1bc73;
   --bad: #ff9eaa;
@@ -128,7 +134,7 @@
   --OOP: #a0c6ff;
   --RETI: #b6db8d;
   --action-bg: var(--tint);
-  --action-ink: #101b30;
+  --action-ink: #102a21;
   --depth-1: 0 3px 12px -8px #0006;
   --depth-2: 0 12px 32px -16px #0009;
   --depth-3: 0 24px 64px -20px #000b;
@@ -138,21 +144,21 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light, [data-theme="light"]) {
-    --surface-canvas: #101724;
-    --surface-card: #1b2535;
-    --surface-inset: #253145;
-    --text-primary: #edf2ff;
-    --text-secondary: #b4c1d8;
-    --text-tertiary: #b4c1d8;
-    --accent-primary: #a8bfff;
+    --surface-canvas: #111a16;
+    --surface-card: #1a2720;
+    --surface-inset: #223329;
+    --text-primary: #edf3e9;
+    --text-secondary: #bacbbf;
+    --text-tertiary: #aec2b5;
+    --accent-primary: #86ddbe;
     --glass-clear: 68%;
     --glass-range: 22%;
-    --glass-border: #ffffff36;
-    --glass-highlight: #ffffff05;
-    --glass-highlight-soft: #ffffff02;
-    --glass-specular: inset 0 1px 0 #ffffff36, inset 0 -1px 0 #0003;
+    --glass-border: #d5f8e344;
+    --glass-highlight: #c0edd105;
+    --glass-highlight-soft: #c0edd102;
+    --glass-specular: inset 0 1px 0 #bedbcd38, inset 0 -1px 0 #080e0bb3;
     --glass-shadow: 0 12px 32px -16px #0009;
-    --line: #3e4e68;
+    --line: #394d42;
     --ok: #7bd4a3;
     --warn: #f1bc73;
     --bad: #ff9eaa;
@@ -163,7 +169,7 @@
     --OOP: #a0c6ff;
     --RETI: #b6db8d;
     --action-bg: var(--tint);
-    --action-ink: #101b30;
+    --action-ink: #102a21;
     --depth-1: 0 3px 12px -8px #0006;
     --depth-2: 0 12px 32px -16px #0009;
     --depth-3: 0 24px 64px -20px #000b;
