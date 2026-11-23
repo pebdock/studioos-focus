@@ -56,11 +56,11 @@ test("viaggio su giorno esame -> rifiutato senza modifiche", () => {
   assert.strictEqual(r.ok, false); assert.strictEqual(r.moves.length, 0);
   assert.ok(r.unresolved.some(u => /esame/i.test(u.reason)));
 });
-test("viaggio su blocco protetto (lun 23/11 09:15) -> non sposta il protetto", () => {
-  const r = TRAVEL.simulate(clone(BASE), trip("2026-11-23", "09:00", "2026-11-29", "06:00"));
+test("viaggio su blocco protetto (lun 23/11 20:00, piano D-051) -> non sposta il protetto", () => {
+  const r = TRAVEL.simulate(clone(BASE), trip("2026-11-23", "19:30", "2026-11-29", "06:00"));
   assert.strictEqual(r.ok, false);
-  const p = BASE.find(b => b.d === "2026-11-23" && b.s === 555);
-  assert.ok(p, "blocco 09:15 presente");
+  const p = BASE.find(b => b.d === "2026-11-23" && b.s === 1200);
+  assert.ok(p, "blocco 20:00 presente");
   assert.ok(!r.moves.some(m => m.id === p.id));
 });
 test("nessun viaggio in collisione -> zero spostamenti", () => {
@@ -69,28 +69,40 @@ test("nessun viaggio in collisione -> zero spostamenti", () => {
 });
 
 /* ---- 5 scenari reali ---- */
+/* D-051: viaggi fino all'ultimo (15 o 18/12); dopo, a Cesena solo nei giorni d'esame (già nel piano) */
 const SCEN = [
   ["S3  27/11 + 29/11", trip("2026-11-27", "15:50", "2026-11-29", "06:00")],
   ["S4  04/12 + 06/12", trip("2026-12-04", "15:50", "2026-12-06", "06:00")],
   ["S5  09/12 + 11/12", trip("2026-12-09", "15:50", "2026-12-11", "06:00")],
-  ["S7  24/12 + 26/12 (festivi)", trip("2026-12-24", "15:50", "2026-12-26", "06:00")],
-  ["S14 13/02 + 14/02 (vigilia MN)", trip("2027-02-13", "15:50", "2027-02-14", "06:00")],
+  ["S6  11/12 + 13/12", trip("2026-12-11", "15:50", "2026-12-13", "06:00")],
+  ["S15 ultimo viaggio mar 15/12", trip("2026-12-15", "15:50", "2026-12-15", "15:50").slice(0, 1)],
+  ["S18 ultimo viaggio ven 18/12", trip("2026-12-18", "15:50", "2026-12-18", "15:50").slice(0, 1)],
 ];
-/* settimane in cui il buffer fisico non regge 2 tratte da 3h: il motore deve rifiutare senza toccare il piano */
-const INFEAS = [
+/* dopo l'ultimo viaggio: rifiuto sicuro, piano invariato */
+const AFTER = [
+  ["S7  24/12 + 26/12 (festivi)", trip("2026-12-24", "15:50", "2026-12-26", "06:00")],
   ["S11 appello BD 20/01 + 23/01", trip("2027-01-20", "15:50", "2027-01-23", "06:00")],
   ["S12 fine gennaio 28/01 + 31/01", trip("2027-01-28", "15:50", "2027-01-31", "06:00")],
+  ["S14 13/02 + 14/02 (vigilia MN)", trip("2027-02-13", "15:50", "2027-02-14", "06:00")],
 ];
-for (const [name, trips] of INFEAS) {
-  test("infattibile (rifiuto sicuro) " + name, () => {
+for (const [name, trips] of AFTER) {
+  test("dopo l'ultimo viaggio (rifiuto sicuro) " + name, () => {
     const r = TRAVEL.simulate(clone(BASE), trips);
     assert.strictEqual(r.ok, false); assert.strictEqual(r.moves.length, 0);
     assert.deepStrictEqual(r.blocks.map(b => [b.id, b.d, b.s, b.e, b.f]), BASE.map(b => [b.id, b.d, b.s, b.e, b.f]));
-    assert.ok(r.unresolved.length > 0 && r.margins.every(m => Number.isFinite(m.marginMin)));
+    assert.ok(r.unresolved.length > 0 && r.unresolved.every(u => /ultimo viaggio|esame/.test(u.reason)));
     assert.strictEqual(TRAVEL.validate(r.blocks, []).violations.length, 0);
     assert.strictEqual(inversions(r.blocks), 0);
   });
 }
+/* settimana piena: il motore rifiuta senza toccare il piano e riporta il margine */
+test("infattibile (rifiuto sicuro) S9 tratte lunghe 07/12 + 08/12", () => {
+  const trips = [{ n: 1, dir: "andata", d: "2026-12-07", s: 420, e: 1380 }, { n: 2, dir: "ritorno", d: "2026-12-08", s: 420, e: 1380 }];
+  const r = TRAVEL.simulate(clone(BASE), trips);
+  assert.strictEqual(r.ok, false); assert.strictEqual(r.moves.length, 0);
+  assert.deepStrictEqual(r.blocks.map(b => [b.id, b.d, b.s, b.e, b.f]), BASE.map(b => [b.id, b.d, b.s, b.e, b.f]));
+  assert.ok(r.unresolved.length > 0 && r.margins.every(m => Number.isFinite(m.marginMin)));
+});
 for (const [name, trips] of SCEN) {
   test("scenario " + name, () => {
     const before = clone(BASE);

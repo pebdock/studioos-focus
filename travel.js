@@ -1,4 +1,4 @@
-/* STUDIOOS Focus - viaggi dinamici (D-040-R28). Solo Google Sheets, nessun Calendar.
+/* STUDIOOS Focus - viaggi dinamici (regole D-051-R28). Solo Google Sheets, nessun Calendar.
  * Riflusso deterministico: sposta solo blocchi "Da iniziare" (mai Completato/Parziale/Min fatti>0, mai lun 23/11),
  * conserva l'ordine per materia (propedeuticita), pasti, pause >=10', riposo, giorni esame e scadenze appello. */
 (function (root, factory) {
@@ -9,15 +9,19 @@
   "use strict";
   var W0 = "2026-11-23", LAST = "2027-02-14", FROZEN = { "2026-11-23": 1 };
   var EXAM = { "2027-01-11": 1, "2027-01-13": 1, "2027-01-19": 1, "2027-02-12": 1, "2027-02-15": 1 };
-  var DEADLINE = { MDP: "2027-01-12", BD: "2027-01-18", RETI: "2027-01-31", OOP: "2027-02-11", MN: "2027-02-14" };
-  var WIN = [[375, 1410], [375, 1410], [375, 1410], [375, 1410], [375, 1140], [450, 1140], [450, 1380]];
-  var MEALS = [[40, 40], [40, 40], [40, 40], [40, 40], [40, 0], [60, 0], [60, 60]];
-  var LUNCH = [690, 900], DINNER = [1080, 1290], PAUSE = 10, MAXNET = 840, MAXWEEK = 5100, NODES = 1500;
+  var DEADLINE = { MDP: "2027-01-12", BD: "2027-01-18", RETI: "2027-02-10", OOP: "2027-02-11", MN: "2027-02-14" };   /* RETI: finestra d'esame fino all'11/02 */
+  /* D-051: studio 07:00–23:30 (weekend dalle 07:30), una serata libera a settimana */
+  var WIN = [[420, 1410], [420, 1410], [420, 1410], [420, 1410], [420, 1410], [450, 1410], [450, 1410]];
+  var MEALS = [[40, 40], [40, 40], [40, 40], [40, 40], [40, 40], [60, 60], [60, 60]];
+  var LUNCH = [690, 900], DINNER = [1080, 1290], PAUSE = 10, MAXNET = 720, NODES = 1500;   /* 720′/giorno (D-051); finestre pasti larghe per i giorni di viaggio */
+  function maxWeek(w) { return 4800; }   /* 4.800′/settimana; il piano tiene 4.410′ fino al 20/12: il margine serve ai viaggi */
+  var LASTTRIP = "2026-12-18";   /* ultimo viaggio il 15 o il 18/12; poi a Cesena solo nei giorni d'esame (andata e ritorno già nel piano) */
+  var VIGIL = { "2027-01-12": 1, "2027-01-18": 1, "2027-02-11": 1 };   /* esame del mattino il giorno dopo: fine entro le 21:30 */
 
   function dow(d) { return (new Date(d + "T00:00:00Z").getUTCDay() + 6) % 7; }
   function addDays(d, n) { return new Date(new Date(d + "T00:00:00Z").getTime() + n * 864e5).toISOString().slice(0, 10); }
   function monday(d) { return addDays(d, -dow(d)); }
-  function win(d) { var w = WIN[dow(d)], lo = w[0], hi = w[1]; if (EXAM[d]) lo = Math.max(lo, 840); if (d === "2027-01-10") hi = 825; return [lo, hi]; }
+  function win(d) { var w = WIN[dow(d)], lo = w[0], hi = w[1]; if (EXAM[d]) lo = Math.max(lo, 1200); if (d === "2027-01-10") hi = 825; if (VIGIL[d]) hi = 1290; return [lo, hi]; }   /* giorni d'esame: dalle 20:00, dopo il rientro da Cesena */
   function meals(d) { var m = MEALS[dow(d)]; return EXAM[d] && win(d)[0] >= 840 ? [0, m[1]] : m; }
   function restNeed(a) { var k = dow(a); return k === 4 || k === 5 ? 480 : 435; }
   function hh(t) { return (t < 600 ? "0" : "") + Math.floor(t / 60) + ":" + (t % 60 < 10 ? "0" : "") + (t % 60); }
@@ -69,7 +73,7 @@
       if (!restOk(m, d)) v.push({ rule: "riposo", d: d });
       var k = monday(d); m[d].forEach(function (x) { if (!x.t) wk[k] = (wk[k] || 0) + x.net; });
     });
-    Object.keys(wk).forEach(function (k) { if (wk[k] > MAXWEEK) v.push({ rule: "tetto_sett", d: k }); });
+    Object.keys(wk).forEach(function (k) { if (wk[k] > maxWeek(k)) v.push({ rule: "tetto_sett", d: k }); });
     return { violations: v, week: wk };
   }
   function inversions(blocks) {
@@ -214,10 +218,11 @@
     for (i = 0; i < trips.length; i++) {
       t = trips[i];
       if (EXAM[t.d]) { res.unresolved.push({ trip: t.n, reason: "giorno esame: nessun viaggio" }); bad = true; }
+      else if (t.d > LASTTRIP) { res.unresolved.push({ trip: t.n, reason: "dopo l'ultimo viaggio (15 o 18/12): rientro a Cesena solo nei giorni d'esame, già nel piano" }); bad = true; }
       else if (t.d < W0 || t.d > LAST) { res.unresolved.push({ trip: t.n, reason: "data fuori dal piano (23/11-14/02)" }); bad = true; }
       else if (!(t.e > t.s)) { res.unresolved.push({ trip: t.n, reason: "intervallo non valido" }); bad = true; }
     }
-    if (bad) return res;
+    if (bad) { res.margins = []; return res; }
     var prot = blocks.filter(function (b) { return isActive(b) && !isMovable(b); }), protBad = [];
     tripItems(trips).forEach(function (x) {
       prot.forEach(function (b) { if (b.d === x.d && b.s < x.e + PAUSE && b.e > x.s - PAUSE) protBad.push({ trip: x.id, id: b.id, reason: "blocco protetto in collisione (" + b.st + ")" }); });
@@ -265,7 +270,7 @@
     });
   }
   function toPatch(moves, trips) {
-    return { action: "applyTravelShift", version: "D-040-R28", trips: trips || [], moves: moves.map(function (m) { return { id: m.id, row: m.row, d: m.to.d, s: hh(m.to.s), e: hh(m.to.e), f: m.f, from: { d: m.from.d, s: hh(m.from.s), e: hh(m.from.e) } }; }) };
+    return { action: "applyTravelShift", version: "D-051-R28", trips: trips || [], moves: moves.map(function (m) { return { id: m.id, row: m.row, d: m.to.d, s: hh(m.to.s), e: hh(m.to.e), f: m.f, from: { d: m.from.d, s: hh(m.from.s), e: hh(m.from.e) } }; }) };
   }
   function q(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }
   function toCsv(moves) {
@@ -278,5 +283,5 @@
   }
   return { weekMargin: weekMargin, _plan: plan, _applyPos: applyPos, simulate: simulate, validate: validate, restore: restore, toPatch: toPatch, toCsv: toCsv, shiftText: shiftText,
     inversions: inversions, deadlineBad: deadlineBad, weeksTo: weeksTo, addDays: addDays, hh: hh, isMovable: isMovable,
-    constants: { W0: W0, LAST: LAST, EXAM: EXAM, DEADLINE: DEADLINE, SLOT: 180 } };
+    constants: { W0: W0, LAST: LAST, LASTTRIP: LASTTRIP, EXAM: EXAM, DEADLINE: DEADLINE, SLOT: 180, MAXNET: MAXNET, maxWeek: maxWeek } };
 });

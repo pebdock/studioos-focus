@@ -1,4 +1,4 @@
-/* STUDIOOS Focus - pannello "Viaggi della settimana" (D-040-R28). Solo Google Sheets: nessun Calendar, nessun ICS.
+/* STUDIOOS Focus - pannello "Viaggi della settimana" (D-051-R28: viaggi fino al 18/12, poi Cesena solo nei giorni d'esame). Solo Google Sheets: nessun Calendar, nessun ICS.
  * Legge PROGRAMMA dall'indice gia' caricato da app.js, simula con STUDIOOS_TRAVEL, applica via Apps Script doPost
  * (action "applyTravelShift") oppure esporta la patch JSON/CSV. Nessun dato lascia il dispositivo se non verso il tuo script. */
 (function () {
@@ -25,7 +25,7 @@
     return [{ n: 1, dir: "andata", d: d1, s: 950, e: 1130 }, { n: 2, dir: "ritorno", d: d2, s: 360, e: 540 }];
   }
   function setWeek(wk) {
-    var first = C.W0, last = mon(C.LAST);
+    var first = C.W0, last = mon(C.LASTTRIP || C.LAST);   /* D-051: viaggi solo fino all'ultimo (15 o 18/12) */
     wk = wk < first ? first : wk > last ? last : wk;
     state.wk = wk; state.res = null;
     var saved = jget(K, {})[wk];
@@ -40,7 +40,7 @@
   }
   function dayOpts(sel) {
     var o = "";
-    for (var k = 0; k < 7; k++) { var d = T.addDays(state.wk, k), dis = d > C.LAST || d < C.W0 || C.EXAM[d]; o += '<option value="' + d + '"' + (d === sel ? " selected" : "") + (dis ? " disabled" : "") + ">" + DAYS[k] + " " + it(d) + (C.EXAM[d] ? " (esame)" : "") + "</option>"; }
+    for (var k = 0; k < 7; k++) { var d = T.addDays(state.wk, k), dis = d > C.LAST || d < C.W0 || C.EXAM[d] || (C.LASTTRIP && d > C.LASTTRIP); o += '<option value="' + d + '"' + (d === sel ? " selected" : "") + (dis ? " disabled" : "") + ">" + DAYS[k] + " " + it(d) + (C.EXAM[d] ? " (esame)" : C.LASTTRIP && d > C.LASTTRIP ? " (dopo l'ultimo viaggio)" : "") + "</option>"; }
     return o;
   }
   function tripRow(t) {
