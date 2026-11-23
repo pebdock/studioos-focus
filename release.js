@@ -1,19 +1,21 @@
-/* STUDIOOS Focus · note della versione definitiva (2.4.0: timer e lettura compatta).
+/* STUDIOOS Focus · note della versione (2.6.0: Ripasso rapido; 2.5.0: viaggi dinamici, solo Google Sheets).
    Mostrate una sola volta dopo l'aggiornamento (mai durante una sessione attiva) e sempre
    disponibili in Opzioni › Informazioni. Nessun dato letto o scritto oltre a una chiave locale. */
 (function(root){
   "use strict";
   const doc=root.document;if(!doc)return;
-  const VERSION="2.4.0",KEY="sfocus_release_seen";
+  const VERSION="2.6.0",KEY="sfocus_release_seen";
   const NOTES=[
+    ["Ripasso rapido (2.6.0)","Nuova sezione separata dal timer: tocca «Ripasso rapido» in Oggi o in Studio. Schede, quiz, domande aperte corrette direttamente nel sito ed esercizi numerici sempre nuovi, pesati su quanto ogni argomento esce agli esami. Modalità per pause, pasti e fine blocco; i progressi del ripasso restano su questo dispositivo e non toccano il piano."],
+    ["Viaggi e piano (2.5.0)","Solo Google Sheets: niente più Google Calendar né file ICS. Il pannello Viaggi della settimana sposta solo i blocchi Da iniziare rispettando pasti, riposo e giorni d'esame, con anteprima e ripristino."],
     ["Timer (2.4.0)","Il mini-timer in basso non copre più lo schermo e ha il suo tasto ❚❚ / ▶: metti in pausa o riprendi da qualsiasi sezione. Nel blocco vedi un solo comando principale (Avvia oppure Pausa); StandBy, OLED e gli altri sono in «Altre opzioni»."],
     ["Scaletta (2.4.0)","Un passo per riga: stato (○ ◐ ✓ ◑ ↺), orario, durata e tipo (Teoria, Esercizi, Esame, Prerequisito…). «Cosa fare» è su due righe: tocca il passo per il testo completo e per cambiare il tipo. Gli esercizi d'esame reali sono evidenziati."],
     ["Lettura (2.4.0)","Le spiegazioni lunghe sono chiuse dietro «ⓘ Come funziona»; i materiali del blocco non si ripetono più (stesso file, pagine unite)."],
     ["Versioni precedenti","Interfaccia più leggibile e controlli touch da 44 px (2.3.1), prerequisiti come passi veri della scaletta, basi usate ma non spiegate, file e pagine per ogni intervallo, sincronizzazione tra dispositivi con coda offline, nessun minuto inventato."]];
   const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-  const body=()=>`<p class="eyebrow">Versione stabile · sessione invernale 2026/27</p><h2 id="relTitle">STUDIOOS Focus ${VERSION} · Definitiva</h2>
+  const body=()=>`<p class="eyebrow">Versione stabile · sessione invernale 2026/27</p><h2 id="relTitle">STUDIOOS Focus ${VERSION}</h2>
     <ul class="rel-list">${NOTES.map(([t,d])=>`<li><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join("")}</ul>
-    <p class="rel-bye">Questa è la versione definitiva: da qui in avanti solo correzioni, se serviranno, e nessuna novità a sorpresa durante la sessione. Una cosa alla volta: buono studio e in bocca al lupo per gli appelli.</p>
+    <p class="rel-bye">Il timer e il piano funzionano come prima: il Ripasso è una sezione a parte, da usare nelle pause e a fine blocco. Una cosa alla volta: buono studio e in bocca al lupo per gli appelli.</p>
     <p class="rel-sign">— Claude</p>`;
   function open(){let d=doc.getElementById("relDialog");
     if(!d){d=doc.createElement("dialog");d.id="relDialog";d.className="rel-dialog";d.setAttribute("aria-labelledby","relTitle");
@@ -24,7 +26,7 @@
   function busy(){try{const s=root.STUDIOOS_STUDY&&root.STUDIOOS_STUDY.current&&root.STUDIOOS_STUDY.current();return !!(s&&s.run&&s.run.status==="active")}catch(e){return false}}
   function card(){const v=doc.getElementById("v-impostazioni");if(!v||doc.getElementById("relCard"))return;
     const c=doc.createElement("article");c.className="card rel-info";c.id="relCard";
-    c.innerHTML=`<div class="row"><div class="sp"><span class="eyebrow">Informazioni</span><h2>Focus ${VERSION} · Definitiva</h2></div><button class="btn ghost" type="button" id="relOpen">Note di versione</button></div><p class="small mute">Versione stabile per la sessione invernale 2026/27.</p>`;
+    c.innerHTML=`<div class="row"><div class="sp"><span class="eyebrow">Informazioni</span><h2>Focus ${VERSION}</h2></div><button class="btn ghost" type="button" id="relOpen">Note di versione</button></div><p class="small mute">Versione stabile per la sessione invernale 2026/27.</p>`;
     const sys=doc.getElementById("lgSys");if(sys)sys.before(c);else v.appendChild(c);
     c.querySelector("#relOpen").onclick=open}
   function start(){let n=0;const t=setInterval(()=>{card();if(doc.getElementById("relCard")||++n>40)clearInterval(t)},250);
