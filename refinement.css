@@ -30,8 +30,8 @@ button.pill,.pill[role="button"]{min-height:44px}.pill.ok{color:var(--ok)}.pill.
 
 @media(hover:hover){.btn:not(:disabled):hover,.chipbtn:hover,.ui-glass-guide-open:hover{outline:1px solid var(--acc);outline-offset:1px}}
 
-/* Two materials: compact controls and denser reading surfaces. Text never fades.
-   Gradient rim/reflection is the Safari fallback; only the small island can use SVG. */
+/* Compact controls and denser reading surfaces keep opaque text.
+   The gradient rim remains visible when SVG backdrop refraction is unavailable. */
 #tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog{background:var(--surface-card)}
 .sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.sess,.pill,.top{--glass-material-bg:var(--glass-panel-bg)}
 #tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open{--glass-material-bg:var(--glass-bg)}
@@ -58,9 +58,16 @@ button.pill,.pill[role="button"]{min-height:44px}.pill.ok{color:var(--ok)}.pill.
 .glass #tabbar.nav-scrub .tab[aria-selected="true"]:not(.nav-preview){color:var(--ink)}
 
 @supports (backdrop-filter:url("#ui-glass-lens")){
-  .ui-glass-lens-ready .glass #island{backdrop-filter:url("#ui-glass-lens") blur(14px) saturate(var(--glass-saturation))}
+  @media (prefers-reduced-motion:no-preference){
+    /* Use one live lens during interaction. The hidden or covered control needs no SVG pass. */
+    .glass:where(.ui-glass-lens-ready:not(:has(body.rm, body.oled, #standby.on, .sheet.on, .rel-dialog[open], .ui-glass-dialog:popover-open))) #island:where(.on),
+    .glass:where(.ui-glass-lens-ready:not(:has(body.rm, body.oled, #standby.on, .sheet.on, .rel-dialog[open], .ui-glass-dialog:popover-open, #island.on))) #tabbar:where(:focus-within, .nav-scrub){
+      backdrop-filter:url("#ui-glass-lens") blur(14px) saturate(var(--glass-saturation));
+    }
+  }
 }
-.glass :is(#focusCard,.top).ui-glass-offscreen{-webkit-backdrop-filter:none;backdrop-filter:none}
+.glass :is(#focusCard,.top).ui-glass-offscreen,.glass #island:not(.on){-webkit-backdrop-filter:none;backdrop-filter:none}
+.glass :is(#focusCard,.top).ui-glass-offscreen::before,.glass #island:not(.on)::before{content:none}
 
 /* Fixed dock: original JS owns the spring-driven indicator geometry. */
 #tabbar{position:fixed;z-index:var(--z-floating-glass);left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));display:flex;isolation:isolate;gap:4px;padding:6px;margin:0 auto;width:min(840px,calc(100% - 24px));max-width:100%;border:1px solid var(--line);border-radius:9999px;box-shadow:var(--soft-shadow)}
@@ -231,13 +238,13 @@ body.rm .view.on,body.rm .sheet.on,body.rm .rel-dialog[open] .rel-card{animation
 
 @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
   :root{--glass-bg:var(--surface-card);--glass-panel-bg:var(--surface-card);--glass-highlight:transparent;--glass-highlight-soft:transparent}
-  .glass :is(#tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top),.ui-glass-lens-ready .glass #island,.sheet,.rel-dialog::backdrop,.ui-glass-dialog::backdrop{-webkit-backdrop-filter:none;backdrop-filter:none}
+  .glass :is(#tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top),.sheet,.rel-dialog::backdrop,.ui-glass-dialog::backdrop{-webkit-backdrop-filter:none;backdrop-filter:none}
   .glass :is(#tabbar,#island,#focusCard,.top,.sheet>div,.rel-card,.ui-glass-dialog)::before{display:none}
 }
 
 @media(forced-colors:active){
   .card,.btn,.pill,.lg-seg,#tabbar,.sheet>div,.rel-card,.ui-glass-dialog{border:1px solid CanvasText}
-  .glass :is(#tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top,.sess,.pill),.ui-glass-lens-ready .glass #island{background:Canvas;color:CanvasText;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .glass :is(#tabbar,#island,.lg-seg,#lgStatus,.top .ui-glass-guide-open,.top .chips.lg-popover,.sheet>div,.rel-card,.ui-glass-dialog,#focusCard,.top,.sess,.pill){background:Canvas;color:CanvasText;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
   .glass :is(#tabbar,#island,#focusCard,.top,.sheet>div,.rel-card,.ui-glass-dialog)::before{display:none}
   #tabInd,.lg-seg-ind{background:Highlight;border:1px solid Highlight}.tab[aria-selected="true"]{color:Highlight;outline:2px solid Highlight}
 }
