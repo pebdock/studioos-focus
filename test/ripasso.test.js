@@ -72,5 +72,6 @@ for (const g of G.list) for (let seed = 1; seed <= 200; seed++) {
   if (kind === "num") { ok(Number.isFinite(d.ans), "numero finito " + g.id + " seed " + seed); ok(C.checkNum(String(d.ans).replace(".", ","), d.ans, d.tol).ok, "auto-verifica " + g.id); }
   else ok(String(d.ans).length > 0, "risposta " + g.id);
 }
+for (let seed = 1; seed <= 500; seed++) { const d = G.byId["g-mdp-cov"].make(C.rng(seed)), m = /Var\[X\]=(\d+), Var\[Y\]=(\d+), Cov\(X,Y\)=(-?\d+)/.exec(d.q); ok(m && Math.abs(+m[3]) <= Math.sqrt(m[1] * m[2]) && d.ans >= 0, "covarianza ammissibile " + d.q); }
 ok(G.keys("ABCDE", [["A", "B"], ["B", "C"], ["CD", "E"]]).join() === "AD" || true, "chiavi");
 console.log("ripasso: " + n + " controlli OK");

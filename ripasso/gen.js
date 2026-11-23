@@ -35,8 +35,8 @@
     return {q:`X assume i valori ${xs.join(", ")} con probabilità ${ws.map(w=>w+"/"+S).join(", ")}. Calcola ${askVar?"Var[X]":"E[X]"}.`,ans:askVar?V:E,tol:{rel:.01},
       ex:`E[X] = Σx·p = ${fmt(E)}. E[X²] = ${fmt(E2)}. Var[X] = E[X²] − E[X]² = ${fmt(V)}.`}});
   add("g-mdp-cov","MDP",4,["covarianz","varianza"],"Varianza di una combinazione lineare",r=>{
-    const a=pick(r,[1,2,3,-1,-2]),b=pick(r,[1,2,-1,3]),vx=int(r,1,9),vy=int(r,1,9),cv=pick(r,[-2,-1,0,1,2]),v=a*a*vx+b*b*vy+2*a*b*cv;
-    return {q:`Var[X]=${vx}, Var[Y]=${vy}, Cov(X,Y)=${cv}. Calcola Var[${a}X ${b<0?"−":"+"} ${Math.abs(b)}Y].`,ans:v,tol:{abs:.001},ex:`Var[aX+bY] = a²Var X + b²Var Y + 2ab·Cov = ${a*a}·${vx} + ${b*b}·${vy} + ${2*a*b}·${cv} = ${v}.`}});
+    const a=pick(r,[1,2,3,-1,-2]),b=pick(r,[1,2,-1,3]),vx=int(r,1,9),vy=int(r,1,9),lim=Math.sqrt(vx*vy),cv=pick(r,[-2,-1,0,1,2].filter(c=>Math.abs(c)<=lim)),v=a*a*vx+b*b*vy+2*a*b*cv;
+    return {q:`Var[X]=${vx}, Var[Y]=${vy}, Cov(X,Y)=${cv}. Calcola Var[${a===1?"":a===-1?"−":String(a).replace("-","−")}X ${b<0?"−":"+"} ${Math.abs(b)===1?"":Math.abs(b)}Y].`,ans:v,tol:{abs:.001},ex:`Var[aX+bY] = a²Var X + b²Var Y + 2ab·Cov = ${a*a}·${vx} + ${b*b}·${vy} + ${2*a*b}·${cv} = ${v}.`}});
   add("g-mdp-anagram","MDP",3,["combinator","anagramm","permutazion"],"Anagrammi con lettere ripetute",r=>{
     const w=pick(r,["BANANA","MATEMATICA","STATISTICA","CESENA","PROBABILITA","ANANAS","PAPPAGALLO"]);const cnt={};for(const c of w)cnt[c]=(cnt[c]||0)+1;
     const v=fact(w.length)/Object.values(cnt).reduce((a,k)=>a*fact(k),1);

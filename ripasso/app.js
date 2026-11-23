@@ -215,8 +215,9 @@
     if(a==="reset")return doReset(b)});
   document.addEventListener("submit",e=>{const f=e.target.closest("form[data-form]");if(!f)return;e.preventDefault();if(f.dataset.form==="num")onNum(false);else onOpen(false)});
   document.addEventListener("change",e=>{if(e.target.id==="rpImport"&&e.target.files[0])doImport(e.target.files[0]);if(e.target.id==="rpStudied"){S.prefs.studied=e.target.checked;save()}});
-  document.addEventListener("keydown",e=>{if(!R||$("rpRun").hidden||e.altKey||e.ctrlKey||e.metaKey)return;const tag=(e.target.tagName||"").toLowerCase();
-    if(tag==="textarea"){if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))onOpen(false);return}if(tag==="input")return;
+  document.addEventListener("keydown",e=>{if(!R||$("rpRun").hidden)return;const tag=(e.target.tagName||"").toLowerCase();
+    if(tag==="textarea"){if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)&&!R.answered){e.preventDefault();onOpen(false)}return}
+    if(tag==="input"||e.altKey||e.ctrlKey||e.metaKey)return;
     const c=R.cards[R.i],t=c.x.t,q=$("rpCard");
     if(R.answered&&(e.key==="Enter"||e.key===" ")){const n=q.querySelector('[data-act="next"]');if(n){e.preventDefault();n.click()}return}
     if(t==="flash"){if((e.key===" "||e.key==="Enter")&&q.querySelector('[data-act="reveal"]')){e.preventDefault();onReveal()}else if(/^[123]$/.test(e.key)&&q.querySelector('[data-act="rate"]')){record([1,3,5][Number(e.key)-1]);next()}}
