@@ -71,6 +71,12 @@
   --duration-sheet: 450ms;
   --ease-spring: var(--spring-snappy);
   --ease-sheet: var(--spring-smooth);
+  --motion-feedback-time: 120ms;
+  --motion-reveal-time: var(--duration-fast);
+  --motion-overlay-time: var(--duration-control);
+  --motion-quiet-ease: var(--spring-smooth);
+  --motion-breath-time: 8s;
+  --motion-loading-time: 1.4s;
   --z-base: 1;
   --z-sticky: 10;
   --z-floating-glass: 50;
