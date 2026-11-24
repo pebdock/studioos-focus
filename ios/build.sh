@@ -32,6 +32,7 @@ xcrun simctl boot "$device" || true
 xcrun simctl bootstatus "$device" -b
 xcodebuild -scheme Live -destination "id=$device" -derivedDataPath "$TMPDIR/focus-sim" build
 app="$TMPDIR/focus-sim/Build/Products/Debug-iphonesimulator/StudioFocus.app"
+bash check-upgrade.sh "$device" "$app" "$out"
 xcrun simctl install "$device" "$app"
 xcrun simctl launch "$device" io.github.pebdock.studioosfocus
 sleep 2
@@ -40,5 +41,6 @@ xcrun simctl io "$device" recordVideo "$out/percorso.mp4" &
 rec=$!
 trap 'kill -INT "$rec" 2>/dev/null || true; wait "$rec" || true' EXIT
 xcodebuild -scheme Live -destination "id=$device" -parallel-testing-enabled NO -derivedDataPath "$TMPDIR/focus-sim" -resultBundlePath "$out/Studio.xcresult" test
+
 
 

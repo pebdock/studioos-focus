@@ -3,6 +3,7 @@ import SwiftUI
 struct FocusView: View {
     @ObservedObject var store: Store
     @State private var confirm = false
+    @FocusState private var editing: Bool
     private var block: Block { store.block }
     @StateObject private var plan = PlanLibrary()
 
@@ -17,11 +18,11 @@ struct FocusView: View {
             Form {
                 if block.phase == .ready {
                     Section("Prepara il blocco") {
-                        TextField("Titolo", text: field(\.title))
+                        TextField("Titolo", text: field(\.title)).focused($editing).accessibilityIdentifier("titleField")
                         Stepper("Durata · \(block.minutes) min", value: field(\.minutes), in: 1...240)
-                        TextField("Scaletta, un passo per riga", text: field(\.outline), axis: .vertical)
-                        TextField("Materiali e riferimenti", text: field(\.materials), axis: .vertical)
-                        TextField("Criterio di completamento", text: field(\.criterion), axis: .vertical)
+                        TextField("Scaletta, un passo per riga", text: field(\.outline), axis: .vertical).focused($editing)
+                        TextField("Materiali e riferimenti", text: field(\.materials), axis: .vertical).focused($editing)
+                        TextField("Criterio di completamento", text: field(\.criterion), axis: .vertical).focused($editing).accessibilityIdentifier("criterionField")
                         Button("Avvia blocco") { store.change { $0.start(at: .now) } }
                             .disabled(!block.configured)
                     }
@@ -72,6 +73,7 @@ struct FocusView: View {
                 }
             }
             .navigationTitle("Studio")
+            .toolbar { ToolbarItemGroup(placement: .keyboard) { Spacer(); Button("Fine") { editing = false } } }
             .confirmationDialog("Hai soddisfatto il criterio?", isPresented: $confirm, titleVisibility: .visible) {
                 Button("Conferma completamento") { store.change { $0.finish() } }
             } message: { Text(block.criterion) }
@@ -81,4 +83,5 @@ struct FocusView: View {
         }
     }
 }
+
 
