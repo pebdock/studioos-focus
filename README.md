@@ -4,4 +4,4 @@ Versione autonoma (PWA) di un timer di studio personale. Il sito contiene solo c
 
 La sezione **Ripasso** (`ripasso/`) è separata dal timer: quiz, schede, domande aperte corrette nel browser ed esercizi numerici generati, pesati sulla frequenza delle domande agli esami. Legge in sola lettura il piano già scaricato da Focus sul dispositivo e salva i propri progressi solo in `sfocus_rp_state`; nessuna richiesta di rete. Test: `node test/ripasso.test.js`.
 
-Versione 202611231000 (2.6.0).
+Versione funzionale 2.6.3 (D-053). Build di presentazione 202611241700. Le note in-app 2.6.0 descrivono l’introduzione del Ripasso.
