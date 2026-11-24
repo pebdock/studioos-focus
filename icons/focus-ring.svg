@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">STUDIOOS Focus</title>
+  <desc id="desc">Due anelli di vetro su fondo blu notte. Un arco aperto culmina in un indice luminoso a ore dodici.</desc>
+  <defs>
+    <radialGradient id="field" cx=".24" cy=".04" r="1.1">
+      <stop stop-color="#304b72"/>
+      <stop offset=".52" stop-color="#172944"/>
+      <stop offset="1" stop-color="#091320"/>
+    </radialGradient>
+    <linearGradient id="track" x1="0" y1="0" x2=".72" y2="1">
+      <stop stop-color="#7793b3"/>
+      <stop offset=".45" stop-color="#324967"/>
+      <stop offset=".78" stop-color="#30415f"/>
+      <stop offset="1" stop-color="#6a7d9f"/>
+    </linearGradient>
+    <linearGradient id="glass" x1=".18" y1=".05" x2=".86" y2=".94">
+      <stop stop-color="#e6fcff"/>
+      <stop offset=".22" stop-color="#aadcee"/>
+      <stop offset=".48" stop-color="#64a7cd"/>
+      <stop offset=".73" stop-color="#8da6d8"/>
+      <stop offset="1" stop-color="#c8c9eb"/>
+    </linearGradient>
+    <linearGradient id="edge" x1=".2" y1="0" x2=".83" y2="1">
+      <stop stop-color="#f4ffff"/>
+      <stop offset=".44" stop-color="#a0cde6"/>
+      <stop offset="1" stop-color="#d1cde8"/>
+    </linearGradient>
+    <linearGradient id="inner" x1=".13" y1="0" x2=".85" y2="1">
+      <stop stop-color="#a9c8da"/>
+      <stop offset=".26" stop-color="#637c97"/>
+      <stop offset=".64" stop-color="#344d6d"/>
+      <stop offset="1" stop-color="#7f8faa"/>
+    </linearGradient>
+  </defs>
+  <rect id="background" width="512" height="512" fill="url(#field)"/>
+  <g id="outer-track" fill="none">
+    <circle cx="256" cy="260" r="167" stroke="#101c31" stroke-width="41"/>
+    <circle cx="256" cy="256" r="167" stroke="url(#track)" stroke-width="38"/>
+  </g>
+  <g id="elapsed-arc" fill="none" stroke-linecap="round">
+    <path d="M256 89a167 167 0 1 0 153.73 232.21" stroke="url(#glass)" stroke-width="38"/>
+    <path d="M256 72a184 184 0 1 0 169.38 255.85" stroke="url(#edge)" stroke-width="3"/>
+    <path d="M256 105a151 151 0 1 0 139.01 209.97" stroke="#436284" stroke-opacity=".58" stroke-width="2.5"/>
+  </g>
+  <g id="inner-lens" fill="none">
+    <circle cx="256" cy="258" r="114" stroke="#122039" stroke-width="20"/>
+    <circle cx="256" cy="256" r="114" stroke="url(#inner)" stroke-width="17"/>
+    <path d="M139.65 218.19a122.35 122.35 0 0 1 155.06-78.25" stroke="#c7dfec" stroke-opacity=".75" stroke-width="2"/>
+  </g>
+  <circle id="time-index" cx="256" cy="89" r="13" fill="#f3ffff"/>
+</svg>

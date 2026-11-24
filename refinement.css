@@ -60,14 +60,54 @@ button.pill,.pill[role="button"]{min-height:44px}.pill.ok{color:var(--ok)}.pill.
 @supports (backdrop-filter:url("#ui-glass-lens")){
   @media (prefers-reduced-motion:no-preference){
     /* Use one live lens during interaction. The hidden or covered control needs no SVG pass. */
-    .glass:where(.ui-glass-lens-ready:not(:has(body.rm, body.oled, #standby.on, .sheet.on, .rel-dialog[open], .ui-glass-dialog:popover-open))) #island:where(.on),
-    .glass:where(.ui-glass-lens-ready:not(:has(body.rm, body.oled, #standby.on, .sheet.on, .rel-dialog[open], .ui-glass-dialog:popover-open, #island.on))) #tabbar:where(:focus-within, .nav-scrub){
-      backdrop-filter:url("#ui-glass-lens") blur(14px) saturate(var(--glass-saturation));
+    .glass:where(.ui-glass-lens-ready:not([data-lg-phase="work"], :has(body.rm, body.oled, #standby.on, .sheet.on, .rel-dialog[open], .ui-glass-dialog:popover-open))) #island:where(.on),
+    .glass:where(.ui-glass-lens-ready:not([data-lg-phase="work"], :has(body.rm, body.oled, #standby.on, .sheet.on, .rel-dialog[open], .ui-glass-dialog:popover-open, #island.on))) #tabbar:where(:focus-within, .nav-scrub){
+      backdrop-filter:blur(6px) saturate(var(--glass-saturation)) url("#ui-glass-lens");
     }
   }
 }
 .glass :is(#focusCard,.top).ui-glass-offscreen,.glass #island:not(.on){-webkit-backdrop-filter:none;backdrop-filter:none}
 .glass :is(#focusCard,.top).ui-glass-offscreen::before,.glass #island:not(.on)::before{content:none}
+
+/* A wider optical rim on floating controls follows the existing pointer light.
+   The mask leaves the centre clear, including when SVG filters are unavailable. */
+.glass :is(#tabbar,#island)::before {
+  padding: 2px;
+  background:
+    radial-gradient(ellipse at var(--ui-light-x, 30%) var(--ui-light-y, 0%), var(--glass-border), transparent 54%),
+    linear-gradient(150deg, transparent 48%, var(--glass-highlight-soft) 72%, var(--glass-edge));
+}
+
+/* During work, remove moving light from the reading plane and navigation. */
+.glass:where([data-lg-phase="work"]) :is(#focusCard,.top,#tabbar,#island) {
+  background: var(--glass-material-bg);
+}
+
+.glass[data-lg-phase="work"] :is(#focusCard,.top,#tabbar,#island)::before,
+.glass body.oled #focusCard::before {
+  content: none;
+}
+
+.glass body.oled #focusCard {
+  background: #000;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.card :is(.tdkpi>div,.progress-grid>.coverage-metric,.kpis>.kpi) {
+  border-radius: var(--radius-nested);
+}
+
+@supports (corner-shape: squircle) {
+  :is(.card,.top,.sess,.prop,.kpi,.coverage-metric,.steps li,.tdkpi>div,.sheet>div,.rel-card,.ui-glass-dialog,.top .chips.lg-popover) {
+    corner-shape: var(--corner-panel);
+  }
+
+  .glass :is(#focusCard,.top,.sheet>div,.rel-card,.ui-glass-dialog)::before {
+    corner-shape: inherit;
+  }
+}
 
 /* Fixed dock: original JS owns the spring-driven indicator geometry. */
 #tabbar{position:fixed;z-index:var(--z-floating-glass);left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));display:flex;isolation:isolate;gap:4px;padding:6px;margin:0 auto;width:min(840px,calc(100% - 24px));max-width:100%;border:1px solid var(--line);border-radius:9999px;box-shadow:var(--soft-shadow)}

@@ -47,6 +47,8 @@
   --radius-32: 32px;
   --radius-outer: var(--radius-32);
   --radius-inner: var(--radius-12);
+  --radius-nested: max(var(--space-4), calc(var(--radius-outer) - var(--pad-card) - 1px));
+  --corner-panel: squircle;
   --space-4: 4px;
   --space-8: 8px;
   --space-12: 12px;
