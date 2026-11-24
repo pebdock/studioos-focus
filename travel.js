@@ -1,4 +1,4 @@
-/* STUDIOOS Focus - viaggi dinamici (regole D-052-R28). Solo Google Sheets, nessun Calendar.
+/* STUDIOOS Focus - viaggi dinamici (regole D-053-R28). Solo Google Sheets, nessun Calendar.
  * Riflusso deterministico: sposta solo blocchi "Da iniziare" (mai Completato/Parziale/Min fatti>0, mai lun 23/11),
  * conserva l'ordine per materia (propedeuticita), pasti, pause >=10', riposo, giorni esame e scadenze appello. */
 (function (root, factory) {
@@ -270,7 +270,7 @@
     });
   }
   function toPatch(moves, trips) {
-    return { action: "applyTravelShift", version: "D-052-R28", trips: trips || [], moves: moves.map(function (m) { return { id: m.id, row: m.row, d: m.to.d, s: hh(m.to.s), e: hh(m.to.e), f: m.f, from: { d: m.from.d, s: hh(m.from.s), e: hh(m.from.e) } }; }) };
+    return { action: "applyTravelShift", version: "D-053-R28", trips: trips || [], moves: moves.map(function (m) { return { id: m.id, row: m.row, d: m.to.d, s: hh(m.to.s), e: hh(m.to.e), f: m.f, from: { d: m.from.d, s: hh(m.from.s), e: hh(m.from.e) } }; }) };
   }
   function q(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }
   function toCsv(moves) {

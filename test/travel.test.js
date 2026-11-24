@@ -56,7 +56,7 @@ test("viaggio su giorno esame -> rifiutato senza modifiche", () => {
   assert.strictEqual(r.ok, false); assert.strictEqual(r.moves.length, 0);
   assert.ok(r.unresolved.some(u => /esame/i.test(u.reason)));
 });
-test("giorni di febbre 23–24/11 (piano D-052): vuoti, e il motore non vi sposta studio", () => {
+test("giorni di febbre 23–24/11 (piani D-052/D-053): vuoti, e il motore non vi sposta studio", () => {
   assert.ok(!BASE.some(b => b.d < "2026-11-25" && b.st === "Da iniziare"), "nessun blocco da iniziare prima del 25/11");
   const r = TRAVEL.simulate(clone(BASE), trip("2026-11-27", "15:50", "2026-11-29", "06:00"));
   assert.ok(!r.moves.some(m => m.to.d < "2026-11-25"), "spostato verso i giorni di febbre");

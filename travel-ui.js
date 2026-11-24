@@ -1,4 +1,4 @@
-/* STUDIOOS Focus - pannello "Viaggi della settimana" (D-052-R28: viaggi fino al 18/12, poi Cesena solo nei giorni d'esame). Solo Google Sheets: nessun Calendar, nessun ICS.
+/* STUDIOOS Focus - pannello "Viaggi della settimana" (D-053-R28: viaggi fino al 18/12, poi Cesena solo nei giorni d'esame). Solo Google Sheets: nessun Calendar, nessun ICS.
  * Legge PROGRAMMA dall'indice gia' caricato da app.js, simula con STUDIOOS_TRAVEL, applica via Apps Script doPost
  * (action "applyTravelShift") oppure esporta la patch JSON/CSV. Nessun dato lascia il dispositivo se non verso il tuo script. */
 (function () {
