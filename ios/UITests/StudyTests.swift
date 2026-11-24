@@ -1,0 +1,33 @@
+import XCTest
+
+final class StudyTests: XCTestCase {
+    func testSessionSurvivesRelaunch() throws {
+        let app = XCUIApplication()
+        app.launch()
+        let title = app.textFields["Titolo"]
+        title.tap()
+        title.typeText("Blocco sintetico\n")
+        let criterion = app.descendants(matching: .any).matching(NSPredicate(format: "placeholderValue == %@", "Criterio di completamento")).firstMatch
+        criterion.tap()
+        criterion.typeText("Spiegare il metodo")
+        app.buttons["Avvia blocco"].tap()
+        XCTAssertTrue(app.buttons["Pausa"].waitForExistence(timeout: 5))
+        XCUIDevice.shared.press(.home)
+        app.activate()
+        app.buttons["Pausa"].tap()
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(app.buttons["Riprendi"].waitForExistence(timeout: 5))
+        let evidence = XCTAttachment(screenshot: app.screenshot())
+        evidence.name = "Blocco sintetico in pausa"
+        evidence.lifetime = .keepAlways
+        add(evidence)
+        app.buttons["Riprendi"].tap()
+        XCTAssertTrue(app.buttons["Pausa"].exists)
+    }
+    func testLaunchMetric() {
+        measure(metrics: [XCTApplicationLaunchMetric()]) {
+            XCUIApplication().launch()
+        }
+    }
+}

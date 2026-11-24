@@ -1,0 +1,32 @@
+name: Focus iPhone personale
+on:
+  push:
+    branches: [native/iphone-focus]
+    paths: ['ios/**', '.github/workflows/native-focus.yml']
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Generatore XcodeGen 2.44.1
+        run: |
+          curl -fsSL https://github.com/yonaskolb/XcodeGen/releases/download/2.44.1/xcodegen.zip -o "$RUNNER_TEMP/gen.zip"
+          unzip -q "$RUNNER_TEMP/gen.zip" -d "$RUNNER_TEMP/gen"
+          dirname "$(find "$RUNNER_TEMP/gen" -type f -name xcodegen | head -1)" >> "$GITHUB_PATH"
+      - name: Build e verifica
+        run: bash ios/build.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: studioos-focus-iphone
+          path: |
+            ios/evidence/
+            ios/StudioFocus.xcodeproj/
+            ios/Plists/
+          retention-days: 1
+
