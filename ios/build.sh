@@ -27,20 +27,39 @@ for variant in Base Live; do
   (cd "$stage" && /usr/bin/zip -qyr "$out/Focus-$variant.ipa" Payload)
 done
 (cd "$out" && shasum -a 256 *.ipa > SHA256SUMS)
-device=$(xcrun simctl list devices available -j | python3 -c 'import sys,json; ds=[d for devices in json.load(sys.stdin)["devices"].values() for d in devices if d["name"].startswith("iPhone")]; print(next((d for d in ds if d["name"]=="iPhone 15 Pro"),ds[0])["udid"])')
-xcrun simctl boot "$device" || true
+sdk=$(xcrun --sdk iphonesimulator --show-sdk-version)
+runtime=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; rs=[r for r in json.load(sys.stdin)["runtimes"] if r["isAvailable"] and ".iOS-" in r["identifier"]]; print(next(r["identifier"] for r in rs if r["version"]==sys.argv[1]))' "$sdk")
+device=$(xcrun simctl create "Focus CI iPhone 15 Pro" com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro "$runtime")
+rec=""
+cleanup() {
+  if [[ -n "$rec" ]]; then kill -INT "$rec" 2>/dev/null || true; wait "$rec" || true; fi
+  xcrun simctl shutdown "$device" || true
+  xcrun simctl delete "$device"
+}
+trap cleanup EXIT
+echo "iPhone 15 Pro · $runtime · $device"
+xcrun simctl boot "$device"
 xcrun simctl bootstatus "$device" -b
 xcodebuild -scheme Live -destination "id=$device" -derivedDataPath "$TMPDIR/focus-sim" build
 app="$TMPDIR/focus-sim/Build/Products/Debug-iphonesimulator/StudioFocus.app"
 bash check-upgrade.sh "$device" "$app" "$out"
 xcrun simctl install "$device" "$app"
+dir="$(xcrun simctl get_app_container "$device" io.github.pebdock.studioosfocus data)/Library/Application Support"
+mkdir -p "$dir"
+python3 - "$dir/plan-v1.json" <<'PY'
+import json,sys
+rows = [dict(id=f"R20-{i:04}",date="2026-11-30",mat="Materia sintetica",arg=f"Unità {i}",cons="Verifica finale: esempio",mats="Scheda A",stato="Da iniziare",min=20,fatti=0,**{"from":"09:00","to":"09:20"}) for i in range(1, 41)]
+with open(sys.argv[1],"w") as f: json.dump({"blocks":rows},f)
+PY
 xcrun simctl launch "$device" io.github.pebdock.studioosfocus
 sleep 2
 xcrun simctl io "$device" screenshot "$out/avvio.png"
 xcrun simctl io "$device" recordVideo "$out/percorso.mp4" &
 rec=$!
-trap 'kill -INT "$rec" 2>/dev/null || true; wait "$rec" || true' EXIT
+
 xcodebuild -scheme Live -destination "id=$device" -parallel-testing-enabled NO -derivedDataPath "$TMPDIR/focus-sim" -resultBundlePath "$out/Studio.xcresult" test
+
+
 
 
 

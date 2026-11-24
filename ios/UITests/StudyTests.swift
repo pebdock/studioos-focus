@@ -29,10 +29,30 @@ final class StudyTests: XCTestCase {
         app.buttons["Riprendi"].tap()
         XCTAssertTrue(app.buttons["Pausa"].exists)
     }
+    func testLibraryAndScrolling() {
+        let app = XCUIApplication()
+        app.launch()
+        app.buttons["Piano"].tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Unità 1")).firstMatch.waitForExistence(timeout: 5))
+        let options = XCTMeasureOptions()
+        options.iterationCount = 3
+        measure(metrics: [XCTOSSignpostMetric.scrollDecelerationMetric], options: options) {
+            app.swipeUp()
+            app.swipeDown()
+        }
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["Viaggi"].tap()
+        XCTAssertTrue(app.webViews.buttons["Simula spostamento"].waitForExistence(timeout: 10))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["Ripasso"].tap()
+        XCTAssertTrue(app.webViews.buttons["Progressi"].waitForExistence(timeout: 10))
+    }
+
     func testLaunchMetric() {
         measure(metrics: [XCTApplicationLaunchMetric()]) {
             XCUIApplication().launch()
         }
     }
 }
+
 
