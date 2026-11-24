@@ -4,7 +4,7 @@ struct FocusView: View {
     @ObservedObject var store: Store
     @State private var confirm = false
     private var block: Block { store.block }
-    private let web = "https://pebdock.github.io/studioos-focus/"
+    @StateObject private var plan = PlanLibrary()
 
     private func field<T>(_ key: WritableKeyPath<Block, T>) -> Binding<T> {
         Binding(get: { store.block[keyPath: key] }, set: { value in
@@ -64,11 +64,11 @@ struct FocusView: View {
                         } else { Button("Verifica e concludi") { confirm = true } }
                     }
                 }
-                Section("Nel browser") {
-                    Link("Piano", destination: URL(string: web + "#piano")!)
-                    Link("Viaggi della settimana · in Analisi", destination: URL(string: web + "#settimana")!)
-                    Link("Analisi", destination: URL(string: web + "#settimana")!)
-                    Link("Ripasso", destination: URL(string: web + "ripasso/")!)
+                Section("Studio e piano") {
+                    NavigationLink("Piano") { PlanView(plan: plan, store: store) }
+                    NavigationLink("Viaggi") { LocalPage(path: "viaggi.html", blocks: plan.blocks).navigationTitle("Viaggi") }
+                    NavigationLink("Analisi") { PlanAnalysis(blocks: plan.blocks) }
+                    NavigationLink("Ripasso") { LocalPage(path: "ripasso/index.html").navigationTitle("Ripasso") }
                 }
             }
             .navigationTitle("Studio")
@@ -81,3 +81,4 @@ struct FocusView: View {
         }
     }
 }
+

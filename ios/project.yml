@@ -13,7 +13,12 @@ targetTemplates:
   Application:
     type: application
     platform: iOS
-    sources: [App, Shared/Block.swift]
+    sources:
+      - App
+      - Shared/Block.swift
+      - path: Offline
+        type: folder
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.pebdock.studioosfocus
@@ -77,4 +82,5 @@ schemes:
         Live: all
     test:
       targets: [FocusUITests]
+
 

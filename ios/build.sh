@@ -6,6 +6,7 @@ mkdir -p "$out"
 exec > >(tee "$out/build.log") 2>&1
 xcodebuild -version
 xcodegen --version
+bash prepare-offline.sh
 xcodegen generate
 swiftc Shared/Block.swift Tests/main.swift -o "$out/check-model"
 "$out/check-model"
@@ -39,4 +40,5 @@ xcrun simctl io "$device" recordVideo "$out/percorso.mp4" &
 rec=$!
 trap 'kill -INT "$rec" 2>/dev/null || true; wait "$rec" || true' EXIT
 xcodebuild -scheme Live -destination "id=$device" -parallel-testing-enabled NO -derivedDataPath "$TMPDIR/focus-sim" -resultBundlePath "$out/Studio.xcresult" test
+
 
