@@ -16,7 +16,7 @@ struct StudyIntent: AppIntent {
 
 struct Shortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
-        AppShortcut(intent: StudyIntent(), phrases: ["Avvia lo studio con \(.$applicationName)"], shortTitle: "Avvia lo studio", systemImageName: "timer")
+        AppShortcut(intent: StudyIntent(), phrases: ["Avvia lo studio con \(.applicationName)"], shortTitle: "Avvia lo studio", systemImageName: "timer")
     }
 }
 
@@ -34,3 +34,4 @@ struct FocusApp: App {
         }
     }
 }
+
