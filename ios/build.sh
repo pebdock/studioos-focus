@@ -33,6 +33,9 @@ device=$(xcrun simctl create "Focus CI iPhone 15 Pro" com.apple.CoreSimulator.Si
 rec=""
 cleanup() {
   if [[ -n "$rec" ]]; then kill -INT "$rec" 2>/dev/null || true; wait "$rec" || true; fi
+  mkdir -p "$out/diagnostica"
+  find "$HOME/Library/Logs/DiagnosticReports" -type f -name 'StudioFocus*.ips' -exec cp '{}' "$out/diagnostica/" \; || true
+  xcrun simctl spawn "$device" log show --last 8m --style compact --predicate 'process == "StudioFocus" OR (process == "SpringBoard" AND eventMessage CONTAINS "studioosfocus")' > "$out/diagnostica/simulatore.log" || true
   xcrun simctl shutdown "$device" || true
   xcrun simctl delete "$device"
 }
@@ -58,6 +61,7 @@ xcrun simctl io "$device" recordVideo "$out/percorso.mp4" &
 rec=$!
 
 xcodebuild -scheme Live -destination "id=$device" -parallel-testing-enabled NO -derivedDataPath "$TMPDIR/focus-sim" -resultBundlePath "$out/Studio.xcresult" test
+
 
 
 
