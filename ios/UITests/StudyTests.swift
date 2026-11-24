@@ -54,5 +54,3 @@ final class StudyTests: XCTestCase {
         }
     }
 }
-
-

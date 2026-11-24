@@ -23,4 +23,3 @@ precondition(reopened.remaining(at: start + 580) == 0 && reopened.phase == .runn
 restored.finish()
 precondition(restored.phase == .finished)
 print("OK: avvio, idempotenza, pausa, archivio, sospensione, scadenza e conferma.")
-

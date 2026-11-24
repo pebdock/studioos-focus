@@ -18,6 +18,9 @@ for variant in Base Live; do
   mkdir "$stage/Payload"
   cp -R "$derived/Build/Products/Release-iphoneos/StudioFocus.app" "$stage/Payload/"
   app="$stage/Payload/StudioFocus.app"
+  if otool -L "$app/StudioFocus" | grep -q libswiftWebKit; then
+    echo "Dipendenza WebKit Swift inattesa nel binario device"; exit 1
+  fi
   if [[ "$variant" == Live ]]; then
     test -d "$app/PlugIns/FocusActivity.appex"
     /usr/libexec/PlistBuddy -c 'Print NSSupportsLiveActivities' "$app/Info.plist" | grep -i true
@@ -61,9 +64,3 @@ xcrun simctl io "$device" recordVideo "$out/percorso.mp4" &
 rec=$!
 
 xcodebuild -scheme Live -destination "id=$device" -parallel-testing-enabled NO -derivedDataPath "$TMPDIR/focus-sim" -resultBundlePath "$out/Studio.xcresult" test
-
-
-
-
-
-

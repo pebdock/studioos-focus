@@ -24,4 +24,3 @@ Per tornare al flusso web apri la PWA già installata. Per passare da Live a Bas
 ## Build
 
 Dalla radice del worktree su macOS con Xcode 16.4, XcodeGen 2.44.1 e un simulatore iPhone disponibile, esegui `bash ios/build.sh`. Lo script prepara le risorse locali, genera il progetto, compila entrambe le IPA senza identità Apple e salva hash, log, immagini, video e risultato XCTest in `ios/evidence`. Per aprire solo il progetto, da `ios` esegui `bash prepare-offline.sh`, poi `xcodegen generate` e apri `StudioFocus.xcodeproj`. Il runner standard è macos-15. Il profilo Apple viene applicato sul dispositivo attraverso AltStore. [Live Activities secondo Apple](https://developer.apple.com/documentation/activitykit/displaying-live-data-with-live-activities)
-

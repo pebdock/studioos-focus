@@ -31,6 +31,3 @@ xcrun simctl io "$udid" screenshot "$out/ripresa-dopo-aggiornamento.png"
 xcrun simctl terminate "$udid" "$bundle"
 xcrun simctl uninstall "$udid" "$bundle"
 echo "Aggiornamento Base -> Live sul simulatore: archivio conservato."
-
-
-

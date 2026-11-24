@@ -23,6 +23,8 @@ targetTemplates:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.pebdock.studioosfocus
         PRODUCT_NAME: StudioFocus
+        SWIFT_OBJC_BRIDGING_HEADER: App/OfflineReader.h
+        CLANG_ENABLE_OBJC_ARC: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: STUDIOOS Focus
@@ -82,5 +84,3 @@ schemes:
         Live: all
     test:
       targets: [FocusUITests]
-
-
