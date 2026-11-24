@@ -51,6 +51,11 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
           UI_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: node .github/ui-check/cache-update.cjs
+      - name: Verify adaptive materials, motion and PWA icons
+        env:
+          NODE_PATH: ${{ runner.temp }}/focus-ui/node_modules
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
+        run: node tests/adaptive-glass.cjs
       - name: Save review evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
