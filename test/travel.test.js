@@ -14,7 +14,7 @@ const BASE = JSON.parse(fs.readFileSync(fixture, "utf8"));
 const clone = x => JSON.parse(JSON.stringify(x));
 const hm = t => { const a = String(t).split(":").map(Number); return a[0] * 60 + a[1]; };
 const active = bl => bl.filter(b => b.st !== "Rinviato");
-const protectedBlock = b => b.st !== "Da iniziare" || b.mf > 0 || b.d === "2026-11-23";
+const protectedBlock = b => b.st !== "Da iniziare" || b.mf > 0 || b.d <= "2026-11-24";
 
 function parserPass(blocks) {
   let sp = 0, pp = 0, n = 0;
@@ -56,12 +56,10 @@ test("viaggio su giorno esame -> rifiutato senza modifiche", () => {
   assert.strictEqual(r.ok, false); assert.strictEqual(r.moves.length, 0);
   assert.ok(r.unresolved.some(u => /esame/i.test(u.reason)));
 });
-test("viaggio su blocco protetto (lun 23/11 20:00, piano D-051) -> non sposta il protetto", () => {
-  const r = TRAVEL.simulate(clone(BASE), trip("2026-11-23", "19:30", "2026-11-29", "06:00"));
-  assert.strictEqual(r.ok, false);
-  const p = BASE.find(b => b.d === "2026-11-23" && b.s === 1200);
-  assert.ok(p, "blocco 20:00 presente");
-  assert.ok(!r.moves.some(m => m.id === p.id));
+test("giorni di febbre 23–24/11 (piano D-052): vuoti, e il motore non vi sposta studio", () => {
+  assert.ok(!BASE.some(b => b.d < "2026-11-25" && b.st === "Da iniziare"), "nessun blocco da iniziare prima del 25/11");
+  const r = TRAVEL.simulate(clone(BASE), trip("2026-11-27", "15:50", "2026-11-29", "06:00"));
+  assert.ok(!r.moves.some(m => m.to.d < "2026-11-25"), "spostato verso i giorni di febbre");
 });
 test("nessun viaggio in collisione -> zero spostamenti", () => {
   const r = TRAVEL.simulate(clone(BASE), trip("2026-11-28", "06:00", "2026-11-29", "06:00").slice(0, 0));
@@ -69,7 +67,7 @@ test("nessun viaggio in collisione -> zero spostamenti", () => {
 });
 
 /* ---- 5 scenari reali ---- */
-/* D-051: viaggi fino all'ultimo (15 o 18/12); dopo, a Cesena solo nei giorni d'esame (già nel piano) */
+/* D-051/D-052: viaggi fino all'ultimo (15 o 18/12); dopo, a Cesena solo nei giorni d'esame (già nel piano) */
 const SCEN = [
   ["S3  27/11 + 29/11", trip("2026-11-27", "15:50", "2026-11-29", "06:00")],
   ["S4  04/12 + 06/12", trip("2026-12-04", "15:50", "2026-12-06", "06:00")],

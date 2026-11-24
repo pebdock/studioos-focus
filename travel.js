@@ -1,4 +1,4 @@
-/* STUDIOOS Focus - viaggi dinamici (regole D-051-R28). Solo Google Sheets, nessun Calendar.
+/* STUDIOOS Focus - viaggi dinamici (regole D-052-R28). Solo Google Sheets, nessun Calendar.
  * Riflusso deterministico: sposta solo blocchi "Da iniziare" (mai Completato/Parziale/Min fatti>0, mai lun 23/11),
  * conserva l'ordine per materia (propedeuticita), pasti, pause >=10', riposo, giorni esame e scadenze appello. */
 (function (root, factory) {
@@ -7,14 +7,14 @@
   else root.STUDIOOS_TRAVEL = api;
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
-  var W0 = "2026-11-23", LAST = "2027-02-14", FROZEN = { "2026-11-23": 1 };
+  var W0 = "2026-11-23", LAST = "2027-02-14", FROZEN = { "2026-11-23": 1, "2026-11-24": 1 };   /* D-052: 23–24/11 febbre, nessuno studio */
   var EXAM = { "2027-01-11": 1, "2027-01-13": 1, "2027-01-19": 1, "2027-02-12": 1, "2027-02-15": 1 };
   var DEADLINE = { MDP: "2027-01-12", BD: "2027-01-18", RETI: "2027-02-10", OOP: "2027-02-11", MN: "2027-02-14" };   /* RETI: finestra d'esame fino all'11/02 */
   /* D-051: studio 07:00–23:30 (weekend dalle 07:30), una serata libera a settimana */
   var WIN = [[420, 1410], [420, 1410], [420, 1410], [420, 1410], [420, 1410], [450, 1410], [450, 1410]];
   var MEALS = [[40, 40], [40, 40], [40, 40], [40, 40], [40, 40], [60, 60], [60, 60]];
   var LUNCH = [690, 900], DINNER = [1080, 1290], PAUSE = 10, MAXNET = 720, NODES = 1500;   /* 720′/giorno (D-051); finestre pasti larghe per i giorni di viaggio */
-  function maxWeek(w) { return 4800; }   /* 4.800′/settimana; il piano tiene 4.410′ fino al 20/12: il margine serve ai viaggi */
+  function maxWeek(w) { return 4800; }   /* 4.800′/settimana; D-052: il piano tiene 4.710′ nella settimana del 07/12 perché i viaggi 09–11/12 e 11–13/12 restino fattibili */
   var LASTTRIP = "2026-12-18";   /* ultimo viaggio il 15 o il 18/12; poi a Cesena solo nei giorni d'esame (andata e ritorno già nel piano) */
   var VIGIL = { "2027-01-12": 1, "2027-01-18": 1, "2027-02-11": 1 };   /* esame del mattino il giorno dopo: fine entro le 21:30 */
 
@@ -270,7 +270,7 @@
     });
   }
   function toPatch(moves, trips) {
-    return { action: "applyTravelShift", version: "D-051-R28", trips: trips || [], moves: moves.map(function (m) { return { id: m.id, row: m.row, d: m.to.d, s: hh(m.to.s), e: hh(m.to.e), f: m.f, from: { d: m.from.d, s: hh(m.from.s), e: hh(m.from.e) } }; }) };
+    return { action: "applyTravelShift", version: "D-052-R28", trips: trips || [], moves: moves.map(function (m) { return { id: m.id, row: m.row, d: m.to.d, s: hh(m.to.s), e: hh(m.to.e), f: m.f, from: { d: m.from.d, s: hh(m.from.s), e: hh(m.from.e) } }; }) };
   }
   function q(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }
   function toCsv(moves) {
