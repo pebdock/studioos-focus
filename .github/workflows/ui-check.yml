@@ -13,6 +13,8 @@ on:
       - 'tests/**'
       - 'ripasso/**'
       - 'test/ripasso.test.js'
+      - 'intelligence/**'
+      - 'test/intelligence*.test.js'
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,6 +34,8 @@ jobs:
         env:
           UI_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: python3 tests/ui_parity.py --base "${UI_BASE:-origin/main}" --json artifacts-ui/source-parity.json
+      - name: Intelligence local regression tests
+        run: node test/intelligence-launcher.test.js && node test/intelligence-focus.test.js
       - name: Install isolated browser test tools
         env:
           PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/focus-browsers
