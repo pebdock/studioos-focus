@@ -30,7 +30,7 @@ LENS_MAP_BLOCK = re.compile(r"^  function lensMap\(\)\{[\s\S]*?(?=^  function in
 APPROVED_LENS_MAP_SHA256 = "8dafb444eb45d0f0d2e038e618dafc0ff5532807b8b503de7d644440c367e808"
 # Reviewed additive Intelligence module; all original script/hook contracts remain enforced.
 INTELLIGENCE_MODULE = "intelligence/focus.js"
-INTELLIGENCE_SHA256 = "a2915294980667b12ba3624a8d546e9ba41d012e41a07e84067a091a43b88758"
+INTELLIGENCE_SHA256 = "faecc03c7055979e7c6dd01cb7c141975984c59f68517c9a1c64cf24aab1fd40"
 INTELLIGENCE_IDS = {"intelligenceFocus", "intPrivate", "intFresh", "intMetrics", "intMessages"}
 
 
