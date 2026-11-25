@@ -1,0 +1,12 @@
+"use strict";
+const assert=require("node:assert/strict");
+const {analyze,validEndpoint}=require("../intelligence/focus.js");
+const day="2026-11-26",tom="2026-11-27";
+const row=(id,mat,date,min,done=0,stato="Da iniziare",to="10:30")=>({id,mat,date,min,done,stato,to});
+const input=[row("a","RETI",day,195,30),row("b","BD",tom,660),row("c","FIS",day,300),row("d","OOP",day,60,0,"Rinviato"),row("a","RETI",day,195),row("e","MN",day,60,90)];
+const snapshot=JSON.stringify(input);
+const r=analyze(input,day,tom,100,720,b=>b.done,(date)=>date===day?50:1000);
+assert.equal(r.planned,255);assert.equal(r.recorded,90);assert.equal(r.remaining,165);assert.equal(r.backlog,165);assert.equal(r.tomorrowNet,660);assert.equal(r.invalid,1);assert.equal(r.next,2);assert.equal(JSON.stringify(input),snapshot);
+assert(r.messages.some(x=>x.includes("duplicati")));assert(r.messages.some(x=>x.includes("vicino")));
+assert(!validEndpoint("https://script.google.com.evil.test/macros/s/AAAAAAAAAAAAAAAAAAAA/exec"));assert(validEndpoint("https://script.google.com/macros/s/AAAAAAAAAAAAAAAAAAAA/exec"));
+console.log("Intelligence Focus: 12 checks passed");
