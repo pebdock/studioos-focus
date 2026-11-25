@@ -1,6 +1,6 @@
 {
- "build": "202611260010",
- "version": "2.6.0 · Intelligence 0.6 candidate",
+ "build": "202611260130",
+ "version": "2.6.0 · Intelligence 0.7 candidate",
  "client_id_set": true,
  "files": {
   ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -29,7 +29,7 @@
   "sections.js": "e7da29b1ccc06094d9c9b31d1fe33f8e1f7c814fa7edc8dce8f80d904a58b483",
   "setup.html": "d7fdbec6265f31996745f15fae98c8c306fa5e6f3b5d8eeb699a40507dc34fb2",
   "setup.js": "8b7de9b2c92b6dbbcedc7f94cae4d83caa17c43f52a3f2dcb0b0cd482ac2c09a",
-  "sw.js": "bd755cb94f344b7aa1e9084cae6d7d00f8572b2ff84e40a82618106bb8032a39",
+  "sw.js": "d1b56451f227781bd623e54fbdb78d911249290204c97e5b51cbe9d5e7f83591",
   "sync.js": "cad912f417fccb149c2b447e67f635838e15b9cc096f7cde0dba92357840b979",
   "icons/apple-touch-icon.png": "79663366d3e769ec5324d7db26c73656523cfabce2da7715f9176d9ff304eb20",
   "icons/favicon-64.png": "309d6f5f76820a6d5d78de5bf85e0823b26b319e367dd2b430a5e25e0cbd7bbb",
@@ -51,6 +51,6 @@
   "intelligence/index.html": "1d44847f0a8a53d1e8dd70caa5fa94d377c6ddb862e580e13e7187da618f9073",
   "intelligence/launcher.js": "196ce7d4c4498e8ee4d89fa78cfef6cfa8388e42d1a433e2ca6effa140d8366f",
   "intelligence/launcher.css": "78a365c74abea911042d14dd613b9f028b1032310f73e5828e1785f4b79a65c9",
-  "intelligence/focus.js": "faecc03c7055979e7c6dd01cb7c141975984c59f68517c9a1c64cf24aab1fd40"
+  "intelligence/focus.js": "ee3a7759a45f2ab8a630d8ae19a70f91f613df51f7250234f20244ec0721f71c"
  }
 }
