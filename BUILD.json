@@ -1,6 +1,6 @@
 {
- "build": "20261125-intelligence-preview",
- "version": "PWA 2.6.3 · Intelligence launcher preview (not activated)",
+ "build": "202611252230",
+ "version": "PWA 2.6.3 · note in-app 2.6.0 · Intelligence launcher preview (not activated)",
  "client_id_set": true,
  "files": {
   ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -9,7 +9,7 @@
   "app.js": "a04192e050aec9bb06e7b9236887147a7b8e205c7e86c93b2fa9fa7042e7a5b1",
   "career.js": "d4a3e4cd25ed197d1e348504262bbe382f3ed4df369360c2412c5f689290e458",
   "compact.js": "79fecdb1968fdb60eaa85b1e00e798aa71b8f53d8fe905728968456785c5e43a",
-  "index.html": "dd6f2368a18c1ebdfb5635c054e7991844dd6f9178edaac59e6076671b65fc93",
+  "index.html": "21c7be6e3b8bbdf96b3e8683d9a7a421e56c4318308b636c63169f5f3498b8fe",
   "interaction.css": "32e16ba0537d781757b787929cb63e29fa507e1fd00b543c814c564275501ed2",
   "ios.css": "32e16ba0537d781757b787929cb63e29fa507e1fd00b543c814c564275501ed2",
   "learning-ui.js": "e3134a242004dd20b3f7e52eb1f70c73d91bc68507bcc7ca8dc75862ee9cd4fb",
@@ -29,7 +29,7 @@
   "sections.js": "e7da29b1ccc06094d9c9b31d1fe33f8e1f7c814fa7edc8dce8f80d904a58b483",
   "setup.html": "d7fdbec6265f31996745f15fae98c8c306fa5e6f3b5d8eeb699a40507dc34fb2",
   "setup.js": "8b7de9b2c92b6dbbcedc7f94cae4d83caa17c43f52a3f2dcb0b0cd482ac2c09a",
-  "sw.js": "6974207217bb0aeefdead8ff3a6af6df7ea915fb0ddbef7d4cc61489a6d924ac",
+  "sw.js": "f9dfdb93e5f4b07fdf69fd9e8e406b9f3752b8d05b7d6d31974cb7547f37caeb",
   "sync.js": "cad912f417fccb149c2b447e67f635838e15b9cc096f7cde0dba92357840b979",
   "icons/apple-touch-icon.png": "79663366d3e769ec5324d7db26c73656523cfabce2da7715f9176d9ff304eb20",
   "icons/favicon-64.png": "309d6f5f76820a6d5d78de5bf85e0823b26b319e367dd2b430a5e25e0cbd7bbb",
