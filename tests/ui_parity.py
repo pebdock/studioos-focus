@@ -28,6 +28,10 @@ BEHAVIOR = {"id", "role", "name", "type", "for", "href", "src", "value", "min", 
 VISUAL_FORBIDDEN = re.compile(r"\b(?:localStorage|sessionStorage|fetch|XMLHttpRequest|indexedDB)\b|\b(?:location|history)\s*\.")
 LENS_MAP_BLOCK = re.compile(r"^  function lensMap\(\)\{[\s\S]*?(?=^  function installRefraction\(\)\{)", re.M)
 APPROVED_LENS_MAP_SHA256 = "8dafb444eb45d0f0d2e038e618dafc0ff5532807b8b503de7d644440c367e808"
+# Reviewed additive Intelligence module; all original script/hook contracts remain enforced.
+INTELLIGENCE_MODULE = "intelligence/focus.js"
+INTELLIGENCE_SHA256 = "a2915294980667b12ba3624a8d546e9ba41d012e41a07e84067a091a43b88758"
+INTELLIGENCE_IDS = {"intelligenceFocus", "intPrivate", "intFresh", "intMetrics", "intMessages"}
 
 
 # Exact reviewed Git blob pairs for UI-only changes.
@@ -59,7 +63,7 @@ def cache_version_only(before, after):
         original, candidate = json.loads(old_core[1]), json.loads(new_core[1])
     except (json.JSONDecodeError, TypeError):
         return False
-    approved = {"./tokens.css", "./ui-glass-effects.js"}
+    approved = {"./tokens.css", "./ui-glass-effects.js", "./" + INTELLIGENCE_MODULE}
     additions = [name for name in candidate if name not in original]
     if len(candidate) != len(set(candidate)) or not set(additions) <= approved:
         return False
@@ -131,7 +135,7 @@ def check_markup(before, after, filename):
     errors.extend(f"{filename}: duplicate id {key}" for key, count in ids.items() if count > 1)
     old_ids = {a["id"] for _, a in old.nodes if "id" in a}
     new_ids = {key for key in ids if key not in old_ids}
-    errors.extend(f"{filename}: new id must use ui-glass- namespace: {key}" for key in sorted(new_ids) if not key.startswith("ui-glass-") and key != "pwaTop")
+    errors.extend(f"{filename}: new id must use ui-glass- namespace: {key}" for key in sorted(new_ids) if not key.startswith("ui-glass-") and key != "pwaTop" and not (filename == "index.html" and key in INTELLIGENCE_IDS))
     if "pwaTop" in new_ids:
         skeleton = [(tag, attrs) for tag, attrs in new.nodes if attrs.get("id") == "pwaTop"]
         empty = re.search(r'''<div\b[^>]*\bid=["']pwaTop["'][^>]*>\s*</div>''', after)
@@ -159,6 +163,10 @@ def check_markup(before, after, filename):
     original_inline_ids = {item["attrs"].get("id") for item in old.scripts if not item["attrs"].get("src")}
     for item in new.scripts:
         src = item["attrs"].get("src", "")
+        if filename == "index.html" and src == INTELLIGENCE_MODULE:
+            if any(x["attrs"].get("src") == INTELLIGENCE_MODULE for x in old.scripts):
+                prior_scripts.append(item)
+            continue
         if src and Path(src.split("?", 1)[0]).name.startswith("ui-glass-"):
             continue
         if not src and item["attrs"].get("id") == "ui-glass-controls" and "ui-glass-controls" not in original_inline_ids:
@@ -235,6 +243,15 @@ def main():
         errors.extend(found)
         stats["html"][name] = stat
 
+    # Exact reviewed additive read-only module; no broad waiver of protected code.
+    if (ROOT / INTELLIGENCE_MODULE).is_file():
+        if hashlib.sha256((ROOT / INTELLIGENCE_MODULE).read_bytes()).hexdigest() != INTELLIGENCE_SHA256:
+            errors.append("Intelligence module differs from reviewed SHA256")
+        m = Markup((ROOT / "index.html").read_text(encoding="utf-8"))
+        if sum(x["attrs"].get("src") == INTELLIGENCE_MODULE for x in m.scripts) != 1:
+            errors.append("Intelligence module must be loaded exactly once")
+        if not INTELLIGENCE_IDS <= {a.get("id") for _, a in m.nodes}:
+            errors.append("Intelligence hooks missing")
     # A new visual-only module must not create a second application data path.
     # New test scripts are deliberately outside this check.
     added_scripts = [p for p in ROOT.glob("*.js") if p.name not in paths]
