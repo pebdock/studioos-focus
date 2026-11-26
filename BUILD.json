@@ -1,6 +1,6 @@
 {
- "build": "202611241700",
- "version": "PWA 2.6.3 (D-053) \u00b7 note in-app 2.6.0 \u00b7 Focus Ring (Sheets-Only)",
+ "build": "202611260130",
+ "version": "2.6.0 · Intelligence 0.7 candidate",
  "client_id_set": true,
  "files": {
   ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -9,7 +9,7 @@
   "app.js": "a04192e050aec9bb06e7b9236887147a7b8e205c7e86c93b2fa9fa7042e7a5b1",
   "career.js": "d4a3e4cd25ed197d1e348504262bbe382f3ed4df369360c2412c5f689290e458",
   "compact.js": "79fecdb1968fdb60eaa85b1e00e798aa71b8f53d8fe905728968456785c5e43a",
-  "index.html": "3463addac70e638943b10bd995f1c1cd8f11606f88e4bd48e99efec077bd1a73",
+  "index.html": "76c8d3f53d59d056665ef940a230168ec96dad6b2ec9451549f84f89c72be91f",
   "interaction.css": "32e16ba0537d781757b787929cb63e29fa507e1fd00b543c814c564275501ed2",
   "ios.css": "32e16ba0537d781757b787929cb63e29fa507e1fd00b543c814c564275501ed2",
   "learning-ui.js": "e3134a242004dd20b3f7e52eb1f70c73d91bc68507bcc7ca8dc75862ee9cd4fb",
@@ -29,7 +29,7 @@
   "sections.js": "e7da29b1ccc06094d9c9b31d1fe33f8e1f7c814fa7edc8dce8f80d904a58b483",
   "setup.html": "d7fdbec6265f31996745f15fae98c8c306fa5e6f3b5d8eeb699a40507dc34fb2",
   "setup.js": "8b7de9b2c92b6dbbcedc7f94cae4d83caa17c43f52a3f2dcb0b0cd482ac2c09a",
-  "sw.js": "1060050caa40608c25eaff7ff75e8af77a0e140026709f434a47a092d02e1615",
+  "sw.js": "d1b56451f227781bd623e54fbdb78d911249290204c97e5b51cbe9d5e7f83591",
   "sync.js": "cad912f417fccb149c2b447e67f635838e15b9cc096f7cde0dba92357840b979",
   "icons/apple-touch-icon.png": "79663366d3e769ec5324d7db26c73656523cfabce2da7715f9176d9ff304eb20",
   "icons/favicon-64.png": "309d6f5f76820a6d5d78de5bf85e0823b26b319e367dd2b430a5e25e0cbd7bbb",
@@ -47,6 +47,10 @@
   "ripasso/index.html": "59f355e2ca7e450bd15d59832a1983782c582b4bc02cf22a76b4d6f1ff9485e6",
   "ripasso/ripasso.css": "c3eae73e3afac25932a9435424a28f20011ca050a3fe4779d40b756120f1abbc",
   "ripasso/sw.js": "1320ce90485b72efe737831e9483393d18f4597744e80e47a7f7ec1a67a89a04",
-  "icons/focus-ring.svg": "9fe77673ed674c561dc509ad744726cd4db256629ee2f5b1b97019947ce6e9da"
+  "icons/focus-ring.svg": "9fe77673ed674c561dc509ad744726cd4db256629ee2f5b1b97019947ce6e9da",
+  "intelligence/index.html": "1d44847f0a8a53d1e8dd70caa5fa94d377c6ddb862e580e13e7187da618f9073",
+  "intelligence/launcher.js": "196ce7d4c4498e8ee4d89fa78cfef6cfa8388e42d1a433e2ca6effa140d8366f",
+  "intelligence/launcher.css": "78a365c74abea911042d14dd613b9f028b1032310f73e5828e1785f4b79a65c9",
+  "intelligence/focus.js": "ee3a7759a45f2ab8a630d8ae19a70f91f613df51f7250234f20244ec0721f71c"
  }
 }

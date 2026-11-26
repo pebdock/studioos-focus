@@ -48,6 +48,7 @@
 <header class="top">
   <div class="brand"><h1>STUDIOOS Focus</h1><span id="todayLbl">Sessione invernale 2026/27</span></div>
   <button type="button" class="btn ui-glass-guide-open" popovertarget="ui-glass-guide"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg><span>Guida</span></button>
+  <a class="btn" id="ui-glass-intelligence-global" href="intelligence/index.html" aria-label="Apri assistente Intelligence">AI</a>
   <div class="chips" aria-label="Stato dei collegamenti">
     <span id="cSh" class="pill">Sheets …</span><span id="cDb" class="pill">Archivio …</span><span id="cQ" class="pill warn" hidden></span><span id="cSync" class="pill"><i class="syncdot" id="syncDot"></i><span id="syncTxt">Sync</span></span>
   </div>
@@ -165,6 +166,7 @@
 
 <!-- ================= SETTIMANA ================= -->
 <section class="view" id="v-settimana" role="tabpanel" aria-labelledby="t-settimana">
+  <article class="card"><span class="eyebrow">Intelligence · dati registrati</span><h2>Studio e verifiche</h2><div id="ui-glass-intelligence-chart" aria-live="polite"></div><p class="small mute">Ore confermate ≠ voto. Le verifiche facoltative e gli esiti AI sono conservati nell’arena privata.</p><a class="btn" id="ui-glass-intelligence-quest" href="intelligence/index.html">Apri Knowledge Quest</a></article>
   <article class="card learning-card" aria-labelledby="learningTitle">
     <div class="row"><div class="sp"><span class="eyebrow">Quello che hai fatto davvero</span><h2 id="learningTitle">Il tuo ritmo</h2></div><button class="btn ghost" id="studyContext">Copia contesto per il tutor</button></div>
     <p class="small mute" id="learningInfo"></p><div id="learningKpis" class="kpis"></div>
@@ -237,6 +239,7 @@
 
 <!-- ================= PIANO (tutor e ridistribuzione) ================= -->
 <section class="view" id="v-piano" role="tabpanel" aria-labelledby="t-piano">
+  <article class="card" id="intelligenceFocus"><div class="row"><div class="sp"><span class="eyebrow">Intelligence · AUDIT</span><h2>Assistente di studio</h2></div><a class="btn" id="intPrivate" href="intelligence/index.html">Apri Tutor</a></div><p class="small mute" id="intFresh" role="status">In attesa dei dati Focus.</p><div id="intMetrics" class="row" aria-live="polite"></div><div id="intMessages" aria-live="polite"></div><details class="ui-glass-details"><summary>Connessione privata e limiti</summary><p class="small mute">Analisi locale dai dati già caricati da Focus, senza chiamate Groq aggiuntive. Tutor e Inbox completa si aprono nella web app Google autenticata. Nessun aggiornamento del piano da questo pannello.</p><a class="btn" href="intelligence/index.html">Configura il Tutor</a></details></article>
   <article class="card"><span class="eyebrow">Il piano resta il riferimento</span><h2>Il tuo piano, aggiornato</h2><details class="ui-glass-details"><summary>Regole e quote del piano</summary><div id="planRules" class="small"></div></details><p class="small mute">Il piano cambia solo con una proposta che approvi tu.</p><button class="btn" id="pDraft">Prepara richiesta di recupero</button><p class="small mute">Somma i minuti mancanti dei blocchi passati e prepara la richiesta qui sotto: puoi modificarla prima di inviarla.</p></article>
   <article class="card"><div class="row"><h2 class="sp">Tutor e ridistribuzione</h2><button class="btn" id="pReload">Aggiorna</button></div>
     <details class="ui-glass-details"><summary>Come arrivano le proposte</summary><p class="small mute" id="pInfo">Proposte e domande del tutor. Con «Approva» la modifica entra nel piano entro un'ora, se rispetta pasti, pause e limiti.</p></details>
@@ -392,5 +395,6 @@
 </script>
 <script src="travel.js"></script>
 <script src="travel-ui.js"></script>
+<script src="intelligence/focus.js"></script>
 </body>
 </html>

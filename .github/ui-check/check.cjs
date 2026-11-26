@@ -58,6 +58,9 @@ check(cacheVersion.test(sw)&&cacheVersion.test(oldSw),'worker cache identifiers 
 const corePattern=/^const CORE = (\[[\s\S]*?\]);$/m;
 const originalCore=JSON.parse(corePattern.exec(oldSw)[1]),candidateCore=JSON.parse(corePattern.exec(sw)[1]);
 const approvedCosmeticAssets=new Set(['./tokens.css','./ui-glass-effects.js']);
+// Only the exact reviewed read-only Intelligence module may be added to CORE.
+const intModule='intelligence/focus.js';
+if(fs.existsSync(intModule)&&crypto.createHash('sha256').update(fs.readFileSync(intModule)).digest('hex')==='ee3a7759a45f2ab8a630d8ae19a70f91f613df51f7250234f20244ec0721f71c') approvedCosmeticAssets.add('./'+intModule);
 const additions=candidateCore.filter(name=>!originalCore.includes(name));
 const cacheAssetsSafe=new Set(candidateCore).size===candidateCore.length&&additions.every(name=>approvedCosmeticAssets.has(name))&&JSON.stringify(candidateCore.filter(name=>originalCore.includes(name)))===JSON.stringify(originalCore);
 const workerHandlers=source=>source.replace(cacheVersion,'const VERSION = "CACHE_VERSION";').replace(corePattern,'const CORE = APPROVED_ASSETS;');
